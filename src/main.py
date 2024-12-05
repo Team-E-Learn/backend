@@ -1,13 +1,14 @@
 # setup and initialize flask app
 
-from flask import Flask,redirect
+from flask import Flask, redirect
 from flask_restful import Api
 from flasgger import Swagger
+from werkzeug.wrappers import Response
 
 # start flask app
 
-app = Flask(__name__)
-api = Api(app)
+app: Flask = Flask(__name__)
+api: Api = Api(app)
 swagger = Swagger(app, template={
     "info": {
         "title": "Python TSE backend API",
@@ -40,6 +41,10 @@ swagger = Swagger(app, template={
         },
     }
 })
+
+@app.get("/")
+def main() -> Response:
+    return redirect("/apidocs") 
 
 
 # start app
