@@ -1,9 +1,12 @@
 # setup and initialize flask app
 
 from flask import Flask, redirect
-from flask_restful import Api
+from flask_restful import Api, Resource
 from flasgger import Swagger
 from werkzeug.wrappers import Response
+
+from routes.user import subscriptions
+
 
 # start flask app
 
@@ -23,29 +26,15 @@ swagger = Swagger(app, template={
 
 
     "paths": {
-        "/tns/{company_name}": {
-            "get": {
-                "tags": ["Stock info"],
-                "summary": "Attempts to find and return the ticker symbol for a specific company",#
-                "parameters": [
-                    {    "name": "company_name",
-                        "in": "path",
-                        "type": "string",
-                        "required": True,
-                        "description": "The name of the company to get the ticker symbol for",
-                        "default": "Nvidia"
-                    }
-                ],
-                "responses": {"200": {"description": "Returns the ticker symbol"}}
-            }
-        },
     }
 })
 
-@app.get("/")
-def main() -> Response:
-    return redirect("/apidocs") 
+class Main(Resource):
+    def get(self) -> Response:
+        return redirect("/apidocs")
 
+api.add_resource(Main, "/")
+api.add_resource(subscriptions.Subscriptions, "/v1/user/<int:user_id>/subscriptions")
 
 # start app
 
