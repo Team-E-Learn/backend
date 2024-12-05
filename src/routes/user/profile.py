@@ -26,25 +26,4 @@ class Profile(Resource):
     )
     def get(self, user_id: int):
         return {"username": "bob"}
-    
-    @SwagGen(
-        SwagDoc(
-            SwagMethod.POST,
-            ["User"],
-            "Updates user profile",
-            [
-                SwagParam(
-                    "user_id",
-                    "path",
-                    "int",
-                    True,
-                    "The user id",
-                    "1234",
-                ),
-            ],
-            [SwagResp(200, "AAAA")]
-        )        
-    )
-    def post(self):
-        return {"success" : "aaa"}
 
