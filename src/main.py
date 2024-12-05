@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # setup and initialize flask app
 
 from flask import Flask, redirect
@@ -39,7 +40,9 @@ api.add_resource(subscriptions.Subscriptions, "/v1/user/<int:user_id>/subscripti
 # start app
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    app.run(host='0.0.0.0')
+
 
 
 
