@@ -32,5 +32,11 @@
                 "responses": {"200": {"description": "Module added to user"}}
             }
         }
-
 """
+
+from flask_restful import Resource
+
+
+class User(Resource):
+    def put(self, org_id: int, mod_id: int, user_id: int):
+        return { "success": True }

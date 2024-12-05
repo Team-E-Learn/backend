@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # setup and initialize flask app
 
+import profile
 from flask import Flask, redirect
 from flask_restful import Api, Resource
 from flasgger import Swagger
 from werkzeug.wrappers import Response
 
 from routes.user import subscriptions
-
+from routes.org.module import user
 
 # start flask app
 
@@ -36,6 +37,8 @@ class Main(Resource):
 
 api.add_resource(Main, "/")
 api.add_resource(subscriptions.Subscriptions, "/v1/user/<int:user_id>/subscriptions")
+api.add_resource(profile.Profile, "/v1/user/<int:user_id>/profile")
+api.add_resource(user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>")
 
 # start app
 

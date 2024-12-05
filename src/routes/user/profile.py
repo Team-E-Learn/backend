@@ -15,3 +15,9 @@
                 "responses": {"200": {"description": "Returns the profile information"}}
             }
 """
+from flask_restful import Resource
+
+
+class Profile(Resource):
+    def get(self, user_id: int):
+        return { "username": "bob" }
