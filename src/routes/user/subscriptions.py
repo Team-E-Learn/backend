@@ -1,28 +1,30 @@
-"""
-
-"/v1/user/user_id/subscriptions": {
-            "get": {
-                "tags": ["User info"],
-                "summary": "Returns the subscribed orgs, bundles and modules for a specific user",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "type": "string",
-                        "required": True,
-                        "description": "The user id to get the subscriptions for",
-                        "default": "1234"
-                    }
-                ],
-                "responses": {"200": {"description": "Returns the subscriptions"}}
-            }
-        },
-"""
-
 from flask_restful import Resource
+
+from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
+from lib.swagdoc.swagmanager import SwagGen
 
 
 class Subscriptions(Resource):
+    
+    @SwagGen(
+        SwagDoc(
+            "/v1/user/<user_id>/subscriptions",
+            SwagMethod.GET,
+            ["User"],
+            "Returns the subscribed orgs, bundles and modules for a user",
+            [
+                SwagParam(
+                    "user_id",
+                    "path",
+                    "int",
+                    True,
+                    "The user id to add to the module",
+                    "1234",
+                )
+            ],
+            [SwagResp(200, "Returns the subscriptions")],
+        )
+    )
     def get(self, user_id: int):
         return [{
             "org_name": "University of Lincoln",
