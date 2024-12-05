@@ -1,11 +1,11 @@
 from flask_restful import Resource
 
 from lib.swagdoc.swagdoc import SwagDoc, SwagParam, SwagMethod, SwagResp
-from lib.swagdoc.swagmanager import swag_me
+from lib.swagdoc.swagmanager import SwagGen
 
 class User(Resource):
 
-    @swag_me(
+    @SwagGen(
         SwagDoc(
             "/v1/org/<org_id>/module/<module_id>/user/<user_id>",
             SwagMethod.PUT,

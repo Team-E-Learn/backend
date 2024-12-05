@@ -1,12 +1,12 @@
 from flask_restful import Resource
 
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
-from lib.swagdoc.swagmanager import swag_me
+from lib.swagdoc.swagmanager import SwagGen
 
 
 class Subscriptions(Resource):
     
-    @swag_me(
+    @SwagGen(
         SwagDoc(
             "/v1/user/<user_id>/subscriptions",
             SwagMethod.GET,
@@ -25,7 +25,6 @@ class Subscriptions(Resource):
             [SwagResp(200, "Returns the subscriptions")],
         )
     )
-
     def get(self, user_id: int):
         return [{
             "org_name": "University of Lincoln",

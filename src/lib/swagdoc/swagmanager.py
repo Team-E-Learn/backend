@@ -8,7 +8,7 @@ from lib.swagdoc.swagtag import SwagTag
 
 T = TypeVar("T")
 
-class swag_me:
+class SwagGen:
     def __init__(self, doc: SwagDoc) -> None:
         self.__doc: SwagDoc = doc
 

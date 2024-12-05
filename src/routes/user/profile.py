@@ -1,12 +1,12 @@
 from flask_restful import Resource
 
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
-from lib.swagdoc.swagmanager import swag_me
+from lib.swagdoc.swagmanager import SwagGen
 
 
 class Profile(Resource):
 
-    @swag_me(
+    @SwagGen(
         SwagDoc(
             "/v1/user/<user_id>/profile",
             SwagMethod.GET,
