@@ -8,7 +8,6 @@ class Subscriptions(Resource):
     
     @SwagGen(
         SwagDoc(
-            "/v1/user/<user_id>/subscriptions",
             SwagMethod.GET,
             ["User"],
             "Returns the subscribed orgs, bundles and modules for a user",

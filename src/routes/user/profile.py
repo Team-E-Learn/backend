@@ -8,7 +8,6 @@ class Profile(Resource):
 
     @SwagGen(
         SwagDoc(
-            "/v1/user/<user_id>/profile",
             SwagMethod.GET,
             ["User"],
             "Returns the profile information for a specific user",
@@ -27,7 +26,4 @@ class Profile(Resource):
     )
     def get(self, user_id: int):
         return {"username": "bob"}
-
-
-
 

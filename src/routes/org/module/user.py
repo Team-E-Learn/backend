@@ -7,7 +7,6 @@ class User(Resource):
 
     @SwagGen(
         SwagDoc(
-            "/v1/org/<org_id>/module/<module_id>/user/<user_id>",
             SwagMethod.PUT,
             ["Module"],
             "Adds a bundle or module to a user",

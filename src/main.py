@@ -39,9 +39,9 @@ api.add_resource(
 swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 swag.add_tag(SwagTag("Module", "Module related endpoints"))
 swag.add_tag(SwagTag("User", "User related endpoints"))
-swag.add_swag(subscriptions.Subscriptions)
-swag.add_swag(profile.Profile)
-swag.add_swag(user.User)
+swag.add_swag(subscriptions.Subscriptions, "/v1/user/<user_id>/subscriptions")
+swag.add_swag(profile.Profile, "/v1/user/<user_id>/profile")
+swag.add_swag(user.User, "/v1/org/<org_id>/module/<module_id>/user/<user_id>")
 
 swag.start_swag()
 
