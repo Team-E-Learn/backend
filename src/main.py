@@ -22,40 +22,57 @@ print("Database connected")
 cur = db.cursor()
 cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        userID SERIAL PRIMARY KEY,
-        accountType VARCHAR(16),
-        firstName VARCHAR(48),
-        lastName VARCHAR(48),
-        username VARCHAR(64),
-        email VARCHAR(100)
+        userID SERIAL PRIMARY KEY UNIQUE NOT NULL,
+        accountType VARCHAR(16) NOT NULL,
+        firstName VARCHAR(48) NOT NULL,
+        lastName VARCHAR(48) NOT NULL,
+        username VARCHAR(64) UNIQUE NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL
     );
     CREATE TABLE IF NOT EXISTS organisations (
-        orgID SERIAL PRIMARY KEY,
-        name VARCHAR(48),
-        description VARCHAR(100)
+        orgID SERIAL PRIMARY KEY UNIQUE NOT NULL,
+        name VARCHAR(48) UNIQUE NOT NULL,
+        description VARCHAR(100) NOT NULL,
+        ownerID INT REFERENCES users(userID) NOT NULL
     );
     CREATE TABLE IF NOT EXISTS modules (
-        moduleID SERIAL PRIMARY KEY,
-        name VARCHAR(48),
-        description VARCHAR(100),
-        teachers INT[] REFERENCES users(userID),
-        orgID INT REFERENCES organisations(orgID)
+        moduleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
+        name VARCHAR(48) NOT NULL,
+        description VARCHAR(100) NOT NULL,
+        orgID INT REFERENCES organisations(orgID) NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS module_teachers (
+        moduleID INT REFERENCES modules(moduleID) NOT NULL,
+        userID INT REFERENCES users(userID) NOT NULL,
+        PRIMARY KEY (moduleID, userID)
+    );
+    CREATE TABLE IF NOT EXISTS bundles (
+        bundleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
+        name VARCHAR(48) NOT NULL,
+        description VARCHAR(100) NOT NULL,
+        orgID INT REFERENCES organisations(orgID) NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS bundle_modules (
+        bundleID INT REFERENCES bundles(bundleID) NOT NULL,
+        moduleID INT REFERENCES modules(moduleID) NOT NULL,
+        PRIMARY KEY (bundleID, moduleID)
     );
     CREATE TABLE IF NOT EXISTS content (
-        contentID SERIAL PRIMARY KEY,
-        moduleID INT REFERENCES modules(moduleID),
-        title VARCHAR(48),
-        description VARCHAR(100),
-        content JSON
+        contentID SERIAL PRIMARY KEY UNIQUE NOT NULL,
+        moduleID INT REFERENCES modules(moduleID) NOT NULL,
+        title VARCHAR(48) NOT NULL,
+        description VARCHAR(100) NOT NULL,
+        content JSON NOT NULL
     );
     CREATE TABLE IF NOT EXISTS subscriptions (
-        userID INT REFERENCES users(userID),
-        moduleIDs INT[] REFERENCES modules(moduleID)
+        userID INT REFERENCES users(userID) NOT NULL,
+        moduleID INT REFERENCES modules(moduleID) NOT NULL,
+        PRIMARY KEY (userID, moduleID)
     );
     CREATE TABLE IF NOT EXISTS progress (
-        userID INT REFERENCES users(userID),
-        moduleID INT REFERENCES modules(moduleID),
-        progress JSON
+        userID INT REFERENCES users(userID) NOT NULL,
+        moduleID INT REFERENCES modules(moduleID) NOT NULL,
+        progress JSON NOT NULL
     );
 """)
 
