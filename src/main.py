@@ -1,15 +1,64 @@
 #!/usr/bin/env python
 # setup and initialize flask app
+# setup and initialize postgresql database
 
 from flask import Flask, redirect
 from flask_restful import Api, Resource
-from flasgger import Swagger
 from werkzeug.wrappers import Response
 
 from lib.swagdoc.swagmanager import SwagManager
 from lib.swagdoc.swagtag import SwagTag
 from routes.user import subscriptions, profile
 from routes.org.module import user
+import psycopg
+
+# start postgresql database
+
+db = psycopg.connect("dbname=dev user=postgres password=cisco")
+print("Database connected")
+
+# if tables do not exist, create them
+
+cur = db.cursor()
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        userID SERIAL PRIMARY KEY,
+        accountType VARCHAR(16),
+        firstName VARCHAR(48),
+        lastName VARCHAR(48),
+        username VARCHAR(64),
+        email VARCHAR(100)
+    );
+    CREATE TABLE IF NOT EXISTS organisations (
+        orgID SERIAL PRIMARY KEY,
+        name VARCHAR(48),
+        description VARCHAR(100)
+    );
+    CREATE TABLE IF NOT EXISTS modules (
+        moduleID SERIAL PRIMARY KEY,
+        name VARCHAR(48),
+        description VARCHAR(100),
+        teachers INT[] REFERENCES users(userID),
+        orgID INT REFERENCES organisations(orgID)
+    );
+    CREATE TABLE IF NOT EXISTS content (
+        contentID SERIAL PRIMARY KEY,
+        moduleID INT REFERENCES modules(moduleID),
+        title VARCHAR(48),
+        description VARCHAR(100),
+        content JSON
+    );
+    CREATE TABLE IF NOT EXISTS subscriptions (
+        userID INT REFERENCES users(userID),
+        moduleIDs INT[] REFERENCES modules(moduleID)
+    );
+    CREATE TABLE IF NOT EXISTS progress (
+        userID INT REFERENCES users(userID),
+        moduleID INT REFERENCES modules(moduleID),
+        progress JSON
+    );
+""")
+
 
 # start flask app
 
