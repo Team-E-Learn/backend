@@ -15,7 +15,7 @@ class Profile(Resource):
                 SwagParam(
                     "user_id",
                     "path",
-                    "int",
+                    "integer",
                     True,
                     "The user id to add to the module",
                     "1234",
@@ -25,5 +25,5 @@ class Profile(Resource):
         )
     )
     def get(self, user_id: int):
-        return {"username": "bob"}
+        return {"username": f"{user_id}"}
 

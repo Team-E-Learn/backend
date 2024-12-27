@@ -14,7 +14,8 @@ import psycopg
 
 # start postgresql database
 
-db = psycopg.connect("dbname=dev user=postgres password=cisco")
+# password is whatever you set it to be when you installed postgresql
+db = psycopg.connect("dbname=dev user=postgres password=class")
 print("Database connected")
 
 # if tables do not exist, create them
@@ -75,6 +76,7 @@ cur.execute("""
         progress JSON NOT NULL
     );
 """)
+db.commit()
 
 
 # start flask app
@@ -98,9 +100,7 @@ class Main(Resource):
 api.add_resource(Main, "/")
 api.add_resource(subscriptions.Subscriptions, "/v1/user/<int:user_id>/subscriptions")
 api.add_resource(profile.Profile, "/v1/user/<int:user_id>/profile")
-api.add_resource(
-    user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>"
-)
+api.add_resource(user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>")
 
 swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 swag.add_tag(SwagTag("Module", "Module related endpoints"))

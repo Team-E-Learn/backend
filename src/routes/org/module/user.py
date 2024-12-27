@@ -14,7 +14,7 @@ class User(Resource):
                 SwagParam(
                     "org_id",
                     "path",
-                    "int",
+                    "integer",
                     True,
                     "The org id to add the module to",
                     "1234",
@@ -22,7 +22,7 @@ class User(Resource):
                 SwagParam(
                     "module_id",
                     "path",
-                    "int",
+                    "integer",
                     True,
                     "The module id to add the user to",
                     "1234",
@@ -30,7 +30,7 @@ class User(Resource):
                 SwagParam(
                     "user_id",
                     "path",
-                    "int",
+                    "integer",
                     True,
                     "The user id to add to the module",
                     "1234",
