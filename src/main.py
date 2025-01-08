@@ -97,6 +97,8 @@ class Main(Resource):
         return redirect("/apidocs")
 
 
+
+
 api.add_resource(Main, "/")
 api.add_resource(subscriptions.Subscriptions, "/v1/user/<int:user_id>/subscriptions")
 api.add_resource(profile.Profile, "/v1/user/<int:user_id>/profile")
@@ -105,9 +107,9 @@ api.add_resource(user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<i
 swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 swag.add_tag(SwagTag("Module", "Module related endpoints"))
 swag.add_tag(SwagTag("User", "User related endpoints"))
-swag.add_swag(subscriptions.Subscriptions, "/v1/user/<user_id>/subscriptions")
-swag.add_swag(profile.Profile, "/v1/user/<user_id>/profile")
-swag.add_swag(user.User, "/v1/org/<org_id>/module/<module_id>/user/<user_id>")
+swag.add_swag(subscriptions.Subscriptions, "/v1/user/{user_id}/subscriptions")
+swag.add_swag(profile.Profile, "/v1/user/{user_id}/profile")
+swag.add_swag(user.User, "/v1/org/{org_id}/module/{module_id}/user/{user_id}")
 
 swag.start_swag()
 
