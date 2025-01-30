@@ -15,5 +15,4 @@ class OrganisationsTable:
         ownerID INT REFERENCES users(userID) NOT NULL
     );"""
         )
-        conn.commit()
 

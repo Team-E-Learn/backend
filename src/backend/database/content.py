@@ -16,4 +16,3 @@ class ContentTable:
         content JSON NOT NULL
     );"""
         )
-        conn.commit()

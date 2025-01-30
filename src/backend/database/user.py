@@ -17,4 +17,3 @@ class UserTable:
         email VARCHAR(100) UNIQUE NOT NULL
     );"""
         )
-        conn.commit()

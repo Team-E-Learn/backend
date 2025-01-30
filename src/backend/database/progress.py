@@ -14,4 +14,3 @@ class ProgressTable:
         progress JSON NOT NULL
     );"""
         )
-        conn.commit()

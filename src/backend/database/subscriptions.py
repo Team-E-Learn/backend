@@ -14,4 +14,3 @@ class SubscriptionsTable:
         PRIMARY KEY (userID, moduleID)
     );"""
         )
-        conn.commit()

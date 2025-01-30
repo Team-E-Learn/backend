@@ -10,6 +10,7 @@ from werkzeug.wrappers import Response
 from backend.database.setup import initialise_tables
 from lib.instilled.instiled import Instil
 
+from lib.jwt.jwt import Jwt
 from lib.swagdoc.swagmanager import SwagManager
 from lib.swagdoc.swagtag import SwagTag
 from routes.user import subscriptions, profile

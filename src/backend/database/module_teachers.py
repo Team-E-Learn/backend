@@ -14,4 +14,3 @@ class ModuleTeachersTable:
         PRIMARY KEY (moduleID, userID)
     );"""
         )
-        conn.commit()

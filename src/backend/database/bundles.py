@@ -15,4 +15,3 @@ class BundlesTable:
         orgID INT REFERENCES organisations(orgID) NOT NULL
     );"""
         )
-        conn.commit()

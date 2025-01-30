@@ -14,4 +14,3 @@ class BundlesModulesTable:
         PRIMARY KEY (bundleID, moduleID)
     );"""
         )
-        conn.commit()
