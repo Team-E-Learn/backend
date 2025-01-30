@@ -25,15 +25,13 @@ swag: SwagManager = SwagManager(
 )
 
 # TODO: Add docker container detection for which to use
-ip_url: str = "postgres" # 127.0.0.1
+ip_url: str = "postgres"  # 127.0.0.1
 
 conn: Connection[TupleRow] = psql_connect(
     f"postgresql://postgres:cisco@{ip_url}:5432/dev"
 )
 print("Database connected")
 initialise_tables(conn)  # create tables if they don't exist
-# TODO: initialise some data into the tables
-
 
 Instil.add_service("db", conn)
 
