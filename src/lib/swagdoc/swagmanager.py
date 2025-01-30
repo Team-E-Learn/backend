@@ -3,8 +3,8 @@ from typing import TypeVar
 from flasgger import Swagger
 from flask import Flask
 
-from lib.swagdoc.swagdoc import SwagDoc
-from lib.swagdoc.swagtag import SwagTag
+from .swagdoc import SwagDoc
+from .swagtag import SwagTag
 
 T = TypeVar("T")
 

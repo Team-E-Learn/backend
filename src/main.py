@@ -1,81 +1,19 @@
 #!/usr/bin/env python
-# setup and initialize flask app
-# setup and initialize postgresql database
 
 from flask import Flask, redirect
 from flask_restful import Api, Resource
+from psycopg.connection import Connection
+from psycopg.rows import TupleRow
+from psycopg import connect as psql_connect
 from werkzeug.wrappers import Response
+
+from backend.database.setup import initialise_tables
+from lib.instilled.instiled import Instil
 
 from lib.swagdoc.swagmanager import SwagManager
 from lib.swagdoc.swagtag import SwagTag
 from routes.user import subscriptions, profile
 from routes.org.module import user
-import psycopg
-
-# start postgresql database
-
-db = psycopg.connect("dbname=dev user=postgres password=cisco")
-print("Database connected")
-
-# if tables do not exist, create them
-
-cur = db.cursor()
-cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        userID SERIAL PRIMARY KEY UNIQUE NOT NULL,
-        accountType VARCHAR(16) NOT NULL,
-        firstName VARCHAR(48) NOT NULL,
-        lastName VARCHAR(48) NOT NULL,
-        username VARCHAR(64) UNIQUE NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS organisations (
-        orgID SERIAL PRIMARY KEY UNIQUE NOT NULL,
-        name VARCHAR(48) UNIQUE NOT NULL,
-        description VARCHAR(100) NOT NULL,
-        ownerID INT REFERENCES users(userID) NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS modules (
-        moduleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
-        name VARCHAR(48) NOT NULL,
-        description VARCHAR(100) NOT NULL,
-        orgID INT REFERENCES organisations(orgID) NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS module_teachers (
-        moduleID INT REFERENCES modules(moduleID) NOT NULL,
-        userID INT REFERENCES users(userID) NOT NULL,
-        PRIMARY KEY (moduleID, userID)
-    );
-    CREATE TABLE IF NOT EXISTS bundles (
-        bundleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
-        name VARCHAR(48) NOT NULL,
-        description VARCHAR(100) NOT NULL,
-        orgID INT REFERENCES organisations(orgID) NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS bundle_modules (
-        bundleID INT REFERENCES bundles(bundleID) NOT NULL,
-        moduleID INT REFERENCES modules(moduleID) NOT NULL,
-        PRIMARY KEY (bundleID, moduleID)
-    );
-    CREATE TABLE IF NOT EXISTS content (
-        contentID SERIAL PRIMARY KEY UNIQUE NOT NULL,
-        moduleID INT REFERENCES modules(moduleID) NOT NULL,
-        title VARCHAR(48) NOT NULL,
-        description VARCHAR(100) NOT NULL,
-        content JSON NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS subscriptions (
-        userID INT REFERENCES users(userID) NOT NULL,
-        moduleID INT REFERENCES modules(moduleID) NOT NULL,
-        PRIMARY KEY (userID, moduleID)
-    );
-    CREATE TABLE IF NOT EXISTS progress (
-        userID INT REFERENCES users(userID) NOT NULL,
-        moduleID INT REFERENCES modules(moduleID) NOT NULL,
-        progress JSON NOT NULL
-    );
-""")
-
 
 # start flask app
 
@@ -87,6 +25,16 @@ swag: SwagManager = SwagManager(
     "Examples of how to use the projects python API",
     "0.0.0",
 )
+
+conn: Connection[TupleRow] = psql_connect(
+    "postgresql://postgres:cisco@127.0.0.1:5432/dev"
+)
+print("Database connected")
+initialise_tables(conn)  # create tables if they don't exist
+# TODO: initialise some data into the tables
+
+
+Instil.add_service("db", conn)
 
 
 class Main(Resource):
