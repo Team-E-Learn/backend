@@ -15,8 +15,6 @@ from lib.swagdoc.swagtag import SwagTag
 from routes.user import subscriptions, profile
 from routes.org.module import user
 
-# start flask app
-
 app: Flask = Flask(__name__)
 api: Api = Api(app)
 swag: SwagManager = SwagManager(
@@ -42,20 +40,17 @@ class Main(Resource):
     def get(self) -> Response:
         return redirect("/apidocs")
 
-
 api.add_resource(Main, "/")
 api.add_resource(subscriptions.Subscriptions, "/v1/user/<int:user_id>/subscriptions")
 api.add_resource(profile.Profile, "/v1/user/<int:user_id>/profile")
-api.add_resource(
-    user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>"
-)
+api.add_resource(user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>")
 
 swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 swag.add_tag(SwagTag("Module", "Module related endpoints"))
 swag.add_tag(SwagTag("User", "User related endpoints"))
-swag.add_swag(subscriptions.Subscriptions, "/v1/user/<user_id>/subscriptions")
-swag.add_swag(profile.Profile, "/v1/user/<user_id>/profile")
-swag.add_swag(user.User, "/v1/org/<org_id>/module/<module_id>/user/<user_id>")
+swag.add_swag(subscriptions.Subscriptions, "/v1/user/{user_id}/subscriptions")
+swag.add_swag(profile.Profile, "/v1/user/{user_id}/profile")
+swag.add_swag(user.User, "/v1/org/{org_id}/module/{module_id}/user/{user_id}")
 
 swag.start_swag()
 

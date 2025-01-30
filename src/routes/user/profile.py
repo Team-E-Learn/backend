@@ -19,7 +19,7 @@ class Profile(Resource):
                 SwagParam(
                     "user_id",
                     "path",
-                    "int",
+                    "integer",
                     True,
                     "The user id to add to the module",
                     "1234",
@@ -30,15 +30,15 @@ class Profile(Resource):
     )
     @Instil("db")
     def get(self, user_id: int, service: Connection[TupleRow]) -> dict[str, str]:
-        cursor: Cursor[TupleRow] = service.cursor()
-        _ = cursor.execute(
-            """
-            INSERT INTO users 
-            (accounttype, firstname, lastname, username, email)
-            VALUES (
-                'student', 'bob', 'example', 'bobbyexamples', 'bob@example.com'
-            );
-        """
-        )
-        service.commit()
-        return {"username": "bob"}
+        # cursor: Cursor[TupleRow] = service.cursor()
+        # _ = cursor.execute(
+        #    """
+        #    INSERT INTO users
+        #    (accounttype, firstname, lastname, username, email)
+        #    VALUES (
+        #        'student', 'bob', 'example', 'bobbyexamples', 'bob@example.com'
+        #    );
+        # """
+        # )
+        # service.commit()
+        return {"username": f"{user_id}"}

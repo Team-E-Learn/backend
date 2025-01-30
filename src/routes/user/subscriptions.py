@@ -15,7 +15,7 @@ class Subscriptions(Resource):
                 SwagParam(
                     "user_id",
                     "path",
-                    "int",
+                    "integer",
                     True,
                     "The user id to add to the module",
                     "1234",
