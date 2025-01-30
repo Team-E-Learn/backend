@@ -33,8 +33,10 @@ conn: Connection[TupleRow] = psql_connect(
 )
 print("Database connected")
 initialise_tables(conn)  # create tables if they don't exist
+print("Intialised tables")
 
 Instil.add_service("db", conn)
+print("Registered database service")
 
 
 class Main(Resource):
@@ -58,6 +60,7 @@ swag.add_swag(profile.Profile, "/v1/user/{user_id}/profile")
 swag.add_swag(user.User, "/v1/org/{org_id}/module/{module_id}/user/{user_id}")
 
 swag.start_swag()
+print("Register swagger documentation")
 
 # start app
 
