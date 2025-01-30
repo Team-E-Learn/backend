@@ -27,8 +27,9 @@ class Verify2FA(Resource):
         data = request.form
         code = data.get('code')
 
-        # Logic to verify 2FA code
+        # Logic to verify 2FA code and generate full access JWT
         if code == "123456":  # Example verification logic
-            return {"message": "Verification successful"}, 200
+            full_access_jwt = "example_full_access_jwt"
+            return {"message": "Verification successful", "full_access_jwt": full_access_jwt}, 200
         else:
             return {"message": "Unauthorized"}, 401

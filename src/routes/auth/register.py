@@ -3,115 +3,92 @@ from flask_restful import Resource
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 
-class RegisterEmail(Resource):
+class CheckEmail(Resource):
 
     @SwagGen(
         SwagDoc(
-            SwagMethod.POST,
+            SwagMethod.GET,
             ["Auth"],
-            "Registers a user with an email",
+            "Checks if an email exists",
             [
                 SwagParam(
                     "email",
-                    "formData",
+                    "query",
                     "string",
                     True,
-                    "The email of the user",
+                    "The email to check",
                     "example_user@example.com",
                 ),
             ],
-            [SwagResp(200, "Registration successful"), SwagResp(400, "Bad Request")],
+            [SwagResp(200, "Email exists"), SwagResp(400, "Bad Request"), SwagResp(404, "Email not found")],
         )
     )
-    def post(self):
-        data = request.form
-        email = data.get('email')
+    def get(self):
+        email = request.args.get('email')
 
-        # Logic to register user
-        if email:  # Example registration logic
-            return {"message": "Registration successful"}, 200
+        # Logic to check email existence
+        if email == "example_user@example.com":  # Example logic
+            return {"message": "Email exists"}, 200
+        elif email:
+            return {"message": "Email not found"}, 404
         else:
             return {"message": "Bad Request"}, 400
 
-class VerifyEmail(Resource):
+class CheckUsername(Resource):
 
     @SwagGen(
         SwagDoc(
-            SwagMethod.POST,
+            SwagMethod.GET,
             ["Auth"],
-            "Verifies a user's email",
-            [
-                SwagParam(
-                    "email",
-                    "formData",
-                    "string",
-                    True,
-                    "The email of the user",
-                    "example_user@example.com",
-                ),
-                SwagParam(
-                    "code",
-                    "formData",
-                    "string",
-                    True,
-                    "The verification code",
-                    "123456",
-                ),
-            ],
-            [SwagResp(200, "Verification successful"), SwagResp(400, "Bad Request")],
-        )
-    )
-    def post(self):
-        data = request.form
-        email = data.get('email')
-        code = data.get('code')
-
-        # Logic to verify email
-        if email and code == "123456":  # Example verification logic
-            return {"message": "Verification successful"}, 200
-        else:
-            return {"message": "Bad Request"}, 400
-
-class Username(Resource):
-
-    @SwagGen(
-        SwagDoc(
-            SwagMethod.POST,
-            ["Auth"],
-            "Checks if a username is available",
+            "Checks if a username exists",
             [
                 SwagParam(
                     "username",
-                    "formData",
+                    "query",
                     "string",
                     True,
                     "The username to check",
                     "example_username",
                 ),
             ],
-            [SwagResp(200, "Username available"), SwagResp(400, "Bad Request"), SwagResp(409, "Username taken")],
+            [SwagResp(200, "Username exists"), SwagResp(400, "Bad Request"), SwagResp(404, "Username not found")],
         )
     )
-    def post(self):
-        data = request.form
-        username = data.get('username')
+    def get(self):
+        username = request.args.get('username')
 
-        # Logic to check username availability
+        # Logic to check username existence
         if username == "example_username":  # Example logic
-            return {"message": "Username taken"}, 409
+            return {"message": "Username exists"}, 200
         elif username:
-            return {"message": "Username available"}, 200
+            return {"message": "Username not found"}, 404
         else:
             return {"message": "Bad Request"}, 400
 
-class Password(Resource):
+class Register(Resource):
 
     @SwagGen(
         SwagDoc(
             SwagMethod.POST,
             ["Auth"],
-            "Sets a password for a user",
+            "Registers a user with email, username, and password",
             [
+                SwagParam(
+                    "email",
+                    "formData",
+                    "string",
+                    True,
+                    "The email of the user",
+                    "example_user@example.com",
+                ),
+                SwagParam(
+                    "username",
+                    "formData",
+                    "string",
+                    True,
+                    "The username of the user",
+                    "example_username",
+                ),
                 SwagParam(
                     "password",
                     "formData",
@@ -121,15 +98,18 @@ class Password(Resource):
                     "example_password",
                 ),
             ],
-            [SwagResp(200, "Password set successfully"), SwagResp(400, "Bad Request")],
+            [SwagResp(200, "Registration successful"), SwagResp(400, "Bad Request")],
         )
     )
     def post(self):
         data = request.form
+        email = data.get('email')
+        username = data.get('username')
         password = data.get('password')
 
-        # Logic to set password
-        if password:  # Example password setting logic
-            return {"message": "Password set successfully"}, 200
+        # Logic to register user and generate TOTP token
+        if email and username and password:  # Example registration logic
+            totp_token = "example_totp_token"
+            return {"message": "Registration successful", "totp_token": totp_token}, 200
         else:
             return {"message": "Bad Request"}, 400

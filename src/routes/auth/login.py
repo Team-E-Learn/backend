@@ -36,8 +36,9 @@ class Login(Resource):
         email = data.get('email')
         password = data.get('password')
 
-        # Logic to authenticate user
+        # Logic to authenticate user and generate limited JWT
         if email == "example_user@example.com" and password == "example_password":
-            return {"message": "Login successful"}, 200
+            limited_jwt = "example_limited_jwt"
+            return {"message": "Login successful", "limited_jwt": limited_jwt}, 200
         else:
             return {"message": "Unauthorized"}, 401
