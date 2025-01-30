@@ -24,8 +24,11 @@ swag: SwagManager = SwagManager(
     "0.0.0",
 )
 
+# TODO: Add docker container detection for which to use
+ip_url: str = "postgres" # 127.0.0.1
+
 conn: Connection[TupleRow] = psql_connect(
-    "postgresql://postgres:cisco@127.0.0.1:5432/dev"
+    f"postgresql://postgres:cisco@{ip_url}:5432/dev"
 )
 print("Database connected")
 initialise_tables(conn)  # create tables if they don't exist
@@ -40,10 +43,13 @@ class Main(Resource):
     def get(self) -> Response:
         return redirect("/apidocs")
 
+
 api.add_resource(Main, "/")
 api.add_resource(subscriptions.Subscriptions, "/v1/user/<int:user_id>/subscriptions")
 api.add_resource(profile.Profile, "/v1/user/<int:user_id>/profile")
-api.add_resource(user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>")
+api.add_resource(
+    user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>"
+)
 
 swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 swag.add_tag(SwagTag("Module", "Module related endpoints"))

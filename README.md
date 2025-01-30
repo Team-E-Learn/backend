@@ -9,26 +9,14 @@ This will be the repo for the backend of the project, focusing on the API calls 
 ```bash
 python main.py
 ```
+Along with this you will need to run a postgres database, this can be found
+in a docker container in database/ or you can run this yourself with the 
+same configuration.
 
 OR 
 
 ```bash
-docker build -t build-name .
-docker run -p 5000:5000 build-name
-```
-
-### Database
-
-#### Starting
-```bash
-docker-compose up -d
-```
-
-Postgres: localhost:5432
-Adminer WebUI: localhost:8989
-
-
-#### Shutting Down
-```bash
+docker-compose build
+docker-compuse up -d 
 docker-compose down
 ```
