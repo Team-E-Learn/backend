@@ -17,3 +17,15 @@ class UserTable:
         email VARCHAR(100) UNIQUE NOT NULL
     );"""
         )
+
+    @staticmethod
+    def get_by_username(conn: Connection[TupleRow], username: str):
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM users WHERE username = %s;", (username,))
+        return cursor.fetchone()
+
+    @staticmethod
+    def get_by_email(conn: Connection[TupleRow], email: str):
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = %s;", (email,))
+        return cursor.fetchone()

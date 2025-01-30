@@ -16,10 +16,12 @@ from lib.swagdoc.swagtag import SwagTag
 from routes.user.profile import Profile
 from routes.user.subscriptions import Subscriptions
 from routes.org.module import user
-from routes.auth.register import CheckEmail, CheckUsername, Register
+from routes.auth.register import Register
+from routes.auth.username import CheckUsername
 from routes.auth.login import Login
 from routes.auth.verify2fa import Verify2FA
-from routes.auth.verify_email import VerifyEmail, ConfirmEmail
+from routes.auth.email import CheckEmail
+from routes.auth.verify_email import VerifyEmail
 app: Flask = Flask(__name__)
 api: Api = Api(app)
 swag: SwagManager = SwagManager(
@@ -54,8 +56,8 @@ api.add_resource(Subscriptions, "/v1/user/<int:user_id>/subscriptions")
 api.add_resource(Profile, "/v1/user/<int:user_id>/profile")
 api.add_resource(
     user.User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>")
-api.add_resource(CheckEmail, "/v1/auth/email")
-api.add_resource(CheckUsername, '/v1/auth/username')
+api.add_resource(CheckEmail, '/v1/auth/email', resource_class_args=(conn,))
+api.add_resource(CheckUsername, '/v1/auth/username', resource_class_args=(conn,))
 api.add_resource(Register, '/v1/auth/register')
 api.add_resource(Login, '/v1/auth/login')
 api.add_resource(Verify2FA, '/v1/auth/2fa')
@@ -74,7 +76,6 @@ swag.add_swag(Register, "/v1/auth/register")
 swag.add_swag(Login, "/v1/auth/login")
 swag.add_swag(Verify2FA, "/v1/auth/2fa")
 swag.add_swag(VerifyEmail, "/v1/auth/verify-email")
-swag.add_swag(ConfirmEmail, "/v1/auth/confirm-email")
 
 swag.start_swag()
 print("Register swagger documentation")

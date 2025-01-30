@@ -32,35 +32,3 @@ class VerifyEmail(Resource):
             return {"message": "Email verified"}, 200
         else:
             return {"message": "Bad Request"}, 400
-
-class ConfirmEmail(Resource):
-
-    @SwagGen(
-        SwagDoc(
-            SwagMethod.POST,
-            ["Auth"],
-            "Sends a verification code to the user's email",
-            [
-                SwagParam(
-                    "email",
-                    "formData",
-                    "string",
-                    True,
-                    "The email of the user",
-                    "example_user@example.com",
-                ),
-            ],
-            [SwagResp(200, "Verification code sent"), SwagResp(400, "Bad Request")],
-        )
-    )
-    def post(self):
-        data = request.form
-        email = data.get('email')
-
-        # Logic to send verification code to email
-        if email:  # Example logic
-            verification_code = "123456"
-            # Store verification code in DB (example)
-            return {"message": "Verification code sent"}, 200
-        else:
-            return {"message": "Bad Request"}, 400
