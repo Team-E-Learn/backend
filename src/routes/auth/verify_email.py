@@ -1,7 +1,9 @@
 from flask import request
 from flask_restful import Resource
+from werkzeug.datastructures.structures import ImmutableMultiDict
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
+
 
 class VerifyEmail(Resource):
 
@@ -24,43 +26,14 @@ class VerifyEmail(Resource):
         )
     )
     def post(self):
-        data = request.form
-        token = data.get('token')
+        data: ImmutableMultiDict[str, str] = request.form
+        token: str | None = data.get("token")
+
+        if not token:
+            return {"message": "Bad Request"}, 400
 
         # Logic to verify email token
-        if token == "123456":  # Example verification logic
-            return {"message": "Email verified"}, 200
-        else:
+        if token != "123456":  # Example verification logic
             return {"message": "Bad Request"}, 400
 
-class ConfirmEmail(Resource):
-
-    @SwagGen(
-        SwagDoc(
-            SwagMethod.POST,
-            ["Auth"],
-            "Sends a verification code to the user's email",
-            [
-                SwagParam(
-                    "email",
-                    "formData",
-                    "string",
-                    True,
-                    "The email of the user",
-                    "example_user@example.com",
-                ),
-            ],
-            [SwagResp(200, "Verification code sent"), SwagResp(400, "Bad Request")],
-        )
-    )
-    def post(self):
-        data = request.form
-        email = data.get('email')
-
-        # Logic to send verification code to email
-        if email:  # Example logic
-            verification_code = "123456"
-            # Store verification code in DB (example)
-            return {"message": "Verification code sent"}, 200
-        else:
-            return {"message": "Bad Request"}, 400
+        return {"message": "Email verified"}, 200

@@ -1,7 +1,9 @@
 from flask import request
 from flask_restful import Resource
+from werkzeug.datastructures.structures import ImmutableMultiDict
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
+
 
 class Login(Resource):
 
@@ -32,13 +34,16 @@ class Login(Resource):
         )
     )
     def post(self):
-        data = request.form
-        email = data.get('email')
-        password = data.get('password')
+        data: ImmutableMultiDict[str, str] = request.form
+        email: str | None = data.get("email")
+        password: str | None = data.get("password")
+
+        if email is None or password is None:
+            return {"message": "Bad request"}, 400
 
         # Logic to authenticate user and generate limited JWT
         if email == "example_user@example.com" and password == "example_password":
             limited_jwt = "example_limited_jwt"
             return {"message": "Login successful", "limited_jwt": limited_jwt}, 200
-        else:
-            return {"message": "Unauthorized"}, 401
+
+        return {"message": "Unauthorized"}, 401

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from os import walk
-from typing import Type
 from flask import Flask, redirect
 from flask_restful import Api, Resource
 from psycopg.connection import Connection
@@ -14,13 +12,15 @@ from lib.instilled.instiled import Instil
 
 from lib.swagdoc.swagmanager import SwagManager
 from lib.swagdoc.swagtag import SwagTag
+from routes.auth.email import CheckEmail
+from routes.auth.register import Register
+from routes.auth.username import CheckUsername
+from routes.auth.verify_email import VerifyEmail
 from routes.user.profile import Profile
 from routes.user.subscriptions import Subscriptions
 from routes.org.module.user import User
-from routes.auth.register import CheckEmail, CheckUsername, Register
 from routes.auth.login import Login
 from routes.auth.verify2fa import Verify2FA
-from routes.auth.verify_email import VerifyEmail, ConfirmEmail
 
 app: Flask = Flask(__name__)
 api: Api = Api(app)
@@ -92,8 +92,6 @@ register(Register, "/v1/auth/register", "/v1/auth/register", swag, api)
 register(Login, "/v1/auth/login", "/v1/auth/login", swag, api)
 register(Verify2FA, "/v1/auth/2fa", "/v1/auth/2fa", swag, api)
 register(VerifyEmail, "/v1/auth/verify-email", "/v1/auth/verify-email", swag, api)
-register(ConfirmEmail, "/v1/auth/confirm-email", "/v1/auth/confirm-email", swag, api)
-
 
 swag.start_swag()
 print("Register swagger documentation")
