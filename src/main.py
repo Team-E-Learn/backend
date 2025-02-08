@@ -22,6 +22,8 @@ from routes.org.module.user import User
 from routes.auth.login import Login
 from routes.auth.verify2fa import Verify2FA
 
+import projenv
+
 app: Flask = Flask(__name__)
 api: Api = Api(app)
 swag: SwagManager = SwagManager(
@@ -32,9 +34,7 @@ swag: SwagManager = SwagManager(
 )
 
 
-conn: Connection[TupleRow] = psql_connect(
-    f"postgresql://postgres:cisco@postgres:5432/dev"
-)
+conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
 print("Database connected")
 initialise_tables(conn)  # create tables if they don't exist
 print("Initialized tables")

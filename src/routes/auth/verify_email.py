@@ -29,6 +29,11 @@ class VerifyEmail(Resource):
         data: ImmutableMultiDict[str, str] = request.form
         token: str | None = data.get("token")
 
+        # TODO:
+        # 1) Take code submitted
+        # 2) Validate
+        # 3) Set database table to show it as validated
+
         if not token:
             return {"message": "Bad Request"}, 400
 

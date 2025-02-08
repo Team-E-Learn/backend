@@ -29,6 +29,13 @@ class Verify2FA(Resource):
         data: ImmutableMultiDict[str, str] = request.form
         code: str | None = data.get("code")
 
+        # TODO:
+        # 1) Take user limited JWT
+        # 2) Validate
+        # 3) Ensure uid in jwt sub is valid
+        # 4) Check 2fa code valid
+        # 5) Produce new JWT with full access (see /auth/login)
+
         if not code:
             return {"message": "Bad Request"}, 400
 

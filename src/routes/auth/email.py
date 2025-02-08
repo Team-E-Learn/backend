@@ -43,7 +43,9 @@ class CheckEmail(Resource):
 
         # Logic to send verification code to email
         verification_code: str = "123456"
-        # TODO: Send email to email address
+        # TODO:
+        # 1) Send email to email address
+        # 2) Generate a unique token and store in a database table
 
         # Store verification code in DB (example)
         return {"message": "Verification code sent"}, 200

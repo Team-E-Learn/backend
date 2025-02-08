@@ -47,6 +47,8 @@ class Register(Resource):
         username: str | None = data.get("username")
         password: str | None = data.get("password")
 
+        # TODO: Validate the email has been validated
+
         # Logic to register user and generate TOTP token
         if email and username and password:  # Example registration logic
             totp_token = "example_totp_token"

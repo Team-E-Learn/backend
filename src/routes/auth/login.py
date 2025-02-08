@@ -1,8 +1,11 @@
+from time import time
 from flask import request
 from flask_restful import Resource
 from werkzeug.datastructures.structures import ImmutableMultiDict
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
+from lib.jwt.jwt import Jwt
+from projenv import JWT_LOGIN_KEY, JWT_LOGIN_EXP
 
 
 class Login(Resource):
@@ -41,9 +44,21 @@ class Login(Resource):
         if email is None or password is None:
             return {"message": "Bad request"}, 400
 
-        # Logic to authenticate user and generate limited JWT
-        if email == "example_user@example.com" and password == "example_password":
-            limited_jwt = "example_limited_jwt"
-            return {"message": "Login successful", "limited_jwt": limited_jwt}, 200
+        # TODO: Perform database user validation
+        if email != "example_user@example.com" and password != "example_password":
+            return {"message": "Unauthorized"}, 401
+        uid: int = 1  # found user id
 
-        return {"message": "Unauthorized"}, 401
+        expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now
+
+        # Logic to authenticate user and generate limited JWT
+        limited_jwt: str = (
+            Jwt(JWT_LOGIN_KEY)
+            .add_claim("iss", "elearn-backend")
+            .add_claim("aud", "elearn-login")
+            .add_claim("sub", f"{uid}")
+            .add_claim("exp", f"{expiry_time}")
+            .sign()
+        )
+
+        return {"message": "Login successful", "limited_jwt": limited_jwt}, 200
