@@ -5,7 +5,7 @@ Database Access
 """
 DB_UNAME: str = "postgres"
 DB_PWD: str = "cisco"
-DB_HOSTNAME: str = "localhost"
+DB_HOSTNAME: str = "postgres"
 DB_PORT: str = "5432"
 DB_NAME: str = "dev"
 
