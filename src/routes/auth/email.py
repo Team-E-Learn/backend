@@ -1,3 +1,4 @@
+import requests
 from flask import request
 from flask_restful import Resource
 from psycopg.connection import Connection
@@ -7,6 +8,23 @@ from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 from backend.database.user import UserTable
+
+
+def send_verification_email(to_email: str, verification_code: str):
+
+    url = "https://cartervernon.com/elearn-script.php"
+    payload = {
+        "auth_key": "TVL7fjlHixxphDqrAmzTbNgKAMqbJivLjZ8d6CpYCExQIVMAadBDG3uyXyEqv4t74b0yE8",
+        "email": to_email,
+        "code": verification_code,
+    }
+
+    try:
+        response = requests.post(url, data=payload)
+        response.raise_for_status()
+        print("Email sent successfully")
+    except requests.RequestException as e:
+        print(f"Failed to send email: {e}")
 
 
 class CheckEmail(Resource):
@@ -41,11 +59,12 @@ class CheckEmail(Resource):
         if UserTable.get_by_email(service, email):
             return {"message": "Bad Request"}, 400
 
+
         # Logic to send verification code to email
         verification_code: str = "123456"
         # TODO:
         # 1) Send email to email address
-        # 2) Generate a unique token and store in a database table
+        send_verification_email(email, verification_code)
 
         # Store verification code in DB (example)
         return {"message": "Verification code sent"}, 200
