@@ -71,13 +71,25 @@ swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 swag.add_tag(SwagTag("Module", "Module related endpoints"))
 swag.add_tag(SwagTag("User", "User related endpoints"))
 
-register(Subscriptions, "/v1/user/<int:user_id>/subscriptions",
-    "/v1/user/{user_id}/subscriptions", swag, api)
+register(
+    Subscriptions,
+    "/v1/user/<int:user_id>/subscriptions",
+    "/v1/user/{user_id}/subscriptions",
+    swag,
+    api,
+)
 
-register(Profile, "/v1/user/<int:user_id>/profile", "/v1/user/{user_id}/profile", swag, api)
+register(
+    Profile, "/v1/user/<int:user_id>/profile", "/v1/user/{user_id}/profile", swag, api
+)
 
-register(User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>",
-    "/v1/org/{org_id}/module/{module_id}/user/{user_id}", swag, api)
+register(
+    User,
+    "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>",
+    "/v1/org/{org_id}/module/{module_id}/user/{user_id}",
+    swag,
+    api,
+)
 
 register(CheckEmail, "/v1/auth/email", "/v1/auth/email", swag, api)
 register(CheckUsername, "/v1/auth/username", "/v1/auth/username", swag, api)
@@ -86,10 +98,17 @@ register(Login, "/v1/auth/login", "/v1/auth/login", swag, api)
 register(Verify2FA, "/v1/auth/2fa", "/v1/auth/2fa", swag, api)
 register(VerifyEmail, "/v1/auth/verify-email", "/v1/auth/verify-email", swag, api)
 register(Lessons, "/v1/course/lessons", "/v1/course/lessons", swag, api)
-register(Lesson, "/v1/course/lesson/<int:lesson_id>", "/v1/course/lesson/{lesson_id}", swag, api)
+register(
+    Lesson,
+    "/v1/course/lesson/<int:lesson_id>",
+    "/v1/course/lesson/{lesson_id}",
+    swag,
+    api,
+)
 register(HomeDashboard, "/v1/user/dashboard/home", "/v1/user/dashboard/home", swag, api)
-register(CourseDashboard, "/v1/user/dashboard/course", "/v1/user/dashboard/course", swag, api)
-
+register(
+    CourseDashboard, "/v1/user/dashboard/course", "/v1/user/dashboard/course", swag, api
+)
 
 
 swag.start_swag()

@@ -1,4 +1,3 @@
-import requests
 from flask import request
 from flask_restful import Resource
 from psycopg.connection import Connection
@@ -8,23 +7,24 @@ from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 from backend.database.user import UserTable
+from requests import post, Response
+from random import choice
 
 
-def send_verification_email(to_email: str, verification_code: str):
-
-    url = "https://cartervernon.com/elearn-script.php"
-    payload = {
+def send_verification_email(to_email: str, verification_code: str) -> bool:
+    url: str = "https://cartervernon.com/elearn-script.php"
+    payload: dict[str, str] = {
         "auth_key": "TVL7fjlHixxphDqrAmzTbNgKAMqbJivLjZ8d6CpYCExQIVMAadBDG3uyXyEqv4t74b0yE8",
         "email": to_email,
         "code": verification_code,
     }
 
-    try:
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-        print("Email sent successfully")
-    except requests.RequestException as e:
-        print(f"Failed to send email: {e}")
+    response: Response = post(url, data=payload)
+    return response.status_code == 200
+
+
+def generate_code() -> str:
+    return "".join([choice("0123456789") for _ in range(9)])
 
 
 class CheckEmail(Resource):
@@ -59,12 +59,13 @@ class CheckEmail(Resource):
         if UserTable.get_by_email(service, email):
             return {"message": "Bad Request"}, 400
 
-
         # Logic to send verification code to email
-        verification_code: str = "123456"
-        # TODO:
-        # 1) Send email to email address
-        send_verification_email(email, verification_code)
+        verification_code: str = generate_code()
+
+        # TODO: Store verification code in database
+
+        if not send_verification_email(email, verification_code):
+            return {"message": "Failed to send email"}, 400
 
         # Store verification code in DB (example)
         return {"message": "Verification code sent"}, 200

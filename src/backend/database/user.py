@@ -29,3 +29,4 @@ class UserTable:
         cursor = conn.cursor()
         _ = cursor.execute("SELECT * FROM users WHERE email = %s;", (email,))
         return cursor.fetchone()
+
