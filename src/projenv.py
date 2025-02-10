@@ -19,3 +19,12 @@ JWT Signing Keys
 # token for limited usage until 2fa used
 JWT_LOGIN_KEY: bytes = b"secretkey"
 JWT_LOGIN_EXP: int = 1_800  # seconds
+
+
+"""
+Email Sending Token
+"""
+
+EMAIL_API_TOKEN: str = (
+    "TVL7fjlHixxphDqrAmzTbNgKAMqbJivLjZ8d6CpYCExQIVMAadBDG3uyXyEqv4t74b0yE8"
+)

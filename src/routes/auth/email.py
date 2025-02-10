@@ -9,12 +9,13 @@ from lib.swagdoc.swagmanager import SwagGen
 from backend.database.user import UserTable
 from requests import post, Response
 from random import choice
+from projenv import EMAIL_API_TOKEN
 
 
 def send_verification_email(to_email: str, verification_code: str) -> bool:
     url: str = "https://cartervernon.com/elearn-script.php"
     payload: dict[str, str] = {
-        "auth_key": "TVL7fjlHixxphDqrAmzTbNgKAMqbJivLjZ8d6CpYCExQIVMAadBDG3uyXyEqv4t74b0yE8",
+        "auth_key": EMAIL_API_TOKEN,
         "email": to_email,
         "code": verification_code,
     }
