@@ -1,6 +1,5 @@
 from flask_restful import Resource
 from psycopg.connection import Connection
-from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
 
 from lib.instilled.instiled import Instil
