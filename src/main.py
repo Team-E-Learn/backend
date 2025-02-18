@@ -93,7 +93,7 @@ register(
 
 register(CheckEmail, "/v1/auth/email", "/v1/auth/email", swag, api)
 register(CheckUsername, "/v1/auth/username", "/v1/auth/username", swag, api)
-register(Register, "/v1/auth/register", "/v1/auth/register", swag, api)
+register(Register, "/v1/auth/register", "/v1/auth/register", swag, api, conn)
 register(Login, "/v1/auth/login", "/v1/auth/login", swag, api)
 register(Verify2FA, "/v1/auth/2fa", "/v1/auth/2fa", swag, api)
 register(VerifyEmail, "/v1/auth/verify-email", "/v1/auth/verify-email", swag, api)
