@@ -1,18 +1,23 @@
+from time import time
+from typing import cast
 from flask import request
 from flask_restful import Resource
+from psycopg.rows import TupleRow
 from werkzeug.datastructures.structures import ImmutableMultiDict
 from werkzeug.security import generate_password_hash, check_password_hash
 from psycopg.connection import Connection
 from psycopg import sql
+from lib.instilled.instiled import Instil
+from lib.jwt.jwt import Jwt
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
-import jwt
 import datetime
 import os
 
+from projenv import JWT_LOGIN_EXP, JWT_LOGIN_KEY
+
+
 class Register(Resource):
-    def __init__(self, conn: Connection):
-        self.conn = conn
 
     @SwagGen(
         SwagDoc(
@@ -52,7 +57,8 @@ class Register(Resource):
             ],
         )
     )
-    def post(self):
+    @Instil("db")
+    def post(self, service: Connection[TupleRow]):
         data: ImmutableMultiDict[str, str] = request.form
         email: str | None = data.get("email")
         username: str | None = data.get("username")
@@ -64,12 +70,14 @@ class Register(Resource):
 
         # Check for existing user
         try:
-            with self.conn.cursor() as cur:
-                cur.execute(
-                    sql.SQL("""
+            with service.cursor() as cur:
+                _ = cur.execute(
+                    sql.SQL(
+                        """
                         SELECT id FROM users WHERE email = %s OR username = %s
-                    """),
-                    (email, username)
+                    """
+                    ),
+                    (email, username),
                 )
                 if cur.fetchone():
                     return {"message": "Email or username already exists"}, 409
@@ -81,37 +89,44 @@ class Register(Resource):
 
         # Insert user into the database
         try:
-            with self.conn.cursor() as cur:
-                cur.execute(
-                    sql.SQL("""
+            with service.cursor() as cur:
+                _ = cur.execute(
+                    sql.SQL(
+                        """
                         INSERT INTO users (email, username, password)
                         VALUES (%s, %s, %s)
                         RETURNING id, email, username
-                    """),
-                    (email, username, hashed_password)
+                    """
+                    ),
+                    (email, username, hashed_password),
                 )
-                user = cur.fetchone()
-                self.conn.commit()
+                user: TupleRow | None = cur.fetchone()
+                service.commit()
         except Exception as e:
-            self.conn.rollback()
+            service.rollback()
             return {"message": f"Registration failed: {str(e)}"}, 500
 
-        # Generate JWT token
-        token = jwt.encode(
-            {
-                "user_id": user["id"],
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
-            },
-            os.getenv("JWT_SECRET", "default_secret"),
-            algorithm="HS256",
+        if not user:
+            return {"message": "Error finding user"}, 500
+
+        expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now
+
+        # Logic to authenticate user and generate limited JWT
+        token: str = (
+            Jwt(JWT_LOGIN_KEY)
+            .add_claim("iss", "elearn-backend")
+            .add_claim("aud", "elearn-login")
+            .add_claim("sub", f"{user[0]}")
+            .add_claim("exp", f"{expiry_time}")
+            .sign()
         )
 
         return {
             "message": "Registration successful",
             "user": {
-                "id": user["id"],
-                "email": user["email"],
-                "username": user["username"],
+                "id": user[0],
+                "email": user[1],
+                "username": user[2],
             },
             "token": token,
         }, 200
