@@ -27,6 +27,7 @@ class Profile(Resource):
             [SwagResp(200, "Returns the profile information")],
         )
     )
+    # todo make work
     @Instil("db")
     def get(self, user_id: int, service: Connection[TupleRow]) -> dict[str, str]:
         # cursor: Cursor[TupleRow] = service.cursor()

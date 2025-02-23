@@ -68,13 +68,14 @@ class User(Resource):
                 return {"success": False, "error": "Organisation does not own the module"}
 
             # insert into subscriptions user_id and module_id
-            cur.execute(
-                "INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)",
-                (user_id, module_id)
-            )
-            service.commit()
-
-        return {"success": True}
+            try:
+                cur.execute("INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)",
+                    (user_id, module_id)
+                )
+                service.commit()
+                return {"success": True}
+            except Exception as e:
+                return {"success": False, "error": str(e)}
 
 
 
