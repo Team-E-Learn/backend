@@ -24,6 +24,7 @@ class Subscriptions(Resource):
             [SwagResp(200, "Returns the subscriptions")],
         )
     )
+    # todo convert to use DB not dummy data
     def get(self, user_id: int):
         return [{
             "org_name": "University of Lincoln",

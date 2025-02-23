@@ -17,6 +17,7 @@ class Lessons(Resource):
             [SwagResp(200, "Returns the list of lessons")],
         )
     )
+    # todo convert to use DB not dummy data
     @Instil("db")
     def get(self, service: Connection[TupleRow]) -> dict:
         # Demo return data
