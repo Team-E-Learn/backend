@@ -1,6 +1,10 @@
 from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
+from backend.database.user import UserTable
+from backend.database.organisations import OrganisationsTable
+from backend.database.modules import ModulesTable
+from backend.database.subscriptions import SubscriptionsTable
 
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagParam, SwagMethod, SwagResp
@@ -45,37 +49,26 @@ class User(Resource):
     )
 
     @Instil('db')
-    def put(self, org_id: int, module_id: int, user_id: int, service: Connection[TupleRow]) -> dict[str, bool]:
+    def put(self, org_id: int, module_id: int, user_id: int, service: Connection[TupleRow]) -> dict:
         with service.cursor() as cur:
             # check user_id exists in the users table
-            cur.execute("SELECT 1 FROM users WHERE userID = %s", (user_id,))
-            if cur.fetchone() is None:
+            if not UserTable.user_exists(service, user_id):
                 return {"success": False, "error": "User not found"}
 
             # check org_id exists
-            cur.execute("SELECT 1 FROM organisations WHERE orgID = %s", (org_id,))
-            if cur.fetchone() is None:
+            if not OrganisationsTable.org_exists(service, org_id):
                 return {"success": False, "error": "Organisation not found"}
 
             # check module_id exists
-            cur.execute("SELECT 1 FROM modules WHERE moduleID = %s", (module_id,))
-            if cur.fetchone() is None:
+            if not ModulesTable.module_exists(service, module_id):
                 return {"success": False, "error": "Module not found"}
 
             # check org owns module
-            cur.execute("SELECT 1 FROM modules WHERE moduleID = %s AND orgID = %s", (module_id, org_id))
-            if cur.fetchone() is None:
+            if not ModulesTable.module_owned_by_org(service, module_id, org_id):
                 return {"success": False, "error": "Organisation does not own the module"}
 
             # insert into subscriptions user_id and module_id
-            try:
-                cur.execute("INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)",
-                    (user_id, module_id)
-                )
-                service.commit()
-                return {"success": True}
-            except Exception as e:
-                return {"success": False, "error": str(e)}
+            return SubscriptionsTable.add_subscription(service, user_id, module_id)
 
 
 

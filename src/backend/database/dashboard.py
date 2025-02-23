@@ -16,3 +16,50 @@ class DashboardTable:
         y INT NOT NULL
     );"""
         )
+
+    # for http://127.0.0.1:5000/v1/user/1/dashboard
+    # no alternative API call to add dashboard data, so this is the only way to add it
+    @staticmethod
+    def write_dashboard(conn: Connection[TupleRow]) -> None:
+        dashboard = [
+            (1, 'announcements_widget', 'announcements', 10, 20),
+            (1, 'info_widget', 'info', 30, 20),
+            (1, 'about_widget', 'about', 10, 40),
+            (1, 'grade_centre_widget', 'grade_centre', 30, 40),
+            (1, 'calendar_widget', 'calendar', 10, 60),
+            (2, 'announcements_widget', 'announcements', 10, 20),
+            (2, 'grade_centre_widget', 'grade_centre', 30, 20),
+            (2, 'calendar_widget', 'calendar', 10, 40),
+            (3, 'announcements_widget', 'announcements', 10, 20),
+            (3, 'info_widget', 'info', 30, 20),
+            (3, 'about_widget', 'about', 10, 40),
+            (3, 'grade_centre_widget', 'grade_centre', 30, 40),
+            (3, 'calendar_widget', 'calendar', 10, 60),
+            (4, 'announcements_widget', 'announcements', 10, 20),
+            (4, 'grade_centre_widget', 'grade_centre', 30, 20),
+            (4, 'calendar_widget', 'calendar', 10, 40)
+        ]
+
+        cursor = conn.cursor()
+        for user_id, widget_id, widget_type, x, y in dashboard:
+            cursor.execute(
+                "INSERT INTO dashboard (userID, widgetID, widgetType, x, y) VALUES (%s, %s, %s, %s, %s)",
+                (user_id, widget_id, widget_type, x, y)
+            )
+
+
+    @staticmethod
+    def get_dashboard(conn: Connection[TupleRow], user_id: int) -> dict:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM dashboard WHERE userID = %s", (user_id,))
+        dashboard = cursor.fetchall()
+        return {
+            "elements": [
+                {
+                    "id": row[1],
+                    "type": row[2],
+                    "position": {"x": row[3], "y": row[4]}
+                }
+                for row in dashboard
+            ]
+        }

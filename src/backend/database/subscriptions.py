@@ -14,3 +14,34 @@ class SubscriptionsTable:
         PRIMARY KEY (userID, moduleID)
     );"""
         )
+
+    # so you don't need to manually add subscriptions with http://127.0.0.1:5000/v1/org/1/module/1/user/1
+    @staticmethod
+    def write_subscriptions(conn: Connection[TupleRow]) -> None:
+        subscriptions = [
+            (3, 1),
+            (3, 2),
+            (3, 5),
+            (3, 8),
+            (4, 1),
+            (4, 3),
+            (4, 7),
+            (4, 8)
+        ]
+
+        cursor = conn.cursor()
+        for user_id, module_id in subscriptions:
+            cursor.execute(
+                "INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)",
+                (user_id, module_id)
+            )
+
+    @staticmethod
+    def add_subscription(conn: Connection[TupleRow], user_id: int, module_id: int) -> dict[str, bool]:
+        try:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)", (user_id, module_id))
+            conn.commit()
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}

@@ -7,7 +7,7 @@ from psycopg.rows import TupleRow
 from psycopg import connect as psql_connect
 from werkzeug.wrappers import Response
 
-from backend.database.setup import initialise_tables
+from backend.database.setup import initialise_tables, populate_dummy_data
 from lib.instilled.instiled import Instil
 
 from lib.swagdoc.swagmanager import SwagManager
@@ -28,7 +28,6 @@ from routes.module.lessons_ import Lessons
 
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
-import dummy_data
 
 app: Flask = Flask(__name__)
 api: Api = Api(app)
@@ -72,38 +71,19 @@ swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 swag.add_tag(SwagTag("Module", "Module related endpoints"))
 swag.add_tag(SwagTag("User", "User related endpoints"))
 
-register(
-    Subscriptions,
-    "/v1/user/<int:user_id>/subscriptions",
-    "/v1/user/{user_id}/subscriptions",
-    swag,
-    api,
-)
-
+register(Subscriptions,"/v1/user/<int:user_id>/subscriptions",
+         "/v1/user/{user_id}/subscriptions", swag, api)
 register(Profile, "/v1/user/<int:user_id>/profile", "/v1/user/{user_id}/profile", swag, api)
-
-register(
-    User,
-    "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>",
-    "/v1/org/{org_id}/module/{module_id}/user/{user_id}",
-    swag,
-    api,
-)
-
+register(User,"/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>",
+    "/v1/org/{org_id}/module/{module_id}/user/{user_id}", swag, api)
 register(CheckEmail, "/v1/auth/email", "/v1/auth/email", swag, api)
 register(CheckUsername, "/v1/auth/username", "/v1/auth/username", swag, api)
 register(Register, "/v1/auth/register", "/v1/auth/register", swag, api)
 register(Login, "/v1/auth/login", "/v1/auth/login", swag, api)
 register(Verify2FA, "/v1/auth/2fa", "/v1/auth/2fa", swag, api)
 register(VerifyEmail, "/v1/auth/verify-email", "/v1/auth/verify-email", swag, api)
-register(Lessons, "/v1/module/lessons", "/v1/module/lessons", swag, api)
-register(
-    Lesson,
-    "/v1/module/lesson/<int:lesson_id>",
-    "/v1/module/lesson/{lesson_id}",
-    swag,
-    api,
-)
+register(Lessons, "/v1/module/<int:module_id>/lessons", "/v1/module/{module_id}/lessons", swag, api)
+register(Lesson,"/v1/module/lesson/<int:lesson_id>","/v1/module/lesson/{lesson_id}", swag, api)
 register(HomeDashboard, "/v1/user/<int:user_id>/dashboard", "/v1/user/{user_id}/dashboard", swag, api)
 register(ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>",
          "/v1/user/{user_id}/dashboard/module/{module_id}", swag, api)
@@ -113,13 +93,7 @@ swag.start_swag()
 print("Register swagger documentation")
 
 # write dummy data
-dummy_data.write_users(conn)
-dummy_data.write_orgs(conn)
-dummy_data.write_modules(conn)
-dummy_data.write_bundles(conn)
-dummy_data.write_subscriptions(conn)
-dummy_data.write_dashboard(conn)
-dummy_data.write_module_dashboard(conn)
+populate_dummy_data(conn)
 
 # start app
 

@@ -30,3 +30,16 @@ def initialise_tables(conn: Connection[TupleRow]) -> None:
     ModuleDashboardTable.create(conn)
     ProgressTable.create(conn)
     conn.commit()
+
+# populate the tables with dummy data
+def populate_dummy_data(conn: Connection[TupleRow]) -> None:
+    UserTable.write_users(conn)
+    OrganisationsTable.write_orgs(conn)
+    ModulesTable.write_modules(conn)
+    BundlesTable.write_bundles(conn)
+    LessonsTable.write_lessons(conn)
+    BlocksTable.write_blocks(conn)
+    SubscriptionsTable.write_subscriptions(conn)
+    DashboardTable.write_dashboard(conn)
+    ModuleDashboardTable.write_module_dashboard(conn)
+    conn.commit()
