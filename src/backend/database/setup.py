@@ -10,7 +10,10 @@ from backend.database.lessons import LessonsTable
 from backend.database.blocks import BlocksTable
 from backend.database.module_teachers import ModuleTeachersTable
 from backend.database.subscriptions import SubscriptionsTable
+from backend.database.dashboard import DashboardTable
+from backend.database.module_dashboard import ModuleDashboardTable
 from backend.database.progress import ProgressTable
+
 
 # create all tables if they don't exist
 def initialise_tables(conn: Connection[TupleRow]) -> None:
@@ -23,5 +26,7 @@ def initialise_tables(conn: Connection[TupleRow]) -> None:
     BlocksTable.create(conn)
     ModuleTeachersTable.create(conn)
     SubscriptionsTable.create(conn)
+    DashboardTable.create(conn)
+    ModuleDashboardTable.create(conn)
     ProgressTable.create(conn)
     conn.commit()

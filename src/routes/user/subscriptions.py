@@ -22,8 +22,8 @@ class Subscriptions(Resource):
                     "path",
                     "integer",
                     True,
-                    "The user id to add to the module",
-                    "1234",
+                    "The user id get the subscriptions for",
+                    "3",
                 )
             ],
             [SwagResp(200, "Returns the subscriptions")],
@@ -67,14 +67,14 @@ class Subscriptions(Resource):
                     if bundle is None:
                         bundle = {
                             "bundle_id": bundle_id,
-                            "bundle_name": module_name,  # use module_name as bundle_name
+                            "bundle_name": bundle_name,
                             "modules": []
                         }
                         org["bundles"].append(bundle)
 
                     # add module to the bundle
                     bundle["modules"].append({
-                        "name": bundle_name,  # use bundle_name as module_name
+                        "name": module_name,
                         "module_id": module_id
                     })
                 else:

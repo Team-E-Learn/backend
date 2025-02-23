@@ -27,18 +27,22 @@ class Profile(Resource):
             [SwagResp(200, "Returns the profile information")],
         )
     )
-    # todo make work
+    # gets the profile information for a user
     @Instil("db")
     def get(self, user_id: int, service: Connection[TupleRow]) -> dict[str, str]:
-        # cursor: Cursor[TupleRow] = service.cursor()
-        # _ = cursor.execute(
-        #    """
-        #    INSERT INTO users
-        #    (accounttype, firstname, lastname, username, email)
-        #    VALUES (
-        #        'student', 'bob', 'example', 'bobbyexamples', 'bob@example.com'
-        #    );
-        # """
-        # )
-        # service.commit()
-        return {"username": f"{user_id}"}
+        with service.cursor() as cur:
+            cur.execute(
+                "SELECT username, email, firstName, lastName, accountType FROM users WHERE userID = %s",
+                (user_id,)
+            )
+            user = cur.fetchone()
+            if user:
+                return {
+                    "username": user[0],
+                    "email": user[1],
+                    "firstName": user[2],
+                    "lastName": user[3],
+                    "accountType": user[4]
+                }
+            else:
+                return {"error": "User not found"}

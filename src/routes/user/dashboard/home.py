@@ -1,4 +1,4 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
@@ -16,41 +16,32 @@ class HomeDashboard(Resource):
             [
                 SwagParam(
                     "user_id",
-                    "query",
+                    "path",
                     "integer",
                     True,
                     "The user id to add to the module",
-                    "1234",
+                    "1",
                 )
             ],
             [SwagResp(200, "Returns the home dashboard")],
         )
     )
     @Instil("db")
-    def get(self, service: Connection[TupleRow]) -> dict:
-        parser = reqparse.RequestParser()
-        parser.add_argument('user_id', type=int, required=True, location='args')
-        args = parser.parse_args()
+    def get(self, user_id: int, service: Connection[TupleRow]) -> dict:
+       with service.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM dashboard WHERE userID = %s",
+                (user_id,)
+            )
+            dashboard = cur.fetchall()
 
-        user_id = args['user_id']
-
-        # Demo return data
-        return {
-            "elements": [
-                {
-                    "id": "announcements_widget",
-                    "type": "announcements",
-                    "position": {"x": 10, "y": 20}
-                },
-                {
-                    "id": "grade_centre_widget",
-                    "type": "grade_centre",
-                    "position": {"x": 30, "y": 20}
-                },
-                {
-                    "id": "calendar_widget",
-                    "type": "calendar",
-                    "position": {"x": 10, "y": 40}
-                }
-            ]
-        }
+            return {
+                "elements": [
+                    {
+                        "id": row[1],
+                        "type": row[2],
+                        "position": {"x": row[3], "y": row[4]}
+                    }
+                    for row in dashboard
+                ]
+            }
