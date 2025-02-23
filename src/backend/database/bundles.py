@@ -33,20 +33,18 @@ class BundlesTable:
                     "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
                     (name, description, orgID))
 
-        def add_modules_to_bundle(bundle_name, module_names):
-            cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", (bundle_name,))
-            bundle_id = cursor.fetchone()[0]
-            for module_name in module_names:
-                cursor.execute("SELECT moduleID FROM modules WHERE name = %s", (module_name,))
-                module_id = cursor.fetchone()[0]
-                cursor.execute(
-                    "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
-                    (bundle_id, module_id)
-                )
-
-        add_modules_to_bundle('Computer Science BSc', [
+        cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", ('Computer Science BSc',))
+        bundle_id = cursor.fetchone()[0]
+        module_names = [
             'Team Software Engineering',
             'Networking Fundamentals',
             'Applied Programming Paradigms',
             'Personal Development'
-        ])
+        ]
+        for module_name in module_names:
+            cursor.execute("SELECT moduleID FROM modules WHERE name = %s", (module_name,))
+            module_id = cursor.fetchone()[0]
+            cursor.execute(
+                "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
+                (bundle_id, module_id)
+            )
