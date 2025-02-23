@@ -28,6 +28,7 @@ from routes.course.lessons_ import Lessons
 
 from routes.user.dashboard.course import CourseDashboard
 from routes.user.dashboard.home import HomeDashboard
+import write_dummy_data
 
 app: Flask = Flask(__name__)
 api: Api = Api(app)
@@ -113,6 +114,12 @@ register(
 
 swag.start_swag()
 print("Register swagger documentation")
+
+# write dummy data
+write_dummy_data.write_users(conn)
+write_dummy_data.write_orgs(conn)
+write_dummy_data.write_modules(conn)
+write_dummy_data.write_bundles(conn)
 
 # start app
 

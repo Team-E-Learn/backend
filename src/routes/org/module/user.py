@@ -45,7 +45,7 @@ class User(Resource):
     )
 
     @Instil('db')
-    def put(self, org_id: int, mod_id: int, user_id: int, service: Connection[TupleRow]) -> dict[str, bool]:
+    def put(self, org_id: int, module_id: int, user_id: int, service: Connection[TupleRow]) -> dict[str, bool]:
         with service.cursor() as cur:
             # check user_id exists in the users table
             cur.execute("SELECT 1 FROM users WHERE userID = %s", (user_id,))
@@ -58,19 +58,19 @@ class User(Resource):
                 return {"success": False, "error": "Organisation not found"}
 
             # check module_id exists
-            cur.execute("SELECT 1 FROM modules WHERE moduleID = %s", (mod_id,))
+            cur.execute("SELECT 1 FROM modules WHERE moduleID = %s", (module_id,))
             if cur.fetchone() is None:
                 return {"success": False, "error": "Module not found"}
 
             # check org owns module
-            cur.execute("SELECT 1 FROM modules WHERE moduleID = %s AND orgID = %s", (mod_id, org_id))
+            cur.execute("SELECT 1 FROM modules WHERE moduleID = %s AND orgID = %s", (module_id, org_id))
             if cur.fetchone() is None:
                 return {"success": False, "error": "Organisation does not own the module"}
 
-            # insert into subscriptions user_id and org_id
+            # insert into subscriptions user_id and module_id
             cur.execute(
-                "INSERT INTO subscriptions (userID, orgID, moduleID) VALUES (%s, %s, %s)",
-                (user_id, org_id, mod_id)
+                "INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)",
+                (user_id, module_id)
             )
             service.commit()
 
