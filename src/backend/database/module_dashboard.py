@@ -14,8 +14,7 @@ class ModuleDashboardTable:
         widgetID VARCHAR(48) NOT NULL,
         widgetType VARCHAR(48) NOT NULL,
         x INT NOT NULL,
-        y INT NOT NULL,
-        PRIMARY KEY (userID, moduleID)
+        y INT NOT NULL
     );"""
         )
 

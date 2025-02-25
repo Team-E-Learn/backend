@@ -50,26 +50,26 @@ class User(Resource):
 
     # add a module to a user using org_id, module_id and user_id
     @Instil('db')
-    def put(self, org_id: int, module_id: int, user_id: int, conn: Connection[TupleRow]) -> dict:
+    def put(self, org_id: int, module_id: int, user_id: int, service: Connection[TupleRow]) -> dict:
         # check user_id exists in the users table
-        if not UserTable.user_exists(conn, user_id):
+        if not UserTable.user_exists(service, user_id):
             return {"success": False, "error": "User not found"}
 
         # check org_id exists
-        if not OrganisationsTable.org_exists(conn, org_id):
+        if not OrganisationsTable.org_exists(service, org_id):
             return {"success": False, "error": "Organisation not found"}
 
         # check module_id exists
-        if not ModulesTable.module_exists(conn, module_id):
+        if not ModulesTable.module_exists(service, module_id):
             return {"success": False, "error": "Module not found"}
 
         # check org owns module
-        if not ModulesTable.module_owned_by_org(conn, module_id, org_id):
+        if not ModulesTable.module_owned_by_org(service, module_id, org_id):
             return {"success": False, "error": "Organisation does not own the module"}
 
         # insert into subscriptions user_id and module_id
         try:
-            return SubscriptionsTable.add_subscription(conn, user_id, module_id)
+            return SubscriptionsTable.add_subscription(service, user_id, module_id)
         except Exception as e:
             return {"success": False, "error": str(e)}
 

@@ -30,9 +30,9 @@ class Lesson(Resource):
 
     # get lesson sidebar with basic blocks using lesson_id
     @Instil("db")
-    def get(self, lesson_id: int, conn: Connection[TupleRow]):
+    def get(self, lesson_id: int, service: Connection[TupleRow]):
         blocks = []
-        for block in BlocksTable.get_blocks(conn, lesson_id):
+        for block in BlocksTable.get_blocks(service, lesson_id):
             block_type, block_order, data = block
             blocks.append({
                 "block_type": block_type,

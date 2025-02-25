@@ -32,9 +32,9 @@ class Subscriptions(Resource):
 
     # get the subscribed orgs, bundles and modules for a user using user_id
     @Instil('db')
-    def get(self, user_id: int, conn: Connection[TupleRow]) -> list[dict[str, Any]]:
+    def get(self, user_id: int, service: Connection[TupleRow]) -> list[dict[str, Any]]:
         # get the user's subscriptions
-        cur = conn.cursor()
+        cur = service.cursor()
         cur.execute("""
             SELECT organisations.orgID, organisations.name AS orgName,
                    bundles.bundleID, bundles.name AS bundleName,

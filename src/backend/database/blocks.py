@@ -1,3 +1,4 @@
+import json
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
@@ -43,6 +44,7 @@ class BlocksTable:
 
         cursor = conn.cursor()
         for lesson_id, block_type, order, data in blocks:
+            data = json.dumps(data)
             cursor.execute(
                 "INSERT INTO blocks (lessonID, blockType, blockOrder, data) VALUES (%s, %s, %s, %s)",
                 (lesson_id, block_type, order, data)

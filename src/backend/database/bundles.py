@@ -2,6 +2,19 @@ from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
 
+def add_modules_to_bundle(bundle_name, module_names, conn: Connection[TupleRow]) -> None:
+    cursor = conn.cursor()
+    cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", (bundle_name,))
+    bundle_id = cursor.fetchone()[0]
+    for module_name in module_names:
+        cursor.execute("SELECT moduleID FROM modules WHERE name = %s", (module_name,))
+        module_id = cursor.fetchone()[0]
+        cursor.execute(
+            "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
+            (bundle_id, module_id)
+        )
+
+
 class BundlesTable:
 
     @staticmethod
@@ -30,41 +43,20 @@ class BundlesTable:
         for name, description, orgID in bundles:
             cursor.execute("SELECT 1 FROM bundles WHERE name = %s", (name,))
             if cursor.fetchone() is None:
-                continue
-            cursor.execute(
-                "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
-                (name, description, orgID))
+                cursor.execute(
+                    "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
+                    (name, description, orgID))
 
-        cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", ('Computer Science BSc',))
-        bundle_id = cursor.fetchone()[0]
         # list of modules to add to the CS bundle from modules.py
-        module_names = [
+        add_modules_to_bundle('Computer Science BSc', [
             'Team Software Engineering',
             'Networking Fundamentals',
             'Applied Programming Paradigms',
             'Personal Development'
-        ]
-        for module_name in module_names:
-            cursor.execute("SELECT moduleID FROM modules WHERE name = %s", (module_name,))
-            module_id = cursor.fetchone()[0]
-            cursor.execute(
-                "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
-                (bundle_id, module_id)
-            )
+        ], conn)
 
-        cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", ('Excel Certification',))
-        bundle_id = cursor.fetchone()[0]
         # list of modules to add to the Excel bundle from modules.py
-        module_names = [
+        add_modules_to_bundle('Excel Certification', [
             'Excel Certification',
             'Advanced Excel',
-        ]
-        for module_name in module_names:
-            cursor.execute("SELECT moduleID FROM modules WHERE name = %s", (module_name,))
-            module_id = cursor.fetchone()[0]
-            cursor.execute(
-                "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
-                (bundle_id, module_id)
-            )
-
-
+        ], conn)
