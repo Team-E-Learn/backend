@@ -34,6 +34,7 @@ class UserTable:
     # no alternative API call to add users, so this is the only way to add them
     @staticmethod
     def write_users(conn: Connection[TupleRow]) -> None:
+        # format is (accountType, firstName, lastName, username, email)
         users = [
             ('user', 'Alice', 'Smith', 'alice.smith', 'alice.smith@example.com'),
             ('admin', 'Bob', 'Johnson', 'bob.johnson', 'bob.johnson@example.com'),
@@ -52,25 +53,14 @@ class UserTable:
 
     # this function is called from src/routes/user/profile.py
     @staticmethod
-    def get_user_profile(conn: Connection[TupleRow], user_id: int) -> dict[str, str]:
+    def get_user_profile(conn: Connection[TupleRow], user_id: int) -> tuple[str, str, str, str, str]:
         cursor = conn.cursor()
         cursor.execute(
             "SELECT username, email, firstName, lastName, accountType FROM users WHERE userID = %s",
             (user_id,)
         )
-        user = cursor.fetchone()
-        if user:
-            return {
-                "username": user[0],
-                "email": user[1],
-                "firstName": user[2],
-                "lastName": user[3],
-                "accountType": user[4]
-            }
-        else:
-            return {"error": "User not found"}
+        return cursor.fetchone()
 
-    # this function is called from src/routes/user/user.py
     @staticmethod
     def user_exists(conn: Connection[TupleRow], user_id: int) -> bool:
         cursor = conn.cursor()

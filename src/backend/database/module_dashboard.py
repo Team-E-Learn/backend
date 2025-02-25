@@ -14,7 +14,8 @@ class ModuleDashboardTable:
         widgetID VARCHAR(48) NOT NULL,
         widgetType VARCHAR(48) NOT NULL,
         x INT NOT NULL,
-        y INT NOT NULL
+        y INT NOT NULL,
+        PRIMARY KEY (userID, moduleID)
     );"""
         )
 
@@ -22,6 +23,7 @@ class ModuleDashboardTable:
     # no alternative API call to add module dashboard data, so this is the only way to add it
     @staticmethod
     def write_module_dashboard(conn: Connection[TupleRow]) -> None:
+        # format is (userID, moduleID, widgetID, widgetType, x, y)
         module_dashboard = [
             (1, 1, 'announcements_widget', 'announcements', 10, 20),
             (1, 1, 'info_widget', 'info', 30, 20),
@@ -49,19 +51,11 @@ class ModuleDashboardTable:
 
 
     @staticmethod
-    def get_dashboard(conn: Connection[TupleRow], user_id: int, module_id: int) -> dict:
+    def get_dashboard(conn: Connection[TupleRow], user_id: int, module_id: int) -> (
+            list)[tuple[int, int, str, str, int, int]]:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM module_dashboard WHERE userID = %s AND moduleID = %s",
             (user_id, module_id)
                     )
-        dashboard = cursor.fetchall()
-        return {
-            "elements": [
-                {
-                    "id": row[2],
-                    "type": row[3],
-                    "position": {"x": row[4], "y": row[5]}
-                }
-                for row in dashboard
-            ]
-        }
+        return cursor.fetchall()
+

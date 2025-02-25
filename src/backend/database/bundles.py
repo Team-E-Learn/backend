@@ -20,6 +20,7 @@ class BundlesTable:
     # no alternative API call to add bundles, so this is the only way to add them
     @staticmethod
     def write_bundles(conn: Connection[TupleRow]) -> None:
+        # format is (name, description, orgID)
         bundles = [
             ('Computer Science BSc', 'A bundle of modules for a Computer Science degree', 1),
             ('Excel Certification', 'A bundle of modules for an Excel certification', 2)
@@ -29,12 +30,14 @@ class BundlesTable:
         for name, description, orgID in bundles:
             cursor.execute("SELECT 1 FROM bundles WHERE name = %s", (name,))
             if cursor.fetchone() is None:
-                cursor.execute(
-                    "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
-                    (name, description, orgID))
+                continue
+            cursor.execute(
+                "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
+                (name, description, orgID))
 
         cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", ('Computer Science BSc',))
         bundle_id = cursor.fetchone()[0]
+        # list of modules to add to the CS bundle from modules.py
         module_names = [
             'Team Software Engineering',
             'Networking Fundamentals',
@@ -48,3 +51,20 @@ class BundlesTable:
                 "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
                 (bundle_id, module_id)
             )
+
+        cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", ('Excel Certification',))
+        bundle_id = cursor.fetchone()[0]
+        # list of modules to add to the Excel bundle from modules.py
+        module_names = [
+            'Excel Certification',
+            'Advanced Excel',
+        ]
+        for module_name in module_names:
+            cursor.execute("SELECT moduleID FROM modules WHERE name = %s", (module_name,))
+            module_id = cursor.fetchone()[0]
+            cursor.execute(
+                "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
+                (bundle_id, module_id)
+            )
+
+

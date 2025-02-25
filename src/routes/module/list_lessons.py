@@ -28,6 +28,17 @@ class Lessons(Resource):
         )
     )
 
+    # get list of lessons for a specific module using module_id
     @Instil("db")
-    def get(self, module_id: int, service: Connection[TupleRow]) -> dict:
-        return LessonsTable.get_lessons(service, module_id)
+    def get(self, module_id: int, service: Connection[TupleRow]):
+        lessons = LessonsTable.get_lessons(service, module_id)
+        return {
+            "lessons": [
+                {
+                    "id": row[0],
+                    "title": row[1],
+                    "description": row[2]
+                }
+                for row in lessons
+            ]
+        }

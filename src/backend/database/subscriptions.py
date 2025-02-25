@@ -18,6 +18,7 @@ class SubscriptionsTable:
     # so you don't need to manually add subscriptions with http://127.0.0.1:5000/v1/org/1/module/1/user/1
     @staticmethod
     def write_subscriptions(conn: Connection[TupleRow]) -> None:
+        # format is (userID, moduleID)
         subscriptions = [
             (3, 1),
             (3, 2),
@@ -37,11 +38,8 @@ class SubscriptionsTable:
             )
 
     @staticmethod
-    def add_subscription(conn: Connection[TupleRow], user_id: int, module_id: int) -> dict[str, bool]:
-        try:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)", (user_id, module_id))
-            conn.commit()
-            return {"success": True}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+    def add_subscription(conn: Connection[TupleRow], user_id: int, module_id: int) -> bool:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)", (user_id, module_id))
+        conn.commit()
+        return True

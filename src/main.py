@@ -24,7 +24,7 @@ from routes.auth.verify2fa import Verify2FA
 
 import projenv
 from routes.module.lessons.lesson import Lesson
-from routes.module.lessons_ import Lessons
+from routes.module.list_lessons import Lessons
 
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard

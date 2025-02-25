@@ -20,6 +20,7 @@ class LessonsTable:
     # no alternative API call to add lessons, so this is the only way to add them
     @staticmethod
     def write_lessons(conn: Connection[TupleRow]) -> None:
+        # format is (module_id, title, description)
         lessons = [
             (1, 'Introduction', 'An introduction to the module'),
             (1, 'Lesson 1', 'The first lesson in the module'),
@@ -48,20 +49,10 @@ class LessonsTable:
 
 
     @staticmethod
-    def get_lessons(conn: Connection[TupleRow], module_id: int) -> dict:
+    def get_lessons(conn: Connection[TupleRow], module_id: int) -> list[tuple[int, int, str, str]]:
         cursor = conn.cursor()
         cursor.execute(
             "SELECT * FROM lessons WHERE moduleID = %s",
             (module_id,)
         )
-        lessons =  cursor.fetchall()
-        return {
-            "lessons": [
-                {
-                    "id": row[0],
-                    "title": row[1],
-                    "description": row[2]
-                }
-                for row in lessons
-            ]
-        }
+        return cursor.fetchall()

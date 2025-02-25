@@ -20,6 +20,7 @@ class ModulesTable:
     # no alternative API call to add modules, so this is the only way to add them
     @staticmethod
     def write_modules(conn: Connection[TupleRow]) -> None:
+        # format is (name, description, orgID)
         modules = [
             ('Personal Development', 'Learn how to develop yourself', 1),
             ('Team Software Engineering', 'Team-based software engineering project', 1),

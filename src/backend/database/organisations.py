@@ -20,6 +20,7 @@ class OrganisationsTable:
     # no alternative API call to add organisations, so this is the only way to add them
     @staticmethod
     def write_orgs(conn: Connection[TupleRow]) -> None:
+        # format is (name, description, ownerID (userID who owns the org))
         orgs = [
             ('University of Lincoln', 'A university in Lincoln', 4),
             ('Microsoft', 'A tech company', 2),

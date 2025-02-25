@@ -29,7 +29,16 @@ class Profile(Resource):
         )
     )
 
-    # get user profile
+    # get user profile information using user_id
     @Instil("db")
-    def get(self, user_id: int, service: Connection[TupleRow]) -> dict[str, str]:
-        return UserTable.get_user_profile(service, user_id)
+    def get(self, user_id: int, conn: Connection[TupleRow]):
+        user = UserTable.get_user_profile(conn, user_id)
+        if user is None:
+            return {"error": "User not found"}  # Guard clause for user not found
+        return {
+            "username": user[0],
+            "email": user[1],
+            "firstName": user[2],
+            "lastName": user[3],
+            "accountType": user[4]
+        }
