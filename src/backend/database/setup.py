@@ -2,6 +2,7 @@ from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
 from backend.database.user import UserTable
+from backend.database.email_codes import EmailCodesTable
 from backend.database.organisations import OrganisationsTable
 from backend.database.modules import ModulesTable
 from backend.database.bundles import BundlesTable
@@ -18,6 +19,7 @@ from backend.database.progress import ProgressTable
 # create all tables if they don't exist
 def initialise_tables(conn: Connection[TupleRow]) -> None:
     UserTable.create(conn)
+    EmailCodesTable.create(conn)
     OrganisationsTable.create(conn)
     ModulesTable.create(conn)
     BundlesTable.create(conn)

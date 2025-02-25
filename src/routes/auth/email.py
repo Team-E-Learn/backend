@@ -7,6 +7,7 @@ from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 from backend.database.user import UserTable
+from backend.database.email_codes import EmailCodesTable
 from requests import post, Response
 from random import choice
 from projenv import EMAIL_API_TOKEN
@@ -25,7 +26,7 @@ def send_verification_email(to_email: str, verification_code: str) -> bool:
 
 
 def generate_code() -> str:
-    return "".join([choice("0123456789") for _ in range(9)])
+    return "".join([choice("0123456789") for _ in range(6)])
 
 
 class CheckEmail(Resource):
@@ -48,6 +49,7 @@ class CheckEmail(Resource):
             [SwagResp(200, "Verification code sent"), SwagResp(400, "Bad Request")],
         )
     )
+
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
         data: ImmutableMultiDict[str, str] = request.form
@@ -63,10 +65,10 @@ class CheckEmail(Resource):
         # Logic to send verification code to email
         verification_code: str = generate_code()
 
-        # TODO: Store verification code in database
-
         if not send_verification_email(email, verification_code):
             return {"message": "Failed to send email"}, 400
+
+        EmailCodesTable.add_code(service, email, verification_code)
 
         # Store verification code in DB (example)
         return {"message": "Verification code sent"}, 200
