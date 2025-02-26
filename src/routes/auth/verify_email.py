@@ -1,8 +1,12 @@
 from flask import request
 from flask_restful import Resource
+from psycopg.connection import Connection
+from psycopg.rows import TupleRow
 from werkzeug.datastructures.structures import ImmutableMultiDict
+from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
+from backend.database.email_codes import EmailCodesTable
 
 
 class VerifyEmail(Resource):
@@ -13,6 +17,14 @@ class VerifyEmail(Resource):
             ["Auth"],
             "Verifies a user's email with a 6 digit code",
             [
+                SwagParam(
+                    "email",
+                    "formData",
+                    "string",
+                    True,
+                    "The email of the user",
+                    "example_user@example.com",
+                ),
                 SwagParam(
                     "token",
                     "formData",
@@ -25,20 +37,20 @@ class VerifyEmail(Resource):
             [SwagResp(200, "Email verified"), SwagResp(400, "Bad Request")],
         )
     )
-    def post(self):
+
+    @Instil("db")
+    def post(self, service: Connection[TupleRow]):
         data: ImmutableMultiDict[str, str] = request.form
+        email: str | None = data.get("email")
         token: str | None = data.get("token")
 
-        # TODO:
-        # 1) Take code submitted
-        # 2) Validate
-        # 3) Set database table to show it as validated
-
-        if not token:
+        if not email or not token:
             return {"message": "Bad Request"}, 400
 
+        print(EmailCodesTable.get_code(service, email))
         # Logic to verify email token
-        if token != "123456":  # Example verification logic
+        if token != EmailCodesTable.get_code(service, email):
             return {"message": "Bad Request"}, 400
 
         return {"message": "Email verified"}, 200
+        # todo # 3) Set database table to show it as validated

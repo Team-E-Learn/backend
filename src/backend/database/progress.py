@@ -11,6 +11,7 @@ class ProgressTable:
     CREATE TABLE IF NOT EXISTS progress (
         userID INT REFERENCES users(userID) NOT NULL,
         moduleID INT REFERENCES modules(moduleID) NOT NULL,
-        progress JSON NOT NULL
+        progress JSON NOT NULL,
+        primary key (userID, moduleID)
     );"""
         )

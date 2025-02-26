@@ -1,5 +1,12 @@
 from flask_restful import Resource
+from psycopg.connection import Connection
+from psycopg.rows import TupleRow
+from backend.database.user import UserTable
+from backend.database.organisations import OrganisationsTable
+from backend.database.modules import ModulesTable
+from backend.database.subscriptions import SubscriptionsTable
 
+from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagParam, SwagMethod, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 
@@ -18,7 +25,7 @@ class User(Resource):
                     "integer",
                     True,
                     "The org id to add the module to",
-                    "1234",
+                    "1",
                 ),
                 SwagParam(
                     "module_id",
@@ -26,7 +33,7 @@ class User(Resource):
                     "integer",
                     True,
                     "The module id to add the user to",
-                    "1234",
+                    "1",
                 ),
                 SwagParam(
                     "user_id",
@@ -34,18 +41,38 @@ class User(Resource):
                     "integer",
                     True,
                     "The user id to add to the module",
-                    "1234",
+                    "1",
                 ),
             ],
             [SwagResp(200, "Module added to user")],
         )
     )
-    def put(self, org_id: int, mod_id: int, user_id: int) -> dict[str, bool]:
+    @Instil("db")
+    def put(
+        self, org_id: int, module_id: int, user_id: int, service: Connection[TupleRow]
+    ) -> dict[str, str | bool]:
+        # add a module to a user using org_id, module_id and user_id
+        # check user_id exists in the users table
+        if not UserTable.user_exists(service, user_id):
+            return {"success": False, "error": "User not found"}
 
-        # TODO: Find user via id
-        # TODO: Verify org owns mod id
-        # TODO: Insert into subscriptions user id and org id
+        # check org_id exists
+        if not OrganisationsTable.org_exists(service, org_id):
+            return {"success": False, "error": "Organisation not found"}
 
-        return {"success": True}
+        # check module_id exists
+        if not ModulesTable.module_exists(service, module_id):
+            return {"success": False, "error": "Module not found"}
 
+        # check org owns module
+        if not ModulesTable.module_owned_by_org(service, module_id, org_id):
+            return {"success": False, "error": "Organisation does not own the module"}
 
+        # insert into subscriptions user_id and module_id
+        try:
+            if not SubscriptionsTable.add_subscription(service, user_id, module_id):
+                return {"success": False, "error": "Failed to add subscription"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+        return {"success": True, "message": "Successfully added subscription to user"}

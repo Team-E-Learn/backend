@@ -1,10 +1,12 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
+from backend.database.dashboard import DashboardTable
 
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
+
 
 class HomeDashboard(Resource):
 
@@ -16,41 +18,25 @@ class HomeDashboard(Resource):
             [
                 SwagParam(
                     "user_id",
-                    "query",
+                    "path",
                     "integer",
                     True,
                     "The user id to add to the module",
-                    "1234",
+                    "1",
                 )
             ],
             [SwagResp(200, "Returns the home dashboard")],
         )
     )
     @Instil("db")
-    def get(self, service: Connection[TupleRow]) -> dict:
-        parser = reqparse.RequestParser()
-        parser.add_argument('user_id', type=int, required=True, location='args')
-        args = parser.parse_args()
-
-        user_id = args['user_id']
-
-        # Demo return data
+    def get(self, user_id: int, service: Connection[TupleRow]):
+        # get home dashboard for a specific user using user_id
+        dashboard: list[tuple[int, str, str, int, int]] = DashboardTable.get_dashboard(
+            service, user_id
+        )
         return {
             "elements": [
-                {
-                    "id": "announcements_widget",
-                    "type": "announcements",
-                    "position": {"x": 10, "y": 20}
-                },
-                {
-                    "id": "grade_centre_widget",
-                    "type": "grade_centre",
-                    "position": {"x": 30, "y": 20}
-                },
-                {
-                    "id": "calendar_widget",
-                    "type": "calendar",
-                    "position": {"x": 10, "y": 40}
-                }
+                {"id": row[1], "type": row[2], "position": {"x": row[3], "y": row[4]}}
+                for row in dashboard
             ]
         }
