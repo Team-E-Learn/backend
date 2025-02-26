@@ -1,3 +1,4 @@
+from psycopg.cursor import Cursor
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
@@ -17,15 +18,16 @@ class EmailCodesTable:
     @staticmethod
     def add_code(conn: Connection[TupleRow], email: str, code: str) -> None:
         print(email, code)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO email_codes (email, code) VALUES (%s, %s)",
-            (email, code)
+        cursor: Cursor[TupleRow] = conn.cursor()
+        _ = cursor.execute(
+            "INSERT INTO email_codes (email, code) VALUES (%s, %s)", (email, code)
         )
 
     @staticmethod
     def get_code(conn: Connection[TupleRow], email: str) -> str | None:
         print(email)
-        cursor = conn.cursor()
-        cursor.execute("SELECT code FROM email_codes WHERE email = %s", (email,))
-        return cursor.fetchone()
+        cursor: Cursor[TupleRow] = conn.cursor()
+        _ = cursor.execute("SELECT code FROM email_codes WHERE email = %s", (email,))
+        result: TupleRow | None = cursor.fetchone()
+
+        return None if result is None else result[0]

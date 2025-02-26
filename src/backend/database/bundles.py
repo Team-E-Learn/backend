@@ -1,17 +1,33 @@
 from psycopg.connection import Connection
+from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
 
 
-def add_modules_to_bundle(bundle_name, module_names, conn: Connection[TupleRow]) -> None:
+def add_modules_to_bundle(
+    bundle_name: str, module_names: list[str], conn: Connection[TupleRow]
+) -> None:
     cursor = conn.cursor()
-    cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", (bundle_name,))
-    bundle_id = cursor.fetchone()[0]
+    _ = cursor.execute("SELECT bundleID FROM bundles WHERE name = %s", (bundle_name,))
+    bundle_result: TupleRow | None = cursor.fetchone()
+    if bundle_result is None:
+        return
+
+    bundle_id: int = bundle_result[0]
+
     for module_name in module_names:
-        cursor.execute("SELECT moduleID FROM modules WHERE name = %s", (module_name,))
-        module_id = cursor.fetchone()[0]
-        cursor.execute(
+        _ = cursor.execute(
+            "SELECT moduleID FROM modules WHERE name = %s", (module_name,)
+        )
+        module_result: TupleRow | None = cursor.fetchone()
+
+        if module_result is None:
+            continue
+
+        module_id: int = module_result[0]
+
+        _ = cursor.execute(
             "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)",
-            (bundle_id, module_id)
+            (bundle_id, module_id),
         )
 
 
@@ -34,29 +50,49 @@ class BundlesTable:
     @staticmethod
     def write_bundles(conn: Connection[TupleRow]) -> None:
         # format is (name, description, orgID)
-        bundles = [
-            ('Computer Science BSc', 'A bundle of modules for a Computer Science degree', 1),
-            ('Excel Certification', 'A bundle of modules for an Excel certification', 2)
+        bundles: list[tuple[str, str, int]] = [
+            (
+                "Computer Science BSc",
+                "A bundle of modules for a Computer Science degree",
+                1,
+            ),
+            (
+                "Excel Certification",
+                "A bundle of modules for an Excel certification",
+                2,
+            ),
         ]
 
-        cursor = conn.cursor()
+        cursor: Cursor[TupleRow] = conn.cursor()
         for name, description, orgID in bundles:
-            cursor.execute("SELECT 1 FROM bundles WHERE name = %s", (name,))
-            if cursor.fetchone() is None:
-                cursor.execute(
-                    "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
-                    (name, description, orgID))
+            _ = cursor.execute("SELECT 1 FROM bundles WHERE name = %s", (name,))
+
+            if cursor.fetchone() is not None:
+                continue
+
+            _ = cursor.execute(
+                "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
+                (name, description, orgID),
+            )
 
         # list of modules to add to the CS bundle from modules.py
-        add_modules_to_bundle('Computer Science BSc', [
-            'Team Software Engineering',
-            'Networking Fundamentals',
-            'Applied Programming Paradigms',
-            'Personal Development'
-        ], conn)
+        add_modules_to_bundle(
+            "Computer Science BSc",
+            [
+                "Team Software Engineering",
+                "Networking Fundamentals",
+                "Applied Programming Paradigms",
+                "Personal Development",
+            ],
+            conn,
+        )
 
         # list of modules to add to the Excel bundle from modules.py
-        add_modules_to_bundle('Excel Certification', [
-            'Excel Certification',
-            'Advanced Excel',
-        ], conn)
+        add_modules_to_bundle(
+            "Excel Certification",
+            [
+                "Excel Certification",
+                "Advanced Excel",
+            ],
+            conn,
+        )

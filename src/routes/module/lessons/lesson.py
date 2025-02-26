@@ -7,6 +7,7 @@ from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 
+
 class Lesson(Resource):
 
     @SwagGen(
@@ -27,17 +28,12 @@ class Lesson(Resource):
             [SwagResp(200, "Returns the lesson sidebar")],
         )
     )
-
-    # get lesson sidebar with basic blocks using lesson_id
     @Instil("db")
     def get(self, lesson_id: int, service: Connection[TupleRow]):
-        blocks = []
-        for block in BlocksTable.get_blocks(service, lesson_id):
-            block_type, block_order, data = block
-            blocks.append({
-                "block_type": block_type,
-                "block_order": block_order,
-                "data": data
-            })
+        # get lesson sidebar with basic blocks using lesson_id
+        blocks: list[dict[str, int | str]] = []
+        for block_type, block_order, data in BlocksTable.get_blocks(service, lesson_id):
+            blocks.append(
+                {"block_type": block_type, "block_order": block_order, "data": data}
+            )
         return {"blocks": blocks}
-

@@ -47,10 +47,11 @@ class User(Resource):
             [SwagResp(200, "Module added to user")],
         )
     )
-
-    # add a module to a user using org_id, module_id and user_id
-    @Instil('db')
-    def put(self, org_id: int, module_id: int, user_id: int, service: Connection[TupleRow]) -> dict:
+    @Instil("db")
+    def put(
+        self, org_id: int, module_id: int, user_id: int, service: Connection[TupleRow]
+    ) -> dict[str, str | bool]:
+        # add a module to a user using org_id, module_id and user_id
         # check user_id exists in the users table
         if not UserTable.user_exists(service, user_id):
             return {"success": False, "error": "User not found"}
@@ -69,9 +70,9 @@ class User(Resource):
 
         # insert into subscriptions user_id and module_id
         try:
-            return SubscriptionsTable.add_subscription(service, user_id, module_id)
+            if not SubscriptionsTable.add_subscription(service, user_id, module_id):
+                return {"success": False, "error": "Failed to add subscription"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-
-
+        return {"success": True, "message": "Successfully added subscription to user"}

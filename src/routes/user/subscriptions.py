@@ -1,6 +1,8 @@
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, TypeAlias
 
 from flask_restful import Resource
+from psycopg import Cursor
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
@@ -9,8 +11,52 @@ from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 
 
+ModuleJson: TypeAlias = dict[str, str | int]
+BundleJson: TypeAlias = dict[str, str | int | list[ModuleJson]]
+OrgJson: TypeAlias = dict[str, str | int | list[ModuleJson] | list[BundleJson]]
+
+
+@dataclass
+class Module:
+    module_id: int
+    module_name: str
+
+    def to_dict(self) -> ModuleJson:
+        return {"name": self.module_name, "module_id": self.module_id}
+
+
+@dataclass
+class Bundle:
+    bundle_id: int
+    bundle_name: str
+    modules: list[Module]
+
+    def to_dict(self) -> BundleJson:
+        return {
+            "bundle_id": self.bundle_id,
+            "bundle_name": self.bundle_name,
+            "modules": [mod.to_dict() for mod in self.modules],
+        }
+
+
+@dataclass
+class Org:
+    org_id: int
+    org_name: str
+    bundles: list[Bundle]
+    modules: list[Module]
+
+    def to_dict(self) -> OrgJson:
+        return {
+            "org_name": self.org_name,
+            "org_id": self.org_id,
+            "bundles": [bund.to_dict() for bund in self.bundles],
+            "modules": [mod.to_dict() for mod in self.modules],
+        }
+
+
 class Subscriptions(Resource):
-    
+
     @SwagGen(
         SwagDoc(
             SwagMethod.GET,
@@ -29,13 +75,12 @@ class Subscriptions(Resource):
             [SwagResp(200, "Returns the subscriptions")],
         )
     )
-
-    # get the subscribed orgs, bundles and modules for a user using user_id
-    @Instil('db')
-    def get(self, user_id: int, service: Connection[TupleRow]) -> list[dict[str, Any]]:
+    @Instil("db")
+    def get(self, user_id: int, service: Connection[TupleRow]) -> list[OrgJson]:
         # get the user's subscriptions
-        cur = service.cursor()
-        cur.execute("""
+        cur: Cursor[TupleRow] = service.cursor()
+        _ = cur.execute(
+            """
             SELECT organisations.orgID, organisations.name AS orgName,
                    bundles.bundleID, bundles.name AS bundleName,
                    modules.moduleID, modules.name AS moduleName
@@ -45,47 +90,47 @@ class Subscriptions(Resource):
             LEFT JOIN bundles ON bundle_modules.bundleID = bundles.bundleID
             JOIN organisations ON modules.orgID = organisations.orgID
             WHERE subscriptions.userID = %s
-        """, (user_id,))
-        subscriptions = cur.fetchall()
+        """,
+            (user_id,),
+        )
+        subscriptions: list[TupleRow] = cur.fetchall()
 
-        if not subscriptions:
+        if len(subscriptions) == 0:
             return []
 
         # convert the subscriptions into a more readable format
-        orgs = []
-        for org_id, org_name, bundle_id, bundle_name, module_id, module_name in subscriptions:
+        orgs: list[Org] = []
+        for sub in subscriptions:
+            org_id: int = sub[0]
+            org_name: str = sub[1]
+            bundle_id: int | None = sub[2]
+            bundle_name: str | None = sub[3]
+            module_id: int = sub[4]
+            module_name: str = sub[5]
+
             # check if the org is already in the list
-            org = next((org for org in orgs if org["org_id"] == org_id), None)
+            org: Org | None = next((org for org in orgs if org.org_id == org_id), None)
+
             if org is None:
-                org = {
-                    "org_name": org_name,
-                    "org_id": org_id,
-                    "bundles": [],
-                    "modules": []
-                }
+                org = Org(org_id, org_name, [], [])
                 orgs.append(org)
 
-            if bundle_id:
-                # check if the bundle is already in the list
-                bundle = next((b for b in org["bundles"] if b["bundle_id"] == bundle_id), None)
-                if bundle is None:
-                    bundle = {
-                        "bundle_id": bundle_id,
-                        "bundle_name": bundle_name,
-                        "modules": []
-                    }
-                    org["bundles"].append(bundle)
-
-                # add module to the bundle
-                bundle["modules"].append({
-                    "name": module_name,
-                    "module_id": module_id
-                })
-            else:
+            if bundle_id is None or bundle_name is None:
                 # add module directly to the orgs modules list
-                org["modules"].append({
-                    "name": module_name,
-                    "module_id": module_id
-                })
+                org.modules.append(Module(module_id, module_name))
+                continue
 
-        return orgs
+            # check if the bundle is already in the list
+            bundle: Bundle | None = next(
+                (bundle for bundle in org.bundles if bundle.bundle_id == bundle_id),
+                None,
+            )
+
+            if bundle is None:
+                bundle = Bundle(bundle_id, bundle_name, [])
+                org.bundles.append(bundle)
+
+            # add module to the bundle
+            bundle.modules.append(Module(module_id, module_name))
+
+        return [org.to_dict() for org in orgs]

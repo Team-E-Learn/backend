@@ -1,3 +1,4 @@
+from psycopg import Cursor
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
@@ -23,38 +24,40 @@ class ModuleDashboardTable:
     @staticmethod
     def write_module_dashboard(conn: Connection[TupleRow]) -> None:
         # format is (userID, moduleID, widgetID, widgetType, x, y)
-        module_dashboard = [
-            (1, 1, 'announcements_widget', 'announcements', 10, 20),
-            (1, 1, 'info_widget', 'info', 30, 20),
-            (1, 1, 'about_widget', 'about', 10, 40),
-            (1, 1, 'grade_centre_widget', 'grade_centre', 30, 40),
-            (1, 1, 'calendar_widget', 'calendar', 10, 60),
-            (2, 1, 'announcements_widget', 'announcements', 10, 20),
-            (2, 1, 'grade_centre_widget', 'grade_centre', 30, 20),
-            (2, 1, 'calendar_widget', 'calendar', 10, 40),
-            (3, 1, 'announcements_widget', 'announcements', 10, 20),
-            (3, 1, 'info_widget', 'info', 30, 20),
-            (3, 1, 'about_widget', 'about', 10, 40),
-            (3, 1, 'grade_centre_widget', 'grade_centre', 30, 40),
-            (3, 1, 'calendar_widget', 'calendar', 10, 60),
-            (4, 1, 'announcements_widget', 'announcements', 10, 20),
-            (4, 1, 'grade_centre_widget', 'grade_centre', 30, 20),
-            (4, 1, 'calendar_widget', 'calendar', 10, 40)
+        module_dashboard: list[tuple[int, int, str, str, int, int]] = [
+            (1, 1, "announcements_widget", "announcements", 10, 20),
+            (1, 1, "info_widget", "info", 30, 20),
+            (1, 1, "about_widget", "about", 10, 40),
+            (1, 1, "grade_centre_widget", "grade_centre", 30, 40),
+            (1, 1, "calendar_widget", "calendar", 10, 60),
+            (2, 1, "announcements_widget", "announcements", 10, 20),
+            (2, 1, "grade_centre_widget", "grade_centre", 30, 20),
+            (2, 1, "calendar_widget", "calendar", 10, 40),
+            (3, 1, "announcements_widget", "announcements", 10, 20),
+            (3, 1, "info_widget", "info", 30, 20),
+            (3, 1, "about_widget", "about", 10, 40),
+            (3, 1, "grade_centre_widget", "grade_centre", 30, 40),
+            (3, 1, "calendar_widget", "calendar", 10, 60),
+            (4, 1, "announcements_widget", "announcements", 10, 20),
+            (4, 1, "grade_centre_widget", "grade_centre", 30, 20),
+            (4, 1, "calendar_widget", "calendar", 10, 40),
         ]
 
-        cursor = conn.cursor()
+        cursor: Cursor[TupleRow] = conn.cursor()
         for user_id, module_id, widget_id, widget_type, x, y in module_dashboard:
-            cursor.execute("INSERT INTO module_dashboard (userID, moduleID, widgetID, widgetType, x, y) "
-                        "VALUES (%s, %s, %s, %s, %s, %s)",(user_id, module_id, widget_id, widget_type, x, y)
-                           )
-
+            _ = cursor.execute(
+                "INSERT INTO module_dashboard (userID, moduleID, widgetID, widgetType, x, y)"
+                + " VALUES (%s, %s, %s, %s, %s, %s)",
+                (user_id, module_id, widget_id, widget_type, x, y),
+            )
 
     @staticmethod
-    def get_dashboard(conn: Connection[TupleRow], user_id: int, module_id: int) -> (
-            list)[tuple[int, int, str, str, int, int]]:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM module_dashboard WHERE userID = %s AND moduleID = %s",
-            (user_id, module_id)
-                    )
+    def get_dashboard(
+        conn: Connection[TupleRow], user_id: int, module_id: int
+    ) -> list[tuple[int, int, str, str, int, int]]:
+        cursor: Cursor[TupleRow] = conn.cursor()
+        _ = cursor.execute(
+            "SELECT * FROM module_dashboard WHERE userID = %s AND moduleID = %s",
+            (user_id, module_id),
+        )
         return cursor.fetchall()
-

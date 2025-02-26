@@ -1,3 +1,4 @@
+from psycopg import Cursor
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
@@ -21,7 +22,7 @@ class LessonsTable:
     @staticmethod
     def write_lessons(conn: Connection[TupleRow]) -> None:
         # format is (module_id, title, description)
-        lessons = [
+        lessons: list[tuple[int, str, str]] = [
             (1, 'Introduction', 'An introduction to the module'),
             (1, 'Lesson 1', 'The first lesson in the module'),
             (1, 'Lesson 2', 'The second lesson in the module'),
@@ -40,9 +41,9 @@ class LessonsTable:
             (4, 'Lesson 3', 'The third lesson in the module')
         ]
 
-        cursor = conn.cursor()
+        cursor: Cursor[TupleRow] = conn.cursor()
         for module_id, title, description in lessons:
-            cursor.execute(
+            _ = cursor.execute(
                 "INSERT INTO lessons (moduleID, title, description) VALUES (%s, %s, %s)",
                 (module_id, title, description)
             )
@@ -50,8 +51,8 @@ class LessonsTable:
 
     @staticmethod
     def get_lessons(conn: Connection[TupleRow], module_id: int) -> list[tuple[int, int, str, str]]:
-        cursor = conn.cursor()
-        cursor.execute(
+        cursor: Cursor[TupleRow] = conn.cursor()
+        _ = cursor.execute(
             "SELECT * FROM lessons WHERE moduleID = %s",
             (module_id,)
         )

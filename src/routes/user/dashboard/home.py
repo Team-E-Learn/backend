@@ -7,6 +7,7 @@ from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 
+
 class HomeDashboard(Resource):
 
     @SwagGen(
@@ -27,18 +28,15 @@ class HomeDashboard(Resource):
             [SwagResp(200, "Returns the home dashboard")],
         )
     )
-
-    # get home dashboard for a specific user using user_id
     @Instil("db")
     def get(self, user_id: int, service: Connection[TupleRow]):
-        dashboard = DashboardTable.get_dashboard(service, user_id)
+        # get home dashboard for a specific user using user_id
+        dashboard: list[tuple[int, str, str, int, int]] = DashboardTable.get_dashboard(
+            service, user_id
+        )
         return {
             "elements": [
-                {
-                    "id": row[1],
-                    "type": row[2],
-                    "position": {"x": row[3], "y": row[4]}
-                }
+                {"id": row[1], "type": row[2], "position": {"x": row[3], "y": row[4]}}
                 for row in dashboard
             ]
         }

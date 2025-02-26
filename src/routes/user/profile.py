@@ -40,5 +40,5 @@ class Profile(Resource):
             "email": user[1],
             "firstName": user[2],
             "lastName": user[3],
-            "accountType": user[4]
+            "accountType": user[4],
         }

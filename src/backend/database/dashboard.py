@@ -1,4 +1,5 @@
 from psycopg.connection import Connection
+from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
 
 
@@ -22,7 +23,7 @@ class DashboardTable:
     @staticmethod
     def write_dashboard(conn: Connection[TupleRow]) -> None:
         # format is (user_id, widget_type, x, y)
-        dashboard = [
+        dashboard: list[tuple[int, str, int, int]] = [
             (1, 'announcements', 10, 20),
             (1, 'info', 30, 20),
             (1, 'about', 10, 40),
@@ -41,9 +42,9 @@ class DashboardTable:
             (4, 'calendar', 10, 40)
         ]
 
-        cursor = conn.cursor()
+        cursor: Cursor[TupleRow] = conn.cursor()
         for user_id, widget_type, x, y in dashboard:
-            cursor.execute(
+            _ = cursor.execute(
                 "INSERT INTO dashboard ( userID, widgetType, x, y) VALUES (%s, %s, %s, %s)",
                 (user_id, widget_type, x, y)
             )
@@ -51,6 +52,6 @@ class DashboardTable:
 
     @staticmethod
     def get_dashboard(conn: Connection[TupleRow], user_id: int) -> list[tuple[int, str, str, int, int]]:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM dashboard WHERE userID = %s", (user_id,))
+        cursor: Cursor[TupleRow] = conn.cursor()
+        _ = cursor.execute("SELECT * FROM dashboard WHERE userID = %s", (user_id,))
         return cursor.fetchall()

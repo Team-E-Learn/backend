@@ -31,23 +31,20 @@ class ModuleDashboard(Resource):
                     True,
                     "The module id to retrieve the dashboard for",
                     "1",
-                )
+                ),
             ],
             [SwagResp(200, "Returns the module dashboard")],
         )
     )
-
-    # get module dashboard for a specific user and module using user_id and module_id
     @Instil("db")
     def get(self, user_id: int, module_id: int, service: Connection[TupleRow]):
-        dashboard =  ModuleDashboardTable.get_dashboard(service, user_id, module_id)
+        # get module dashboard for a specific user and module using user_id and module_id
+        dashboard: list[tuple[int, int, str, str, int, int]] = (
+            ModuleDashboardTable.get_dashboard(service, user_id, module_id)
+        )
         return {
             "elements": [
-                {
-                    "id": row[2],
-                    "type": row[3],
-                    "position": {"x": row[4], "y": row[5]}
-                }
+                {"id": row[2], "type": row[3], "position": {"x": row[4], "y": row[5]}}
                 for row in dashboard
             ]
         }
