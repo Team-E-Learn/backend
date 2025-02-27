@@ -8,6 +8,7 @@ from psycopg import connect as psql_connect
 from werkzeug.wrappers import Response
 
 from backend.database.setup import initialise_tables, populate_dummy_data
+from lib.front.front import Front
 from lib.instilled.instiled import Instil
 
 from lib.swagdoc.swagmanager import SwagManager
@@ -30,13 +31,7 @@ from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
 app: Flask = Flask(__name__)
-api: Api = Api(app)
-swag: SwagManager = SwagManager(
-    app,
-    "Python TSE backend API",
-    "Examples of how to use the projects python API",
-    "0.0.0",
-)
+front: Front = Front(app)
 
 
 @app.after_request
@@ -61,77 +56,52 @@ class Main(Resource):
         return redirect("/apidocs")
 
 
-def register(
-    resource: type[Resource],
-    route: str,
-    swag_route: str,
-    swag_manager: SwagManager,
-    api: Api,
-) -> None:
-    api.add_resource(resource, route)
-    swag_manager.add_swag(resource, swag_route)
+front.add_resource(Main, "/")
 
+front.add_swag_tag(SwagTag("Organisation", "Organisation related endpoints"))
+front.add_swag_tag(SwagTag("Module", "Module related endpoints"))
+front.add_swag_tag(SwagTag("User", "User related endpoints"))
 
-api.add_resource(Main, "/")
-
-swag.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
-swag.add_tag(SwagTag("Module", "Module related endpoints"))
-swag.add_tag(SwagTag("User", "User related endpoints"))
-
-register(
+front.register(
     Subscriptions,
     "/v1/user/<int:user_id>/subscriptions",
     "/v1/user/{user_id}/subscriptions",
-    swag,
-    api,
 )
-register(
-    Profile, "/v1/user/<int:user_id>/profile", "/v1/user/{user_id}/profile", swag, api
-)
-register(
+front.register(Profile, "/v1/user/<int:user_id>/profile", "/v1/user/{user_id}/profile")
+front.register(
     User,
     "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>",
     "/v1/org/{org_id}/module/{module_id}/user/{user_id}",
-    swag,
-    api,
 )
-register(CheckEmail, "/v1/auth/email", "/v1/auth/email", swag, api)
-register(CheckUsername, "/v1/auth/username", "/v1/auth/username", swag, api)
-register(Register, "/v1/auth/register", "/v1/auth/register", swag, api)
-register(Login, "/v1/auth/login", "/v1/auth/login", swag, api)
-register(Verify2FA, "/v1/auth/2fa", "/v1/auth/2fa", swag, api)
-register(VerifyEmail, "/v1/auth/verify-email", "/v1/auth/verify-email", swag, api)
-register(
+front.register(CheckEmail, "/v1/auth/email", "/v1/auth/email")
+front.register(CheckUsername, "/v1/auth/username", "/v1/auth/username")
+front.register(Register, "/v1/auth/register", "/v1/auth/register")
+front.register(Login, "/v1/auth/login", "/v1/auth/login")
+front.register(Verify2FA, "/v1/auth/2fa", "/v1/auth/2fa")
+front.register(VerifyEmail, "/v1/auth/verify-email", "/v1/auth/verify-email")
+front.register(
     Lessons,
     "/v1/module/<int:module_id>/lessons",
     "/v1/module/{module_id}/lessons",
-    swag,
-    api,
 )
-register(
+front.register(
     Lesson,
     "/v1/module/lesson/<int:lesson_id>",
     "/v1/module/lesson/{lesson_id}",
-    swag,
-    api,
 )
-register(
+front.register(
     HomeDashboard,
     "/v1/user/<int:user_id>/dashboard",
     "/v1/user/{user_id}/dashboard",
-    swag,
-    api,
 )
-register(
+front.register(
     ModuleDashboard,
     "/v1/user/<int:user_id>/dashboard/module/<int:module_id>",
     "/v1/user/{user_id}/dashboard/module/{module_id}",
-    swag,
-    api,
 )
 
 
-swag.start_swag()
+front.start()
 print("Register swagger documentation")
 
 # write dummy data
