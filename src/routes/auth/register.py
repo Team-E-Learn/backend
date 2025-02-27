@@ -74,7 +74,7 @@ class Register(Resource):
                 _ = cur.execute(
                     sql.SQL(
                         """
-                        SELECT id FROM users WHERE email = %s OR username = %s
+                        SELECT userID FROM users WHERE email = %s OR username = %s
                     """
                     ),
                     (email, username),
