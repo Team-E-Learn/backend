@@ -30,16 +30,16 @@ from routes.module.list_lessons import Lessons
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
-app: Flask = Flask(__name__)
-front: Front = Front(app)
+front: Front = Front(__name__)
 
 
-@app.after_request
 def after_request(response: Response) -> Response:
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     return response
 
+
+front.add_after_request(after_request)
 
 conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
 print("Database connected")
@@ -111,4 +111,4 @@ populate_dummy_data(conn)
 
 if __name__ == "__main__":
     # app.run(debug=True)
-    app.run(host="0.0.0.0")
+    front.run()
