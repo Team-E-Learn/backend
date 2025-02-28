@@ -24,11 +24,11 @@ class Front:
         )
         self.__after_req: Callable[[Response], Response] | None = None
 
-    def register(self, res: type[Resource], route: str, swag: bool = True) -> None:
-        self.__api.add_resource(res, route)
+    def register(self, resource: type[Resource], route: str, swag: bool = True) -> None:
+        self.__api.add_resource(resource, route)
         if swag:
             swag_route: str = sub(__ROUTE_PATTERN, r"{\2}", route)
-            self.__swag.add_swag(res, swag_route)
+            self.__swag.add_swag(resource, swag_route)
 
     def add_tag(self, swag_tag: SwagTag) -> None:
         self.__swag.add_tag(swag_tag)

@@ -39,7 +39,7 @@ def after_request(response: Response) -> Response:
     return response
 
 
-front.add_after_request(after_request)
+front.register_after_request(after_request)
 
 conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
 print("Database connected")
@@ -56,59 +56,31 @@ class Main(Resource):
         return redirect("/apidocs")
 
 
-front.add_resource(Main, "/")
+front.register(Main, "/", swag=False)
 
-front.add_swag_tag(SwagTag("Organisation", "Organisation related endpoints"))
-front.add_swag_tag(SwagTag("Module", "Module related endpoints"))
-front.add_swag_tag(SwagTag("User", "User related endpoints"))
+front.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
+front.add_tag(SwagTag("Module", "Module related endpoints"))
+front.add_tag(SwagTag("User", "User related endpoints"))
 
+front.register(Subscriptions, "/v1/user/<int:user_id>/subscriptions")
+front.register(Profile, "/v1/user/<int:user_id>/profile")
+front.register(User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>")
+front.register(CheckEmail, "/v1/auth/email")
+front.register(CheckUsername, "/v1/auth/username")
+front.register(Register, "/v1/auth/register")
+front.register(Login, "/v1/auth/login")
+front.register(Verify2FA, "/v1/auth/2fa")
+front.register(VerifyEmail, "/v1/auth/verify-email")
+front.register(Lessons, "/v1/module/<int:module_id>/lessons")
+front.register(Lesson, "/v1/module/lesson/<int:lesson_id>")
+front.register(HomeDashboard, "/v1/user/<int:user_id>/dashboard")
 front.register(
-    Subscriptions,
-    "/v1/user/<int:user_id>/subscriptions",
-    "/v1/user/{user_id}/subscriptions",
+    ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>"
 )
-front.register(Profile, "/v1/user/<int:user_id>/profile", "/v1/user/{user_id}/profile")
-front.register(
-    User,
-    "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>",
-    "/v1/org/{org_id}/module/{module_id}/user/{user_id}",
-)
-front.register(CheckEmail, "/v1/auth/email", "/v1/auth/email")
-front.register(CheckUsername, "/v1/auth/username", "/v1/auth/username")
-front.register(Register, "/v1/auth/register", "/v1/auth/register")
-front.register(Login, "/v1/auth/login", "/v1/auth/login")
-front.register(Verify2FA, "/v1/auth/2fa", "/v1/auth/2fa")
-front.register(VerifyEmail, "/v1/auth/verify-email", "/v1/auth/verify-email")
-front.register(
-    Lessons,
-    "/v1/module/<int:module_id>/lessons",
-    "/v1/module/{module_id}/lessons",
-)
-front.register(
-    Lesson,
-    "/v1/module/lesson/<int:lesson_id>",
-    "/v1/module/lesson/{lesson_id}",
-)
-front.register(
-    HomeDashboard,
-    "/v1/user/<int:user_id>/dashboard",
-    "/v1/user/{user_id}/dashboard",
-)
-front.register(
-    ModuleDashboard,
-    "/v1/user/<int:user_id>/dashboard/module/<int:module_id>",
-    "/v1/user/{user_id}/dashboard/module/{module_id}",
-)
-
-
-front.start()
-print("Register swagger documentation")
 
 # write dummy data
 populate_dummy_data(conn)
 
 # start app
-
 if __name__ == "__main__":
-    # app.run(debug=True)
-    front.run()
+    front.run(debug=True)
