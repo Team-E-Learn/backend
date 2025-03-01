@@ -1,18 +1,15 @@
 from time import time
-from typing import cast
 from flask import request
 from flask_restful import Resource
 from psycopg.rows import TupleRow
 from werkzeug.datastructures.structures import ImmutableMultiDict
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from psycopg.connection import Connection
 from psycopg import sql
 from lib.instilled.instiled import Instil
 from lib.jwt.jwt import Jwt
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
-import datetime
-import os
 
 from projenv import JWT_LOGIN_EXP, JWT_LOGIN_KEY
 
@@ -93,12 +90,12 @@ class Register(Resource):
                 _ = cur.execute(
                     sql.SQL(
                         """
-                        INSERT INTO users (email, username, password)
-                        VALUES (%s, %s, %s)
-                        RETURNING id, email, username
+                        INSERT INTO users (accountType, email, firstname, lastname, username, password)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        RETURNING userID, email, username
                     """
                     ),
-                    (email, username, hashed_password),
+                    ("user", email, "firstname", "lastname", username, hashed_password),
                 )
                 user: TupleRow | None = cur.fetchone()
                 service.commit()
