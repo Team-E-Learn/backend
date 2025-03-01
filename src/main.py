@@ -53,7 +53,7 @@ class Main(Resource):
         return redirect("/apidocs")
 
 
-front.register(Main, "/", swag=False)
+front.register(Main, "/", docs=False)
 
 front.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 front.add_tag(SwagTag("Module", "Module related endpoints"))

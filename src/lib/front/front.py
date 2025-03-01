@@ -23,9 +23,9 @@ class Front:
         )
         self.__middleware: set[IMiddleware] = set()
 
-    def register(self, res: type[Resource], route: str, swag: bool = True) -> None:
+    def register(self, res: type[Resource], route: str, docs: bool = True) -> None:
         self.__api.add_resource(res, route)
-        if swag:
+        if docs:
             swag_route: str = sub(Front.__ROUTE_PATTERN, r"{\2}", route)
             self.__swag.add_swag(res, swag_route)
 
