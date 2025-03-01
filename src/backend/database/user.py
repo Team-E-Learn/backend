@@ -37,21 +37,43 @@ class UserTable:
     @staticmethod
     def write_users(conn: Connection[TupleRow]) -> None:
         # format is (accountType, firstName, lastName, username, email)
-        users: list[tuple[str, str, str, str, str]] = [
-            ("user", "Alice", "Smith", "alice.smith", "alice.smith@example.com"),
-            ("admin", "Bob", "Johnson", "bob.johnson", "bob.johnson@example.com"),
+        users: list[tuple[str, str, str, str, str, str]] = [
+            (
+                "user",
+                "Alice",
+                "Smith",
+                "alice.smith",
+                "alice.smith@example.com",
+                "example_password",
+            ),
+            (
+                "admin",
+                "Bob",
+                "Johnson",
+                "bob.johnson",
+                "bob.johnson@example.com",
+                "example_password",
+            ),
             (
                 "user",
                 "Carol",
                 "Williams",
                 "carol.williams",
                 "carol.williams@example.com",
+                "example_password",
             ),
-            ("admin", "David", "Brown", "david.brown", "david.brown@example.com"),
+            (
+                "admin",
+                "David",
+                "Brown",
+                "david.brown",
+                "david.brown@example.com",
+                "example_password",
+            ),
         ]
 
         cursor: Cursor[TupleRow] = conn.cursor()
-        for accountType, firstName, lastName, username, email in users:
+        for accountType, firstName, lastName, username, email, password in users:
             _ = cursor.execute(
                 "SELECT 1 FROM users WHERE username = %s OR email = %s",
                 (username, email),
@@ -61,9 +83,9 @@ class UserTable:
                 continue
 
             _ = cursor.execute(
-                "INSERT INTO users (accountType, firstName, lastName, username, email) "
-                + "VALUES (%s, %s, %s, %s, %s)",
-                (accountType, firstName, lastName, username, email),
+                "INSERT INTO users (accountType, firstName, lastName, username, email, password) "
+                + "VALUES (%s, %s, %s, %s, %s, %s)",
+                (accountType, firstName, lastName, username, email, password),
             )
 
     # this function is called from src/routes/user/profile.py
