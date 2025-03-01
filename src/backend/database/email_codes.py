@@ -11,7 +11,8 @@ class EmailCodesTable:
             """
     CREATE TABLE IF NOT EXISTS email_codes (
         email VARCHAR(48) PRIMARY KEY UNIQUE NOT NULL,
-        code VARCHAR(48) NOT NULL
+        code VARCHAR(48) NOT NULL,
+        verified BOOLEAN DEFAULT FALSE
     );"""
         )
 
@@ -31,3 +32,8 @@ class EmailCodesTable:
         result: TupleRow | None = cursor.fetchone()
 
         return None if result is None else result[0]
+
+    @staticmethod
+    def set_verified(conn: Connection[TupleRow], email: str) -> None:
+        cursor: Cursor[TupleRow] = conn.cursor()
+        _ = cursor.execute("UPDATE email_codes SET verified = TRUE WHERE email = %s", (email,))

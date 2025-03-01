@@ -47,10 +47,9 @@ class VerifyEmail(Resource):
         if not email or not token:
             return {"message": "Bad Request"}, 400
 
-        print(EmailCodesTable.get_code(service, email))
         # Logic to verify email token
         if token != EmailCodesTable.get_code(service, email):
             return {"message": "Bad Request"}, 400
 
+        EmailCodesTable.verify_email(service, email)
         return {"message": "Email verified"}, 200
-        # todo # 3) Set database table to show it as validated
