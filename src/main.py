@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from flask import Flask, redirect
-from flask_restful import Api, Resource
+from flask.helpers import redirect
+from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 from psycopg import connect as psql_connect
@@ -12,7 +12,6 @@ from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
 
-from lib.swagdoc.swagmanager import SwagManager
 from lib.swagdoc.swagtag import SwagTag
 from routes.auth.email import CheckEmail
 from routes.auth.register import Register
@@ -31,14 +30,19 @@ from routes.module.list_lessons import Lessons
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
+# create Front facade for Flask
 front: Front = Front(__name__)
-front.add_middleware(CORSMiddleware())
+front.add_middleware(CORSMiddleware())  # apply middleware for CORS
 
+# get Postgres connection
 conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
 print("Database connected")
+
+# initialise tables for project
 initialise_tables(conn)  # create tables if they don't exist
 print("Initialized tables")
 
+# add database service for Instil
 Instil.add_service("db", conn)
 print("Registered database service")
 
@@ -54,7 +58,6 @@ front.register(Main, "/", swag=False)
 front.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 front.add_tag(SwagTag("Module", "Module related endpoints"))
 front.add_tag(SwagTag("User", "User related endpoints"))
-
 front.register(Subscriptions, "/v1/user/<int:user_id>/subscriptions")
 front.register(Profile, "/v1/user/<int:user_id>/profile")
 front.register(User, "/v1/org/<int:org_id>/module/<int:module_id>/user/<int:user_id>")
@@ -71,9 +74,12 @@ front.register(
     ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>"
 )
 
-# write dummy data
-populate_dummy_data(conn)
 
 # start app
 if __name__ == "__main__":
-    front.run(debug=True)
+    debug_mode: bool = projenv.project_mode == projenv.ProjectMode.DEVELOPMENT
+    if debug_mode:
+        # write dummy data
+        populate_dummy_data(conn)
+
+    front.start(debug=debug_mode)

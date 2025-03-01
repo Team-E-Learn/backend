@@ -21,7 +21,7 @@ class Front:
             "Examples of how to use the projects python API",
             "0.0.0",
         )
-        self.__middleware: list[IMiddleware] = []
+        self.__middleware: set[IMiddleware] = set()
 
     def register(self, res: type[Resource], route: str, swag: bool = True) -> None:
         self.__api.add_resource(res, route)
@@ -33,9 +33,9 @@ class Front:
         self.__swag.add_tag(swag_tag)
 
     def add_middleware(self, middleware: IMiddleware) -> None:
-        self.__middleware.append(middleware)
+        self.__middleware.add(middleware)
 
-    def run(self, debug: bool = False) -> None:
+    def start(self, debug: bool = False) -> None:
         if debug:
             self.__swag.start_swag()
 

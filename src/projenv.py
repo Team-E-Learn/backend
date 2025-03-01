@@ -1,5 +1,18 @@
 # Temporary solution for storing environment variables
 
+from enum import Enum
+
+
+class ProjectMode(Enum):
+    DEVELOPMENT= 0
+    PRODUCTION = 1
+
+
+"""
+Project Mode
+"""
+project_mode: ProjectMode = ProjectMode.PRODUCTION
+
 """
 Database Access
 """
