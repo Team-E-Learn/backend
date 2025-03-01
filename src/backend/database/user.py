@@ -15,7 +15,8 @@ class UserTable:
         firstName VARCHAR(48) NOT NULL,
         lastName VARCHAR(48) NOT NULL,
         username VARCHAR(64) UNIQUE NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(256) NOT NULL
     );"""
         )
 
