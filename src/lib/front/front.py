@@ -1,17 +1,16 @@
-from collections.abc import Callable
 from flask.app import Flask
 from flask_restful import Api, Resource
 from werkzeug.wrappers import Response
 
+from lib.front.middleware import IMiddleware
 from lib.swagdoc.swagmanager import SwagManager
 from lib.swagdoc.swagtag import SwagTag
 
-from re import findall, sub
-
-__ROUTE_PATTERN: str = r"<([a-z]*):([a-z_]*)>"
+from re import sub
 
 
 class Front:
+    __ROUTE_PATTERN: str = r"<([a-z]*):([a-z_]*)>"
 
     def __init__(self, app_name: str) -> None:
         self.__app: Flask = Flask(app_name)
@@ -22,25 +21,33 @@ class Front:
             "Examples of how to use the projects python API",
             "0.0.0",
         )
-        self.__after_req: Callable[[Response], Response] | None = None
+        self.__middleware: list[IMiddleware] = []
 
     def register(self, res: type[Resource], route: str, swag: bool = True) -> None:
         self.__api.add_resource(res, route)
         if swag:
-            swag_route: str = sub(__ROUTE_PATTERN, r"{\2}", route)
+            swag_route: str = sub(Front.__ROUTE_PATTERN, r"{\2}", route)
             self.__swag.add_swag(res, swag_route)
 
     def add_tag(self, swag_tag: SwagTag) -> None:
         self.__swag.add_tag(swag_tag)
 
-    def register_after_request(self, fun: Callable[[Response], Response]) -> None:
-        self.__after_req = fun
+    def add_middleware(self, middleware: IMiddleware) -> None:
+        self.__middleware.append(middleware)
 
     def run(self, debug: bool = False) -> None:
         if debug:
             self.__swag.start_swag()
 
-        if self.__after_req is not None:
-            _ = self.__app.after_request(self.__after_req)
+        if len(self.__middleware) > 0:
+            self.__apply_middleware()
 
         self.__app.run("0.0.0.0")
+
+    def __apply_middleware(self) -> None:
+        def __run_middleware(resp: Response) -> Response:
+            for middle in self.__middleware:
+                resp = middle.process(resp)
+            return resp
+
+        _ = self.__app.after_request(__run_middleware)

@@ -9,6 +9,7 @@ from werkzeug.wrappers import Response
 
 from backend.database.setup import initialise_tables, populate_dummy_data
 from lib.front.front import Front
+from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
 
 from lib.swagdoc.swagmanager import SwagManager
@@ -31,15 +32,7 @@ from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
 front: Front = Front(__name__)
-
-
-def after_request(response: Response) -> Response:
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    return response
-
-
-front.register_after_request(after_request)
+front.add_middleware(CORSMiddleware())
 
 conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
 print("Database connected")
