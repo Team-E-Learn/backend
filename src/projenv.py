@@ -11,7 +11,7 @@ class ProjectMode(Enum):
 """
 Project Mode
 """
-project_mode: ProjectMode = ProjectMode.PRODUCTION
+project_mode: ProjectMode = ProjectMode.DEVELOPMENT
 
 """
 Database Access
