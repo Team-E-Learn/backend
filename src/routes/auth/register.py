@@ -56,10 +56,9 @@ class Register(Resource):
     )
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
-        data: ImmutableMultiDict[str, str] = request.form
-        email: str | None = data.get("email")
-        username: str | None = data.get("username")
-        password: str | None = data.get("password")
+        email: str | None = request.form.get("email")
+        username: str | None = request.form.get("username")
+        password: str | None = request.form.get("password")
 
         # Validate input
         if not email or not username or not password:
@@ -69,17 +68,23 @@ class Register(Resource):
         try:
             with service.cursor() as cur:
                 _ = cur.execute(
-                    sql.SQL(
-                        """
-                        SELECT userID FROM users WHERE email = %s OR username = %s
-                    """
-                    ),
+                    sql.SQL("""SELECT userID FROM users WHERE email = %s OR username = %s"""),
                     (email, username),
                 )
                 if cur.fetchone():
                     return {"message": "Email or username already exists"}, 409
         except Exception as e:
             return {"message": f"Database error: {str(e)}"}, 500
+
+        # Check if email is verified
+        with service.cursor() as cur:
+            _ = cur.execute(
+                sql.SQL("""SELECT verified FROM email_codes WHERE email = %s"""),
+                (email,),
+            )
+            result = cur.fetchone()
+            if result is None or not result[0]:
+                return {"message": "Email not verified"}, 409
 
         # Hash the password
         hashed_password = generate_password_hash(password)

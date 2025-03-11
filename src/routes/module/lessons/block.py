@@ -54,9 +54,9 @@ class Block(Resource):
     )
     @Instil("db")
     def put(self, lesson_id: int, service: Connection[TupleRow]):
-        block_type = request.form.get("block_type")
-        order = request.form.get("order")
-        data = request.form.get("data")
+        block_type: str | None = request.form.get("block_type")
+        order: str | None = request.form.get("order")
+        data: str | None = request.form.get("data")
 
         if BlocksTable.write_block(service, lesson_id, block_type, order, data):
             return {"message": "Block created"}, 200
@@ -99,8 +99,8 @@ class Block(Resource):
     )
     @Instil("db")
     def delete(self, lesson_id: int, service: Connection[TupleRow]):
-        block_type = request.form.get("block_type")
-        order = request.form.get("order")
+        block_type: str | None = request.form.get("block_type")
+        order: str | None = request.form.get("order")
 
         if BlocksTable.delete_block(service, lesson_id, block_type, order):
             return {"message": "Block deleted"}, 200

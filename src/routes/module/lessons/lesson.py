@@ -57,10 +57,10 @@ class Lesson(Resource):
     )
     @Instil("db")
     def put(self, service: Connection[TupleRow]):
-        lesson_id = request.form.get("lesson_id")
-        module_id = request.form.get("module_id")
-        title = request.form.get("title")
-        sections = request.form.get("sections")
+        lesson_id: str | None = request.form.get("lesson_id")
+        module_id: str | None = request.form.get("module_id")
+        title: str | None = request.form.get("title")
+        sections: str | None = request.form.get("sections")
 
         # create new lesson using module_id, title, and sections
         LessonsTable.create_lesson(service, lesson_id, module_id, title, sections)
@@ -86,7 +86,7 @@ class Lesson(Resource):
     )
     @Instil("db")
     def delete(self, service: Connection[TupleRow]):
-        lesson_id = request.form.get("lesson_id")
+        lesson_id: str | None = request.form.get("lesson_id")
 
         # delete lesson using lesson_id
         if LessonsTable.delete_lesson(service, lesson_id):

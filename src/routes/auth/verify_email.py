@@ -51,5 +51,5 @@ class VerifyEmail(Resource):
         if token != EmailCodesTable.get_code(service, email):
             return {"message": "Bad Request"}, 400
 
-        EmailCodesTable.verify_email(service, email)
+        EmailCodesTable.set_verified(service, email)
         return {"message": "Email verified"}, 200

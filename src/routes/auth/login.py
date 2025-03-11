@@ -3,7 +3,7 @@ from flask import request
 from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
-from werkzeug.datastructures.structures import ImmutableMultiDict
+from werkzeug.security import generate_password_hash
 from backend.database.user import UserTable
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -43,10 +43,11 @@ class Login(Resource):
     )
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
-        data: ImmutableMultiDict[str, str] = request.form
-        email: str | None = data.get("email")
-        password: str | None = data.get("password")
+        email: str | None = request.form.get("email")
+        password: str | None = request.form.get("password")
+        hashed_password = generate_password_hash(password)
 
+        print(email, password, hashed_password)
         if email is None or password is None:
             return {"message": "Bad request"}, 400
 
@@ -55,11 +56,11 @@ class Login(Resource):
         if not user_data:
             return {"message": "Bad request"}, 400
 
-        # TODO: Perform database user validation
-        if email != "example_user@example.com" and password != "example_password":
+        print(user_data)
+        if user_data[6] != hashed_password:
             return {"message": "Unauthorized"}, 401
 
-        uid: int = 1  # found user id
+        uid: int = user_data[0]
 
         expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now
         # Logic to authenticate user and generate limited JWT
