@@ -1,5 +1,5 @@
 from flask import request
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 from backend.database.blocks import BlocksTable
@@ -13,7 +13,7 @@ class Block(Resource):
     @SwagGen(
         SwagDoc(
             SwagMethod.PUT,
-            ["Lesson"],
+            ["Block"],
             "Creates a new block",
             [
                 SwagParam(
@@ -58,13 +58,15 @@ class Block(Resource):
         order = request.form.get("order")
         data = request.form.get("data")
 
-        BlocksTable.write_block(service, lesson_id, block_type, order, data)
-        return {"message": "Block created"}, 200
+        if BlocksTable.write_block(service, lesson_id, block_type, order, data):
+            return {"message": "Block created"}, 200
+        else:
+            return {"message": "Block not created, invalid lesson ID"}, 400
 
     @SwagGen(
         SwagDoc(
             SwagMethod.DELETE,
-            ["Lesson"],
+            ["Block"],
             "Deletes a block",
             [
                 SwagParam(
@@ -104,3 +106,31 @@ class Block(Resource):
             return {"message": "Block deleted"}, 200
         else:
             return {"message": "Block not found"}, 404
+
+    @SwagGen(
+        SwagDoc(
+            SwagMethod.GET,
+            ["Block"],
+            "Returns the lesson sidebar with basic blocks",
+            [
+                SwagParam(
+                    "lesson_id",
+                    "path",
+                    "integer",
+                    True,
+                    "The lesson id to retrieve",
+                    "1",
+                )
+            ],
+            [SwagResp(200, "Returns the lesson sidebar")],
+        )
+    )
+    @Instil("db")
+    def get(self, lesson_id: int, service: Connection[TupleRow]):
+        # get lesson sidebar with basic blocks using lesson_id
+        blocks: list[dict[str, int | str]] = []
+        for block_type, block_order, data in BlocksTable.get_blocks(service, lesson_id):
+            blocks.append(
+                {"block_type": block_type, "block_order": block_order, "data": data}
+            )
+        return {"blocks": blocks}

@@ -37,7 +37,7 @@ class Lessons(Resource):
         )
         return {
             "lessons": [
-                {"id": row[0], "title": row[1], "description": row[2]}
+                {"id": row[0], "title": row[2], "sections": row[3]}
                 for row in lessons
             ]
         }

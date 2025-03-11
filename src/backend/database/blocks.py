@@ -22,9 +22,12 @@ class BlocksTable:
 
     @staticmethod
     def write_block(conn: Connection[TupleRow], lesson_id: int, block_type: int,
-                    order: int, data: dict[str, str]) -> None:
-        data = json.dumps(data)
+                    order: int, data: dict[str, str]) -> bool:
         cursor: Cursor[TupleRow] = conn.cursor()
+        # check if lessonID exists
+        if not cursor.execute("SELECT 1 FROM lessons WHERE lessonID = %s", (lesson_id,)).fetchone():
+            return False
+        data = json.dumps(data)
         _ = cursor.execute(
             """
             INSERT INTO blocks (lessonID, blockType, blockOrder, data)
@@ -34,6 +37,7 @@ class BlocksTable:
             """,
             (lesson_id, block_type, order, data),
         )
+        return True
 
 
     # for http://127.0.0.1:5000/v1/module/lesson/
