@@ -10,7 +10,6 @@ from lib.instilled.instiled import Instil
 from lib.jwt.jwt import Jwt
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
-
 from projenv import JWT_LOGIN_EXP, JWT_LOGIN_KEY
 
 

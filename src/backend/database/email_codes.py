@@ -18,7 +18,6 @@ class EmailCodesTable:
 
     @staticmethod
     def add_code(conn: Connection[TupleRow], email: str, code: str) -> None:
-        print(email, code)
         cursor: Cursor[TupleRow] = conn.cursor()
         _ = cursor.execute(
             "INSERT INTO email_codes (email, code) VALUES (%s, %s)", (email, code)
@@ -26,7 +25,6 @@ class EmailCodesTable:
 
     @staticmethod
     def get_code(conn: Connection[TupleRow], email: str) -> str | None:
-        print(email)
         cursor: Cursor[TupleRow] = conn.cursor()
         _ = cursor.execute("SELECT code FROM email_codes WHERE email = %s", (email,))
         result: TupleRow | None = cursor.fetchone()

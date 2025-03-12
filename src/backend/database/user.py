@@ -96,8 +96,7 @@ class UserTable:
 
     # this function is called from src/routes/user/profile.py
     @staticmethod
-    def get_user_profile(
-        conn: Connection[TupleRow], user_id: int
+    def get_user_profile(conn: Connection[TupleRow], user_id: int
     ) -> tuple[str, str, str, str, str] | None:
         cursor: Cursor[TupleRow] = conn.cursor()
         _ = cursor.execute(
@@ -111,3 +110,9 @@ class UserTable:
         cursor: Cursor[TupleRow] = conn.cursor()
         _ = cursor.execute("SELECT 1 FROM users WHERE userID = %s", (user_id,))
         return cursor.fetchone() is not None
+
+    @staticmethod
+    def get_totp_secret(conn: Connection[TupleRow], user_id: int) -> str:
+        cursor: Cursor[TupleRow] = conn.cursor()
+        _ = cursor.execute("SELECT totpSecret FROM users WHERE userID = %s", (user_id,))
+        return cursor.fetchone()[0]
