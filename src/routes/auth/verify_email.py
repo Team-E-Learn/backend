@@ -2,7 +2,6 @@ from flask import request
 from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
-from werkzeug.datastructures.structures import ImmutableMultiDict
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -40,9 +39,8 @@ class VerifyEmail(Resource):
 
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
-        data: ImmutableMultiDict[str, str] = request.form
-        email: str | None = data.get("email")
-        token: str | None = data.get("token")
+        email: str | None = request.form.get("email")
+        token: str | None = request.form.get("token")
 
         if not email or not token:
             return {"message": "Bad Request"}, 400

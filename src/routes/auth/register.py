@@ -1,3 +1,4 @@
+import random
 from time import time
 from flask import request
 from flask_restful import Resource
@@ -88,18 +89,21 @@ class Register(Resource):
         # Hash the password
         hashed_password = generate_password_hash(password)
 
+        # Generate TOTP secret (random 16 char string)
+        secret = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=16))
+
         # Insert user into the database
         try:
             with service.cursor() as cur:
                 _ = cur.execute(
                     sql.SQL(
                         """
-                        INSERT INTO users (accountType, email, firstname, lastname, username, password)
-                        VALUES (%s, %s, %s, %s, %s, %s)
+                        INSERT INTO users (accountType, email, firstname, lastname, username, password, totpSecret)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
                         RETURNING userID, email, username
                     """
                     ),
-                    ("user", email, "firstname", "lastname", username, hashed_password),
+                    ("user", email, "firstname", "lastname", username, hashed_password, secret),
                 )
                 user: TupleRow | None = cur.fetchone()
                 service.commit()
@@ -128,6 +132,7 @@ class Register(Resource):
                 "id": user[0],
                 "email": user[1],
                 "username": user[2],
+                "secret": secret,
             },
             "token": token,
         }, 200

@@ -15,7 +15,7 @@ class Lesson(Resource):
 
     @SwagGen(
         SwagDoc(
-            SwagMethod.PUT,
+            SwagMethod.POST,
             ["Lesson"],
             "Creates a new lesson",
             [
@@ -56,7 +56,7 @@ class Lesson(Resource):
         )
     )
     @Instil("db")
-    def put(self, service: Connection[TupleRow]):
+    def post(self, service: Connection[TupleRow]):
         lesson_id: str | None = request.form.get("lesson_id")
         module_id: str | None = request.form.get("module_id")
         title: str | None = request.form.get("title")

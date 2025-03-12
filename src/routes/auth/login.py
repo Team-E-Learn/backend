@@ -46,7 +46,6 @@ class Login(Resource):
         email: str | None = request.form.get("email")
         password: str | None = request.form.get("password")
 
-        print(email, password)
         if email is None or password is None:
             return {"message": "Bad request"}, 400
 
@@ -55,7 +54,6 @@ class Login(Resource):
         if not user_data:
             return {"message": "Bad request"}, 400
 
-        print(user_data)
         if not check_password_hash(user_data[6], password):
             return {"message": "Unauthorized"}, 401
 

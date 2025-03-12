@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash
 from psycopg.connection import Connection
 from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
@@ -45,8 +46,8 @@ class UserTable:
                 "Smith",
                 "alice.smith",
                 "alice.smith@example.com",
-                "example_password",
-                "KENFKED"
+                 generate_password_hash("example_password"),
+                "WVTBSKRNKORNCBMI"
             ),
             (
                 "admin",
@@ -54,8 +55,8 @@ class UserTable:
                 "Johnson",
                 "bob.johnson",
                 "bob.johnson@example.com",
-                "example_password",
-                "KJDFJF"
+                generate_password_hash("example_password"),
+                "KEQWOVVUJDIFQSJD"
             ),
             (
                 "user",
@@ -63,8 +64,8 @@ class UserTable:
                 "Williams",
                 "carol.williams",
                 "carol.williams@example.com",
-                "example_password",
-                "KEIFGN"
+                generate_password_hash("example_password"),
+                "HARAUJMIXYGDSRLA"
             ),
             (
                 "admin",
@@ -72,8 +73,8 @@ class UserTable:
                 "Brown",
                 "david.brown",
                 "david.brown@example.com",
-                "example_password",
-                "KDWMLD"
+                generate_password_hash("example_password"),
+                "OSQBCMPVGVZTUGPO"
             ),
         ]
 

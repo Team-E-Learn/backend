@@ -12,7 +12,7 @@ class Block(Resource):
 
     @SwagGen(
         SwagDoc(
-            SwagMethod.PUT,
+            SwagMethod.POST,
             ["Block"],
             "Creates a new block",
             [
@@ -53,7 +53,7 @@ class Block(Resource):
         )
     )
     @Instil("db")
-    def put(self, lesson_id: int, service: Connection[TupleRow]):
+    def post(self, lesson_id: int, service: Connection[TupleRow]):
         block_type: str | None = request.form.get("block_type")
         order: str | None = request.form.get("order")
         data: str | None = request.form.get("data")

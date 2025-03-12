@@ -1,6 +1,6 @@
+from mintotp import totp
 from flask import request
 from flask_restful import Resource
-from werkzeug.datastructures.structures import ImmutableMultiDict
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 
@@ -34,8 +34,8 @@ class Verify2FA(Resource):
         )
     )
     def post(self):
-        data: ImmutableMultiDict[str, str] = request.form
-        code: str | None = data.get("code")
+        limited_jwt: str | None = request.form.get("Limited JWT")
+        code: str | None = request.form.get("code")
 
         # TODO:
         # 1) Take user limited JWT
@@ -44,11 +44,14 @@ class Verify2FA(Resource):
         # 4) Check 2fa code valid
         # 5) Produce new JWT with full access (see /auth/login)
 
-        if not code:
+        if not limited_jwt or not code:
             return {"message": "Bad Request"}, 400
 
+        print(limited_jwt)
+        # Resolve limited_jwt to user secret
+
         # Logic to verify 2FA code and generate full access JWT
-        if code != "123456":  # Example verification logic
+        if totp("TODO USER CODE") != code:
             return {"message": "Unauthorized"}, 401
 
         full_access_jwt = "example_full_access_jwt"
