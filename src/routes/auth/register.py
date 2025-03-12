@@ -2,7 +2,6 @@ from time import time
 from flask import request
 from flask_restful import Resource
 from psycopg.rows import TupleRow
-from werkzeug.datastructures.structures import ImmutableMultiDict
 from werkzeug.security import generate_password_hash
 from psycopg.connection import Connection
 from psycopg import sql

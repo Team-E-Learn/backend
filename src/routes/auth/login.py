@@ -3,7 +3,7 @@ from flask import request
 from flask_restful import Resource
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 from backend.database.user import UserTable
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -45,9 +45,8 @@ class Login(Resource):
     def post(self, service: Connection[TupleRow]):
         email: str | None = request.form.get("email")
         password: str | None = request.form.get("password")
-        hashed_password = generate_password_hash(password)
 
-        print(email, password, hashed_password)
+        print(email, password)
         if email is None or password is None:
             return {"message": "Bad request"}, 400
 
@@ -57,7 +56,7 @@ class Login(Resource):
             return {"message": "Bad request"}, 400
 
         print(user_data)
-        if user_data[6] != hashed_password:
+        if not check_password_hash(user_data[6], password):
             return {"message": "Unauthorized"}, 401
 
         uid: int = user_data[0]
