@@ -38,7 +38,7 @@ class UserTable:
     @staticmethod
     def write_users(conn: Connection[TupleRow]) -> None:
         # format is (accountType, firstName, lastName, username, email)
-        users: list[tuple[str, str, str, str, str, str]] = [
+        users: list[tuple[str, str, str, str, str, str, str]] = [
             (
                 "user",
                 "Alice",
@@ -46,6 +46,7 @@ class UserTable:
                 "alice.smith",
                 "alice.smith@example.com",
                 "example_password",
+                "KENFKED"
             ),
             (
                 "admin",
@@ -54,6 +55,7 @@ class UserTable:
                 "bob.johnson",
                 "bob.johnson@example.com",
                 "example_password",
+                "KJDFJF"
             ),
             (
                 "user",
@@ -62,6 +64,7 @@ class UserTable:
                 "carol.williams",
                 "carol.williams@example.com",
                 "example_password",
+                "KEIFGN"
             ),
             (
                 "admin",
@@ -70,11 +73,12 @@ class UserTable:
                 "david.brown",
                 "david.brown@example.com",
                 "example_password",
+                "KDWMLD"
             ),
         ]
 
         cursor: Cursor[TupleRow] = conn.cursor()
-        for accountType, firstName, lastName, username, email, password in users:
+        for accountType, firstName, lastName, username, email, password, totpSecret in users:
             _ = cursor.execute(
                 "SELECT 1 FROM users WHERE username = %s OR email = %s",
                 (username, email),
@@ -84,9 +88,9 @@ class UserTable:
                 continue
 
             _ = cursor.execute(
-                "INSERT INTO users (accountType, firstName, lastName, username, email, password) "
-                + "VALUES (%s, %s, %s, %s, %s, %s)",
-                (accountType, firstName, lastName, username, email, password),
+                "INSERT INTO users (accountType, firstName, lastName, username, email, password, totpSecret) "
+                + "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (accountType, firstName, lastName, username, email, password, totpSecret),
             )
 
     # this function is called from src/routes/user/profile.py

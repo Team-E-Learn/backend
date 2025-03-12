@@ -14,6 +14,14 @@ class Verify2FA(Resource):
             "Verifies a user with a 6-digit 2FA code",
             [
                 SwagParam(
+                    "Limited JWT",
+                    "header",
+                    "string",
+                    True,
+                    "The limited JWT",
+                    "Bearer example_limited_jwt",
+                ),
+                SwagParam(
                     "code",
                     "formData",
                     "string",
