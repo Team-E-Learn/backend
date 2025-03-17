@@ -1,14 +1,16 @@
-from psycopg.connection import Connection
-from psycopg.cursor import Cursor
-from psycopg.rows import TupleRow
+from lib.dataswap.cursor import SwapCursor
+from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
+from lib.dataswap.statement import StringStatement
 
 
 class UserTable:
 
     @staticmethod
-    def create(conn: Connection[TupleRow]) -> None:
-        _ = conn.cursor().execute(
-            """
+    def create(conn: SwapDB) -> None:
+        _ = conn.get_cursor().execute(
+            StringStatement(
+                """
     CREATE TABLE IF NOT EXISTS users (
         userID SERIAL PRIMARY KEY UNIQUE NOT NULL,
         accountType VARCHAR(16) NOT NULL,
@@ -18,24 +20,29 @@ class UserTable:
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(256) NOT NULL
     );"""
+            )
         )
 
     @staticmethod
-    def get_by_username(conn: Connection[TupleRow], username: str):
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute(f"SELECT * FROM users WHERE username = %s;", (username,))
-        return cursor.fetchone()
+    def get_by_username(conn: SwapDB, username: str):
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT * FROM users WHERE username = %s;"), (username,)
+        )
+        return result.fetch_one()
 
     @staticmethod
-    def get_by_email(conn: Connection[TupleRow], email: str):
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute("SELECT * FROM users WHERE email = %s;", (email,))
-        return cursor.fetchone()
+    def get_by_email(conn: SwapDB, email: str):
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT * FROM users WHERE email = %s;"), (email,)
+        )
+        return result.fetch_one()
 
     # this populates user_ids 1-4 with dummy data
     # no alternative API call to add users, so this is the only way to add them
     @staticmethod
-    def write_users(conn: Connection[TupleRow]) -> None:
+    def write_users(conn: SwapDB) -> None:
         # format is (accountType, firstName, lastName, username, email)
         users: list[tuple[str, str, str, str, str, str]] = [
             (
@@ -72,36 +79,44 @@ class UserTable:
             ),
         ]
 
-        cursor: Cursor[TupleRow] = conn.cursor()
+        cursor: SwapCursor = conn.get_cursor()
         for accountType, firstName, lastName, username, email, password in users:
-            _ = cursor.execute(
-                "SELECT 1 FROM users WHERE username = %s OR email = %s",
+            result: SwapResult = cursor.execute(
+                StringStatement(
+                    "SELECT 1 FROM users WHERE username = %s OR email = %s"
+                ),
                 (username, email),
             )
 
-            if cursor.fetchone() is not None:
+            if result.fetch_one() is not None:
                 continue
 
             _ = cursor.execute(
-                "INSERT INTO users (accountType, firstName, lastName, username, email, password) "
-                + "VALUES (%s, %s, %s, %s, %s, %s)",
+                StringStatement(
+                    "INSERT INTO users (accountType, firstName, lastName, username, email, password) "
+                    + "VALUES (%s, %s, %s, %s, %s, %s)"
+                ),
                 (accountType, firstName, lastName, username, email, password),
             )
 
     # this function is called from src/routes/user/profile.py
     @staticmethod
     def get_user_profile(
-        conn: Connection[TupleRow], user_id: int
+        conn: SwapDB, user_id: int
     ) -> tuple[str, str, str, str, str] | None:
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute(
-            "SELECT username, email, firstName, lastName, accountType FROM users WHERE userID = %s",
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement(
+                "SELECT username, email, firstName, lastName, accountType FROM users WHERE userID = %s"
+            ),
             (user_id,),
         )
-        return cursor.fetchone()
+        return result.fetch_one()
 
     @staticmethod
-    def user_exists(conn: Connection[TupleRow], user_id: int) -> bool:
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute("SELECT 1 FROM users WHERE userID = %s", (user_id,))
-        return cursor.fetchone() is not None
+    def user_exists(conn: SwapDB, user_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT 1 FROM users WHERE userID = %s"), (user_id,)
+        )
+        return result.fetch_one() is not None

@@ -1,6 +1,3 @@
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
-
 from backend.database.user import UserTable
 from backend.database.email_codes import EmailCodesTable
 from backend.database.organisations import OrganisationsTable
@@ -14,10 +11,11 @@ from backend.database.subscriptions import SubscriptionsTable
 from backend.database.dashboard import DashboardTable
 from backend.database.module_dashboard import ModuleDashboardTable
 from backend.database.progress import ProgressTable
+from lib.dataswap.database import SwapDB
 
 
 # create all tables if they don't exist
-def initialise_tables(conn: Connection[TupleRow]) -> None:
+def initialise_tables(conn: SwapDB) -> None:
     UserTable.create(conn)
     EmailCodesTable.create(conn)
     OrganisationsTable.create(conn)
@@ -35,7 +33,7 @@ def initialise_tables(conn: Connection[TupleRow]) -> None:
 
 
 # populate the tables with dummy data
-def populate_dummy_data(conn: Connection[TupleRow]) -> None:
+def populate_dummy_data(conn: SwapDB) -> None:
     UserTable.write_users(conn)
     conn.commit()
     OrganisationsTable.write_orgs(conn)

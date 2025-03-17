@@ -1,10 +1,9 @@
 from time import time
 from flask import request
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 from werkzeug.datastructures.structures import ImmutableMultiDict
 from backend.database.user import UserTable
+from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -42,7 +41,7 @@ class Login(Resource):
         )
     )
     @Instil("db")
-    def post(self, service: Connection[TupleRow]):
+    def post(self, service: SwapDB):
         data: ImmutableMultiDict[str, str] = request.form
         email: str | None = data.get("email")
         password: str | None = data.get("password")

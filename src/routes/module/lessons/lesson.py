@@ -1,8 +1,7 @@
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 from backend.database.blocks import BlocksTable
 
+from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -29,7 +28,7 @@ class Lesson(Resource):
         )
     )
     @Instil("db")
-    def get(self, lesson_id: int, service: Connection[TupleRow]):
+    def get(self, lesson_id: int, service: SwapDB):
         # get lesson sidebar with basic blocks using lesson_id
         blocks: list[dict[str, int | str]] = []
         for block_type, block_order, data in BlocksTable.get_blocks(service, lesson_id):
