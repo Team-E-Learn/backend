@@ -1,3 +1,8 @@
+"""
+Module for managing educational lessons in the database.
+Provides operations for creating, populating, retrieving, and deleting lessons
+associated with educational modules.
+"""
 import json
 from psycopg import Cursor
 from psycopg.connection import Connection
@@ -5,6 +10,12 @@ from psycopg.rows import TupleRow
 
 
 class LessonsTable:
+    """Manages database operations for the lessons table.
+
+    This class provides methods to create the lessons table and manage lesson data
+    for modules. Each lesson has a title and JSON-structured content
+    organized into sections.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:
@@ -52,6 +63,7 @@ class LessonsTable:
             (4, 'Lesson 3', '{"content": "This is lesson 3"}'),
         ]
 
+        # write sample lessons to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for module_id, title, sections in lessons:
             _ = cursor.execute(

@@ -1,9 +1,21 @@
+"""
+Module for managing organisations in the database.
+Provides operations for creating, populating, and validating organisations
+that can own modules and are managed by user accounts.
+"""
 from psycopg.connection import Connection
 from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
 
 
 class OrganisationsTable:
+    """Manages database operations for the organisations table.
+
+    This class provides methods to create the organisations table and manage
+    organisation data. Each organisation has a unique name, description, and
+    an owner who is referenced by their user ID. organisations serve as containers
+    for modules and other content.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:
@@ -28,13 +40,16 @@ class OrganisationsTable:
             ("Amazon", "An online retailer", 2),
         ]
 
+        # write sample organisations to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for name, description, ownerID in orgs:
             _ = cursor.execute("SELECT 1 FROM organisations WHERE name = %s", (name,))
 
+            # skip if the organisation already exists
             if cursor.fetchone() is not None:
                 continue
 
+            # insert organisation into organisations table
             _ = cursor.execute(
                 "INSERT INTO organisations (name, description, ownerID) VALUES (%s, %s, %s)",
                 (name, description, ownerID),

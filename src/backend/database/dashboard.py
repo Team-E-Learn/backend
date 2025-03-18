@@ -1,9 +1,20 @@
+"""
+Module for managing user dashboard widgets in the database.
+Provides operations for creating, populating, and retrieving dashboard widget data
+that defines the personalized UI layout for each user.
+"""
 from psycopg.connection import Connection
 from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
 
 
 class DashboardTable:
+    """Manages database operations for the dashboard table.
+
+    This class provides methods to create the dashboard table and manage
+    widget positions for user dashboards. Each record represents a widget
+    positioned on a user's personalized dashboard interface.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:
@@ -42,6 +53,7 @@ class DashboardTable:
             (4, 'calendar', 10, 40)
         ]
 
+        # write sample dashboard data to the dashboard table
         cursor: Cursor[TupleRow] = conn.cursor()
         for user_id, widget_type, x, y in dashboard:
             _ = cursor.execute(

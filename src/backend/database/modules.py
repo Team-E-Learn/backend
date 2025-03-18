@@ -1,9 +1,20 @@
+"""
+Module for managing modules in the database.
+Provides operations for creating, populating, and validating modules
+that are owned by organisations and contain lessons and other content.
+"""
 from psycopg.connection import Connection
 from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
 
 
 class ModulesTable:
+    """Manages database operations for the modules table.
+
+    This class provides methods to create the modules table and manage modules
+    within the system. Each module has a name, description, and belongs to an organisation.
+    Modules serve as containers for lessons and other content.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:
@@ -33,6 +44,7 @@ class ModulesTable:
             ("Machine Learning", "Introduction to machine learning", 3),
         ]
 
+        # write sample modules to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for name, description, orgID in modules:
             _ = cursor.execute("SELECT 1 FROM modules WHERE name = %s", (name,))

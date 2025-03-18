@@ -1,9 +1,19 @@
+"""
+Module for managing email verification codes in the database.
+Provides operations for creating, storing, retrieving, and validating email verification codes.
+"""
 from psycopg.cursor import Cursor
 from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 
 
 class EmailCodesTable:
+    """Manages database operations for the email_codes table.
+
+    This class provides methods to create the email_codes table and manage
+    verification codes used in the email verification process. Each record
+    contains an email, its associated verification code, and a verification status.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:

@@ -1,3 +1,8 @@
+"""
+Module for managing user accounts in the database.
+Provides operations for creating, authenticating, retrieving and validating user accounts
+that can own organizations, access modules, and track educational progress.
+"""
 from werkzeug.security import generate_password_hash
 from psycopg.connection import Connection
 from psycopg.cursor import Cursor
@@ -5,6 +10,13 @@ from psycopg.rows import TupleRow
 
 
 class UserTable:
+    """Manages database operations for the users table.
+
+    This class provides methods to create the users table and manage user account data.
+    Each user has an account type (user/admin), personal information, authentication
+    credentials, and a TOTP secret for two-factor authentication. Users represent the
+    primary actors in the system who interact with educational content.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:
@@ -78,6 +90,7 @@ class UserTable:
             ),
         ]
 
+        # write sample users to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for accountType, firstName, lastName, username, email, password, totpSecret in users:
             _ = cursor.execute(
@@ -85,9 +98,11 @@ class UserTable:
                 (username, email),
             )
 
+            # skip if user already exists
             if cursor.fetchone() is not None:
                 continue
 
+            # insert user into the database
             _ = cursor.execute(
                 "INSERT INTO users (accountType, firstName, lastName, username, email, password, totpSecret) "
                 + "VALUES (%s, %s, %s, %s, %s, %s, %s)",

@@ -1,3 +1,7 @@
+"""
+Module for managing lesson blocks in the database.
+Provides CRUD operations for the blocks table which stores different types of content blocks.
+"""
 import json
 from psycopg.connection import Connection
 from psycopg.cursor import Cursor
@@ -5,6 +9,11 @@ from psycopg.rows import TupleRow
 
 
 class BlocksTable:
+    """Manages database operations for the blocks table.
+
+    This class provides methods to create the blocks table and perform
+    CRUD operations on block records. Blocks are the content units within lessons.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:
@@ -24,10 +33,15 @@ class BlocksTable:
     def write_block(conn: Connection[TupleRow], lesson_id: int, block_type: int,
                     order: int, data: dict[str, str]) -> bool:
         cursor: Cursor[TupleRow] = conn.cursor()
-        # check if lessonID exists
+        
+        # verify the lesson exists before adding a block to it
         if not cursor.execute("SELECT 1 FROM lessons WHERE lessonID = %s", (lesson_id,)).fetchone():
             return False
+        
+        # convert data dictionary to JSON string
         data = json.dumps(data)
+        
+        # insert block into blocks table
         _ = cursor.execute(
             """
             INSERT INTO blocks (lessonID, blockType, blockOrder, data)
@@ -83,6 +97,7 @@ class BlocksTable:
             (4, 4, 4, {"image_url": "https://www.example.com/image.jpg"}),
         ]
 
+        # write sample blocks to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for lesson_id, block_type, order, data in blocks:
             data = json.dumps(data)
@@ -95,11 +110,13 @@ class BlocksTable:
     def delete_block(conn: Connection[TupleRow], lesson_id: int, block_type: int,
                      order: int) -> bool:
         cursor: Cursor[TupleRow] = conn.cursor()
+        
         # check if block exists
         if not cursor.execute("SELECT * FROM blocks WHERE lessonID = %s AND blockType = %s AND blockOrder = %s",
                             (lesson_id, block_type, order)).fetchone():
             # if block does not exist, return False
             return False
+
         # if block exists, delete it, then return True
         _ = cursor.execute(
             "DELETE FROM blocks WHERE lessonID = %s AND blockType = %s AND blockOrder = %s",

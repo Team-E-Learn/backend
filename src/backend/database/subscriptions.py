@@ -1,9 +1,21 @@
+"""
+Module for managing user subscriptions to modules in the database.
+Provides operations for creating, populating, and managing the many-to-many
+relationship between users and the modules they are enrolled in or have access to.
+"""
 from psycopg.connection import Connection
 from psycopg.cursor import Cursor
 from psycopg.rows import TupleRow
 
 
 class SubscriptionsTable:
+    """Manages database operations for the subscriptions table.
+
+    This class provides methods to create the subscriptions table and manage
+    user enrollment in modules. Each record represents a user's
+    subscription to a specific module, forming a many-to-many relationship
+    between users and modules they can access.
+    """
 
     @staticmethod
     def create(conn: Connection[TupleRow]) -> None:
@@ -31,6 +43,7 @@ class SubscriptionsTable:
             (4, 8),
         ]
 
+        # write sample subscriptions to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for user_id, module_id in subscriptions:
             _ = cursor.execute(
