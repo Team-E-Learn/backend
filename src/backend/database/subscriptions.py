@@ -28,10 +28,10 @@ class SubscriptionsTable:
     );"""
         )
 
-    # so you don't need to manually add subscriptions with http://127.0.0.1:5000/v1/org/1/module/1/user/1
+    # So you don't need to manually add subscriptions with http://127.0.0.1:5000/v1/org/1/module/1/user/1
     @staticmethod
     def write_subscriptions(conn: Connection[TupleRow]) -> None:
-        # format is (userID, moduleID)
+        # Format is (userID, moduleID)
         subscriptions: list[tuple[int, int]] = [
             (3, 1),
             (3, 2),
@@ -43,7 +43,7 @@ class SubscriptionsTable:
             (4, 8),
         ]
 
-        # write sample subscriptions to the database
+        # Write sample subscriptions to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for user_id, module_id in subscriptions:
             _ = cursor.execute(

@@ -55,6 +55,7 @@ class Register(Resource):
     )
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
+        # Get email, username, and password from request
         email: str | None = request.form.get("email")
         username: str | None = request.form.get("username")
         password: str | None = request.form.get("password")
@@ -106,6 +107,7 @@ class Register(Resource):
                 )
                 user: TupleRow | None = cur.fetchone()
                 service.commit()
+        # Rollback on error, and return error message 500
         except Exception as e:
             service.rollback()
             return {"message": f"Registration failed: {str(e)}"}, 500
@@ -113,6 +115,7 @@ class Register(Resource):
         if not user:
             return {"message": "Error finding user"}, 500
 
+        # Generate expiry time for JWT
         expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now
 
         # Logic to authenticate user and generate limited JWT
@@ -125,6 +128,7 @@ class Register(Resource):
             .sign()
         )
 
+        # Return success message and token
         return {
             "message": "Registration successful",
             "user": {

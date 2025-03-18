@@ -31,8 +31,8 @@ class ModuleDashboardTable:
     );"""
         )
 
-    # for http://127.0.0.1:5000/v1/user/1234/dashboard/module/5678
-    # no alternative API call to add module dashboard data, so this is the only way to add it
+    # For http://127.0.0.1:5000/v1/user/1234/dashboard/module/5678
+    # No alternative API call to add module dashboard data, so this is the only way to add it
     @staticmethod
     def write_module_dashboard(conn: Connection[TupleRow]) -> None:
         # format is (userID, moduleID, widgetID, widgetType, x, y)
@@ -55,7 +55,7 @@ class ModuleDashboardTable:
             (4, 1, "calendar_widget", "calendar", 10, 40),
         ]
 
-        # write sample module dashboard data to the database
+        # Write sample module dashboard data to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for user_id, module_id, widget_id, widget_type, x, y in module_dashboard:
             _ = cursor.execute(

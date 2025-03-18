@@ -42,23 +42,33 @@ class Login(Resource):
     )
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
+        # Get email and password from request
         email: str | None = request.form.get("email")
         password: str | None = request.form.get("password")
 
+        # Check if email and password are provided
+        # If not, return a 400 Bad Request
         if email is None or password is None:
             return {"message": "Bad request"}, 400
 
+        # Check if user exists
         user_data = UserTable.get_by_email(service, email)
 
+        # If not, return a 400 Bad Request
         if not user_data:
             return {"message": "Bad request"}, 400
 
+        # Check if password is correct
+        # If not, return a 401 Unauthorized
         if not check_password_hash(user_data[6], password):
             return {"message": "Unauthorized"}, 401
 
+        # Get user id
         uid: int = user_data[0]
 
+        # Generate expiry time for JWT
         expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now
+
         # Logic to authenticate user and generate limited JWT
         limited_jwt: str = (
             Jwt(JWT_LOGIN_KEY)
@@ -69,4 +79,5 @@ class Login(Resource):
             .sign()
         )
 
+        # Return limited JWT (for 2fa) and success message
         return {"message": "Login successful", "limited_jwt": limited_jwt}, 200

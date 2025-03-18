@@ -21,7 +21,7 @@ from backend.database.module_dashboard import ModuleDashboardTable
 from backend.database.progress import ProgressTable
 
 
-# create all tables if they don't exist
+# Create all tables if they don't exist
 def initialise_tables(conn: Connection[TupleRow]) -> None:
     """Initialize all the database tables in the correct order.
 
@@ -46,7 +46,7 @@ def initialise_tables(conn: Connection[TupleRow]) -> None:
     conn.commit()
 
 
-# populate the tables with dummy data
+# Populate the tables with dummy data
 def populate_dummy_data(conn: Connection[TupleRow]) -> None:
     """Populate all tables with sample data for development and testing.
 

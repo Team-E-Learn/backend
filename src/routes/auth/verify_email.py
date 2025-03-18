@@ -39,9 +39,11 @@ class VerifyEmail(Resource):
 
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
+        # Get email and token from request
         email: str | None = request.form.get("email")
         token: str | None = request.form.get("token")
 
+        # Check if email and token are provided, if not return a 400 Bad Request
         if not email or not token:
             return {"message": "Bad Request"}, 400
 
@@ -49,5 +51,8 @@ class VerifyEmail(Resource):
         if token != EmailCodesTable.get_code(service, email):
             return {"message": "Bad Request"}, 400
 
+        # Set email as verified
         EmailCodesTable.set_verified(service, email)
+
+        # Return 200 on successful email verification
         return {"message": "Email verified"}, 200

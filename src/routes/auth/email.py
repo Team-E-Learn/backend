@@ -51,8 +51,10 @@ class CheckEmail(Resource):
 
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
+        # Get email from request
         email: str | None = request.form.get("email")
 
+        # Check if email is provided, if not return a 400 Bad Request
         if not email:
             return {"message": "Bad Request"}, 400
 
@@ -63,10 +65,12 @@ class CheckEmail(Resource):
         # Logic to send verification code to email
         verification_code: str = generate_code()
 
+        # Send verification code to email
         if not send_verification_email(email, verification_code):
             return {"message": "Failed to send email"}, 400
 
+        # Store verification code in DB
         EmailCodesTable.add_code(service, email, verification_code)
 
-        # Store verification code in DB (example)
+        # Return success message
         return {"message": "Verification code sent"}, 200

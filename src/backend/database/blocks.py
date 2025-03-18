@@ -34,14 +34,14 @@ class BlocksTable:
                     order: int, data: dict[str, str]) -> bool:
         cursor: Cursor[TupleRow] = conn.cursor()
         
-        # verify the lesson exists before adding a block to it
+        # Verify the lesson exists before adding a block to it
         if not cursor.execute("SELECT 1 FROM lessons WHERE lessonID = %s", (lesson_id,)).fetchone():
             return False
         
-        # convert data dictionary to JSON string
+        # Convert data dictionary to JSON string
         data = json.dumps(data)
         
-        # insert block into blocks table
+        # Insert block into blocks table
         _ = cursor.execute(
             """
             INSERT INTO blocks (lessonID, blockType, blockOrder, data)
@@ -54,10 +54,10 @@ class BlocksTable:
         return True
 
 
-    # for http://127.0.0.1:5000/v1/module/lesson/
+    # For http://127.0.0.1:5000/v1/module/lesson/
     @staticmethod
     def write_blocks(conn: Connection[TupleRow]) -> None:
-        # format is (lesson_id, block_type, order (of appearance on page), data)
+        # Format is (lesson_id, block_type, order (of appearance on page), data)
         blocks: list[tuple[int, int, int, dict[str, str]]] = [
             (1, 1, 1,
                 {
@@ -97,7 +97,7 @@ class BlocksTable:
             (4, 4, 4, {"image_url": "https://www.example.com/image.jpg"}),
         ]
 
-        # write sample blocks to the database
+        # Write sample blocks to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for lesson_id, block_type, order, data in blocks:
             data = json.dumps(data)
@@ -111,13 +111,13 @@ class BlocksTable:
                      order: int) -> bool:
         cursor: Cursor[TupleRow] = conn.cursor()
         
-        # check if block exists
+        # Check if block exists
         if not cursor.execute("SELECT * FROM blocks WHERE lessonID = %s AND blockType = %s AND blockOrder = %s",
                             (lesson_id, block_type, order)).fetchone():
-            # if block does not exist, return False
+            # If block does not exist, return False
             return False
 
-        # if block exists, delete it, then return True
+        # If block exists, delete it, then return True
         _ = cursor.execute(
             "DELETE FROM blocks WHERE lessonID = %s AND blockType = %s AND blockOrder = %s",
             (lesson_id, block_type, order),

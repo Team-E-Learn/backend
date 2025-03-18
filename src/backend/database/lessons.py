@@ -40,10 +40,10 @@ class LessonsTable:
             (lesson_id, module_id, title, sections)
         )
 
-    # for http://127.0.0.1:5000/v1/module/5/lessons
+    # For http://127.0.0.1:5000/v1/module/5/lessons
     @staticmethod
     def write_lessons(conn: Connection[TupleRow]) -> None:
-        # format is (module_id, title, sections)
+        # Format is (module_id, title, sections)
         lessons: list[tuple[int, str, str]] = [
             (1, 'Introduction', '{"content": "Welcome to the introduction"}'),
             (1, 'Lesson 1', '{"content": "This is lesson 1"}'),
@@ -63,7 +63,7 @@ class LessonsTable:
             (4, 'Lesson 3', '{"content": "This is lesson 3"}'),
         ]
 
-        # write sample lessons to the database
+        # Write sample lessons to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for module_id, title, sections in lessons:
             _ = cursor.execute(
@@ -74,13 +74,16 @@ class LessonsTable:
     @staticmethod
     def delete_lesson(conn: Connection[TupleRow], lesson_id: int) -> bool:
         cursor: Cursor[TupleRow] = conn.cursor()
-        # check if lesson exists
+
+        # Check if lesson exists
         if not cursor.execute("SELECT * FROM lessons WHERE lessonID = %s", (lesson_id,)).fetchone():
-            # if lesson does not exist, return False
+            # If lesson does not exist, return False
             return False
-        # if lesson exists, delete blocks associated with lesson
+
+        # If lesson exists, delete blocks associated with lesson
         _ = cursor.execute("DELETE FROM blocks WHERE lessonID = %s", (lesson_id,))
-        # then delete lesson and return True
+
+        # Then delete lesson and return True
         _ = cursor.execute("DELETE FROM lessons WHERE lessonID = %s", (lesson_id,))
         conn.commit()
         return True

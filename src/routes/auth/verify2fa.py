@@ -45,16 +45,18 @@ class Verify2FA(Resource):
     )
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
+        # Get limited JWT and 2FA code from request
         limited_jwt: str | None = request.form.get("Limited JWT")
         code: str | None = request.form.get("code")
 
+        # Check if limited JWT and 2FA code are present, if not return 400
         if not limited_jwt or not code:
             return {"message": "Bad Request"}, 400
 
-
-        # decode limited JWT to get user ID and check expiry time
+        # Decode limited JWT to get user ID and check expiry time
         payload = limited_jwt.split(".")[1]
-        # make sure payload is padded correctly
+
+        # Make sure payload is padded correctly
         if len(payload) % 4 != 0:
             payload += "=" * (4 - len(payload) % 4)
         payload = base64.b64decode(payload)
@@ -62,13 +64,14 @@ class Verify2FA(Resource):
         user_id = payload["sub"]
         expiry_time = payload["exp"]
 
+        # If expiry time is less than current time, return unauthorized
         if int(expiry_time) < int(time()):
             return {"message": "Unauthorized"}, 401
 
-        # get user secret from database
+        # Get user secret from database
         user_secret: str = UserTable.get_totp_secret(service, user_id)
 
-        # if user secret is not found, return unauthorized
+        # If user secret is not found, return unauthorized
         if not user_secret:
             return {"message": "Unauthorized"}, 401
 
@@ -76,6 +79,7 @@ class Verify2FA(Resource):
         if totp(user_secret) != code:
             return {"message": "Unauthorized"}, 401
 
+        # Set expiry time for full access JWT
         expiry_time: int = int(time()) + JWT_ACCESS_EXP
 
         # Produce new JWT with full access
@@ -88,7 +92,7 @@ class Verify2FA(Resource):
             .sign()
         )
 
-        # return full access JWT
+        # Return full access JWT
         return {
             "message": "Verification successful",
             "full_access_jwt": full_access_jwt,

@@ -23,10 +23,10 @@ def add_modules_to_bundle(
     if bundle_result is None:
         return
 
-    # get the bundleID from the result
+    # Get the bundleID from the result
     bundle_id: int = bundle_result[0]
 
-    # for each module in the list, get the moduleID and add it to the bundle_modules table
+    # For each module in the list, get the moduleID and add it to the bundle_modules table
     for module_name in module_names:
         _ = cursor.execute(
             "SELECT moduleID FROM modules WHERE name = %s", (module_name,)
@@ -63,11 +63,11 @@ class BundlesTable:
     );"""
         )
 
-    # adds 2 bundles to the DB, each bundle contains a different set of modules
-    # no alternative API call to add bundles, so this is the only way to add them
+    # Adds 2 bundles to the DB, each bundle contains a different set of modules
+    # No alternative API call to add bundles, so this is the only way to add them
     @staticmethod
     def write_bundles(conn: Connection[TupleRow]) -> None:
-        # format is (name, description, orgID)
+        # Format is (name, description, orgID)
         bundles: list[tuple[str, str, int]] = [
             (
                 "Computer Science BSc",
@@ -81,19 +81,22 @@ class BundlesTable:
             ),
         ]
 
-        # add each bundle to the bundles table
+        # Add each bundle to the bundles table
         cursor: Cursor[TupleRow] = conn.cursor()
         for name, description, orgID in bundles:
             _ = cursor.execute("SELECT 1 FROM bundles WHERE name = %s", (name,))
+
+            # If the bundle already exists, skip it
             if cursor.fetchone() is not None:
                 continue
 
+            # Add the bundle to the bundles table
             _ = cursor.execute(
                 "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)",
                 (name, description, orgID),
             )
 
-        # list of modules to add to the CS bundle from modules.py
+        # List of modules to add to the CS bundle from modules.py
         add_modules_to_bundle(
             "Computer Science BSc",
             [
@@ -105,7 +108,7 @@ class BundlesTable:
             conn,
         )
 
-        # list of modules to add to the Excel bundle from modules.py
+        # List of modules to add to the Excel bundle from modules.py
         add_modules_to_bundle(
             "Excel Certification",
             [

@@ -46,11 +46,11 @@ class UserTable:
         _ = cursor.execute("SELECT * FROM users WHERE email = %s;", (email,))
         return cursor.fetchone()
 
-    # this populates user_ids 1-4 with dummy data
-    # no alternative API call to add users, so this is the only way to add them
+    # This populates user_ids 1-4 with dummy data
+    # No alternative API call to add users, so this is the only way to add them
     @staticmethod
     def write_users(conn: Connection[TupleRow]) -> None:
-        # format is (accountType, firstName, lastName, username, email)
+        # Format is (accountType, firstName, lastName, username, email)
         users: list[tuple[str, str, str, str, str, str, str]] = [
             (
                 "user",
@@ -90,7 +90,7 @@ class UserTable:
             ),
         ]
 
-        # write sample users to the database
+        # Write sample users to the database
         cursor: Cursor[TupleRow] = conn.cursor()
         for accountType, firstName, lastName, username, email, password, totpSecret in users:
             _ = cursor.execute(
@@ -98,18 +98,18 @@ class UserTable:
                 (username, email),
             )
 
-            # skip if user already exists
+            # Skip if user already exists
             if cursor.fetchone() is not None:
                 continue
 
-            # insert user into the database
+            # Insert user into the database
             _ = cursor.execute(
                 "INSERT INTO users (accountType, firstName, lastName, username, email, password, totpSecret) "
                 + "VALUES (%s, %s, %s, %s, %s, %s, %s)",
                 (accountType, firstName, lastName, username, email, password, totpSecret),
             )
 
-    # this function is called from src/routes/user/profile.py
+    # This function is called from src/routes/user/profile.py
     @staticmethod
     def get_user_profile(conn: Connection[TupleRow], user_id: int
     ) -> tuple[str, str, str, str, str] | None:
