@@ -12,6 +12,7 @@ from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
 
+from lib.metro.metro import MetroBus
 from lib.swagdoc.swagtag import SwagTag
 from routes.auth.email import CheckEmail
 from routes.auth.register import Register
@@ -45,7 +46,6 @@ print("Initialized tables")
 # add database service for Instil
 Instil.add_service("db", conn)
 print("Registered database service")
-
 
 class Main(Resource):
 
