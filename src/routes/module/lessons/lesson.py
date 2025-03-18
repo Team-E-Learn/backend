@@ -57,12 +57,13 @@ class Lesson(Resource):
     )
     @Instil("db")
     def post(self, service: Connection[TupleRow]):
+        # Get lesson data from request
         lesson_id: str | None = request.form.get("lesson_id")
         module_id: str | None = request.form.get("module_id")
         title: str | None = request.form.get("title")
         sections: str | None = request.form.get("sections")
 
-        # create new lesson using module_id, title, and sections
+        # Create new lesson using module_id, title, and sections
         LessonsTable.create_lesson(service, lesson_id, module_id, title, sections)
         return {"message": "Lesson created"}, 200
 
@@ -86,10 +87,12 @@ class Lesson(Resource):
     )
     @Instil("db")
     def delete(self, service: Connection[TupleRow]):
+        # Get lesson_id from request
         lesson_id: str | None = request.form.get("lesson_id")
 
-        # delete lesson using lesson_id
+        # Delete lesson using lesson_id, if successful return a 200 response
         if LessonsTable.delete_lesson(service, lesson_id):
             return {"message": "Lesson deleted"}, 200
+        # If fails, return a 404 response
         else:
             return {"message": "Lesson not found"}, 404

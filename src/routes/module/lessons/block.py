@@ -54,12 +54,15 @@ class Block(Resource):
     )
     @Instil("db")
     def post(self, lesson_id: int, service: Connection[TupleRow]):
+        # Get block data from request
         block_type: str | None = request.form.get("block_type")
         order: str | None = request.form.get("order")
         data: str | None = request.form.get("data")
 
+        # Try to create a block, if successful return a 200 response
         if BlocksTable.write_block(service, lesson_id, block_type, order, data):
             return {"message": "Block created"}, 200
+        # If fails, return a 400 response
         else:
             return {"message": "Block not created, invalid lesson ID"}, 400
 
@@ -99,11 +102,14 @@ class Block(Resource):
     )
     @Instil("db")
     def delete(self, lesson_id: int, service: Connection[TupleRow]):
+        # Get block data from request
         block_type: str | None = request.form.get("block_type")
         order: str | None = request.form.get("order")
 
+        # Try to delete a block, if successful return a 200 response
         if BlocksTable.delete_block(service, lesson_id, block_type, order):
             return {"message": "Block deleted"}, 200
+        # If fails, return a 404 response
         else:
             return {"message": "Block not found"}, 404
 
@@ -127,7 +133,7 @@ class Block(Resource):
     )
     @Instil("db")
     def get(self, lesson_id: int, service: Connection[TupleRow]):
-        # get lesson sidebar with basic blocks using lesson_id
+        # Get lesson sidebar with basic blocks using lesson_id
         blocks: list[dict[str, int | str]] = []
         for block_type, block_order, data in BlocksTable.get_blocks(service, lesson_id):
             blocks.append(
