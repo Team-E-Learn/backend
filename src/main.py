@@ -31,7 +31,13 @@ from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
 # create Front facade for Flask
-front: Front = Front(__name__)
+front: Front = Front(
+    __name__,
+    "Team Software Engineering Back-End API",
+    "This API is for the prototype of a E-Learning platform that has been"
+    + " developed for the Team Software Engineering module at the University of Lincoln.",
+    "0.0.0",
+)
 front.add_middleware(CORSMiddleware())  # apply middleware for CORS
 
 # get Postgres connection
