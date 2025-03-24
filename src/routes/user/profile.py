@@ -32,9 +32,12 @@ class Profile(Resource):
     # get user profile information using user_id
     @Instil("db")
     def get(self, user_id: int, service: Connection[TupleRow]):
+        # Get user profile information using user_id
         user = UserTable.get_user_profile(service, user_id)
+
+        # Guard clause for user not found
         if user is None:
-            return {"error": "User not found"}  # Guard clause for user not found
+            return {"error": "User not found"}
         return {
             "username": user[0],
             "email": user[1],

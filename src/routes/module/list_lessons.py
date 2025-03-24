@@ -29,7 +29,7 @@ class Lessons(Resource):
         )
     )
 
-    # get list of lessons for a specific module using module_id
+    # Get list of lessons for a specific module using module_id
     @Instil("db")
     def get(self, module_id: int, service: Connection[TupleRow]):
         lessons: list[tuple[int, int, str, str]] = LessonsTable.get_lessons(
@@ -37,7 +37,7 @@ class Lessons(Resource):
         )
         return {
             "lessons": [
-                {"id": row[0], "title": row[1], "description": row[2]}
+                {"id": row[0], "title": row[2], "sections": row[3]}
                 for row in lessons
             ]
         }

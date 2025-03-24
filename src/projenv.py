@@ -33,6 +33,10 @@ JWT Signing Keys
 JWT_LOGIN_KEY: bytes = b"secretkey"
 JWT_LOGIN_EXP: int = 1_800  # seconds
 
+# token for full access
+JWT_ACCESS_KEY: bytes = b"secretkey"
+JWT_ACCESS_EXP: int = 36_000  # seconds
+
 
 """
 Email Sending Token

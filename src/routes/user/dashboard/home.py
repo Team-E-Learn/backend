@@ -30,7 +30,7 @@ class HomeDashboard(Resource):
     )
     @Instil("db")
     def get(self, user_id: int, service: Connection[TupleRow]):
-        # get home dashboard for a specific user using user_id
+        # Get home dashboard for a specific user using user_id
         dashboard: list[tuple[int, str, str, int, int]] = DashboardTable.get_dashboard(
             service, user_id
         )

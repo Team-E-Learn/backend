@@ -38,7 +38,7 @@ class ModuleDashboard(Resource):
     )
     @Instil("db")
     def get(self, user_id: int, module_id: int, service: Connection[TupleRow]):
-        # get module dashboard for a specific user and module using user_id and module_id
+        # Get module dashboard for a specific user and module using user_id and module_id
         dashboard: list[tuple[int, int, str, str, int, int]] = (
             ModuleDashboardTable.get_dashboard(service, user_id, module_id)
         )
