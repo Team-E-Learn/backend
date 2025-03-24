@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
 from flask_restful import Resource
-from psycopg import Cursor
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 
+from lib.dataswap.cursor import SwapCursor
+from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
+from lib.dataswap.statement import StringStatement
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -76,11 +77,12 @@ class Subscriptions(Resource):
         )
     )
     @Instil("db")
-    def get(self, user_id: int, service: Connection[TupleRow]) -> list[OrgJson]:
+    def get(self, user_id: int, service: SwapDB) -> list[OrgJson]:
         # Get the user's subscriptions
-        cur: Cursor[TupleRow] = service.cursor()
-        _ = cur.execute(
-            """
+        cur: SwapCursor = service.get_cursor()
+        result: SwapResult = cur.execute(
+            StringStatement(
+                """
             SELECT organisations.orgID, organisations.name AS orgName,
                    bundles.bundleID, bundles.name AS bundleName,
                    modules.moduleID, modules.name AS moduleName
@@ -90,12 +92,13 @@ class Subscriptions(Resource):
             LEFT JOIN bundles ON bundle_modules.bundleID = bundles.bundleID
             JOIN organisations ON modules.orgID = organisations.orgID
             WHERE subscriptions.userID = %s
-        """,
+        """
+            ),
             (user_id,),
         )
-        subscriptions: list[TupleRow] = cur.fetchall()
+        subscriptions: list[tuple[Any, ...]] | None = result.fetch_all()
 
-        if len(subscriptions) == 0:
+        if subscriptions is None or len(subscriptions) == 0:
             return []
 
         # Convert the subscriptions into a more readable format

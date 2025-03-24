@@ -2,12 +2,10 @@
 
 from flask.helpers import redirect
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
-from psycopg import connect as psql_connect
 from werkzeug.wrappers import Response
 
 from backend.database.setup import initialise_tables, populate_dummy_data
+from lib.dataswap.database import PsqlDatabase, SwapDB
 from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
@@ -35,8 +33,9 @@ from routes.user.dashboard.home import HomeDashboard
 front: Front = Front(__name__)
 front.add_middleware(CORSMiddleware())  # Apply middleware for CORS
 
-# Get Postgres connection
-conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
+# get Postgres connection
+# conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
+conn: SwapDB = PsqlDatabase(projenv.DB_URL)
 print("Database connected")
 
 # Initialise tables for project

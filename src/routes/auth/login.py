@@ -5,6 +5,7 @@ from psycopg.connection import Connection
 from psycopg.rows import TupleRow
 from werkzeug.security import check_password_hash
 from backend.database.user import UserTable
+from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -41,7 +42,7 @@ class Login(Resource):
         )
     )
     @Instil("db")
-    def post(self, service: Connection[TupleRow]):
+    def post(self, service: SwapDB):
         # Get email and password from request
         email: str | None = request.form.get("email")
         password: str | None = request.form.get("password")

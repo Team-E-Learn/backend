@@ -1,10 +1,14 @@
+from typing import Any
+
+from lib.dataswap.cursor import SwapCursor
+from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
+from lib.dataswap.statement import StringStatement
+
 """
 Module for managing email verification codes in the database.
 Provides operations for creating, storing, retrieving, and validating email verification codes.
 """
-from psycopg.cursor import Cursor
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 
 
 class EmailCodesTable:
@@ -16,32 +20,40 @@ class EmailCodesTable:
     """
 
     @staticmethod
-    def create(conn: Connection[TupleRow]) -> None:
-        _ = conn.cursor().execute(
-            """
+    def create(conn: SwapDB) -> None:
+        _ = conn.get_cursor().execute(
+            StringStatement(
+                """
     CREATE TABLE IF NOT EXISTS email_codes (
         email VARCHAR(48) PRIMARY KEY UNIQUE NOT NULL,
         code VARCHAR(48) NOT NULL,
         verified BOOLEAN DEFAULT FALSE
     );"""
+            )
         )
 
     @staticmethod
-    def add_code(conn: Connection[TupleRow], email: str, code: str) -> None:
-        cursor: Cursor[TupleRow] = conn.cursor()
+    def add_code(conn: SwapDB, email: str, code: str) -> None:
+        cursor: SwapCursor = conn.get_cursor()
         _ = cursor.execute(
-            "INSERT INTO email_codes (email, code) VALUES (%s, %s)", (email, code)
+            StringStatement("INSERT INTO email_codes (email, code) VALUES (%s, %s)"),
+            (email, code),
         )
 
     @staticmethod
-    def get_code(conn: Connection[TupleRow], email: str) -> str | None:
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute("SELECT code FROM email_codes WHERE email = %s", (email,))
-        result: TupleRow | None = cursor.fetchone()
+    def get_code(conn: SwapDB, email: str) -> str | None:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT code FROM email_codes WHERE email = %s"), (email,)
+        )
+        tup_res: tuple[str] | None = result.fetch_one()
 
-        return None if result is None else result[0]
+        return None if tup_res is None else tup_res[0]
 
     @staticmethod
-    def set_verified(conn: Connection[TupleRow], email: str) -> None:
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute("UPDATE email_codes SET verified = TRUE WHERE email = %s", (email,))
+    def set_verified(conn: SwapDB, email: str) -> None:
+        cursor: SwapCursor = conn.get_cursor()
+        _ = cursor.execute(
+            StringStatement("UPDATE email_codes SET verified = TRUE WHERE email = %s"),
+            (email,),
+        )

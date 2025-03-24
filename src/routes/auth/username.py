@@ -1,7 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from psycopg import Connection
-from psycopg.rows import TupleRow
+from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -33,8 +32,7 @@ class CheckUsername(Resource):
         )
     )
     @Instil("db")
-    def get(self, service: Connection[TupleRow]):
-        # Get username from request
+    def get(self, service: SwapDB):
         username: str | None = request.args.get("username")
 
         # Check if username, if not return 400

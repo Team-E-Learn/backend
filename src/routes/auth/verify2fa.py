@@ -2,6 +2,7 @@ import base64
 import json
 from time import time
 
+from lib.dataswap.database import SwapDB
 from mintotp import totp
 from flask import request
 from flask_restful import Resource
@@ -44,7 +45,7 @@ class Verify2FA(Resource):
         )
     )
     @Instil("db")
-    def post(self, service: Connection[TupleRow]):
+    def post(self, service: SwapDB):
         # Get limited JWT and 2FA code from request
         limited_jwt: str | None = request.form.get("Limited JWT")
         code: str | None = request.form.get("code")
@@ -61,7 +62,7 @@ class Verify2FA(Resource):
             payload += "=" * (4 - len(payload) % 4)
         payload = base64.b64decode(payload)
         payload = json.loads(payload)
-        user_id = payload["sub"]
+        user_id: int = int(payload["sub"])
         expiry_time = payload["exp"]
 
         # If expiry time is less than current time, return unauthorized
@@ -69,7 +70,7 @@ class Verify2FA(Resource):
             return {"message": "Unauthorized"}, 401
 
         # Get user secret from database
-        user_secret: str = UserTable.get_totp_secret(service, user_id)
+        user_secret: str | None = UserTable.get_totp_secret(service, user_id)
 
         # If user secret is not found, return unauthorized
         if not user_secret:

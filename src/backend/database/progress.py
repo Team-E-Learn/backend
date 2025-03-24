@@ -1,10 +1,11 @@
+from lib.dataswap.database import SwapDB
+from lib.dataswap.statement import StringStatement
+
 """
 Module for tracking and managing user progress through modules in the database.
 Provides the operation for creating progress records that store
 detailed information about a user's advancement through specific modules.
 """
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 
 
 class ProgressTable:
@@ -17,13 +18,15 @@ class ProgressTable:
     """
 
     @staticmethod
-    def create(conn: Connection[TupleRow]) -> None:
-        _ = conn.cursor().execute(
-            """
+    def create(conn: SwapDB) -> None:
+        _ = conn.get_cursor().execute(
+            StringStatement(
+                """
     CREATE TABLE IF NOT EXISTS progress (
         userID INT REFERENCES users(userID) NOT NULL,
         moduleID INT REFERENCES modules(moduleID) NOT NULL,
         progress JSON NOT NULL,
         primary key (userID, moduleID)
     );"""
+            )
         )

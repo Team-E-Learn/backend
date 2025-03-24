@@ -1,11 +1,13 @@
+from lib.dataswap.cursor import SwapCursor
+from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
+from lib.dataswap.statement import StringStatement
+
 """
 Module for managing modules in the database.
 Provides operations for creating, populating, and validating modules
 that are owned by organisations and contain lessons and other content.
 """
-from psycopg.connection import Connection
-from psycopg.cursor import Cursor
-from psycopg.rows import TupleRow
 
 
 class ModulesTable:
@@ -17,21 +19,23 @@ class ModulesTable:
     """
 
     @staticmethod
-    def create(conn: Connection[TupleRow]) -> None:
-        _ = conn.cursor().execute(
-            """
+    def create(conn: SwapDB) -> None:
+        _ = conn.get_cursor().execute(
+            StringStatement(
+                """
     CREATE TABLE IF NOT EXISTS modules (
         moduleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
         name VARCHAR(48) NOT NULL,
         description VARCHAR(100) NOT NULL,
         orgID INT REFERENCES organisations(orgID) NOT NULL
     );"""
+            )
         )
 
     # Adds 8 modules to the DB, 4 are owned by org_id 1, 2 are owned by org_id 2, 2 are owned by org_id 3
     # No alternative API call to add modules, so this is the only way to add them
     @staticmethod
-    def write_modules(conn: Connection[TupleRow]) -> None:
+    def write_modules(conn: SwapDB) -> None:
         # format is (name, description, orgID)
         modules: list[tuple[str, str, int]] = [
             ("Personal Development", "Learn how to develop yourself", 1),
@@ -44,34 +48,38 @@ class ModulesTable:
             ("Machine Learning", "Introduction to machine learning", 3),
         ]
 
+        cursor: SwapCursor = conn.get_cursor()
         # Write sample modules to the database
-        cursor: Cursor[TupleRow] = conn.cursor()
         for name, description, orgID in modules:
-            _ = cursor.execute("SELECT 1 FROM modules WHERE name = %s", (name,))
+            result: SwapResult = cursor.execute(
+                StringStatement("SELECT 1 FROM modules WHERE name = %s"), (name,)
+            )
 
-            # If the module already exists, skip it
-            if cursor.fetchone() is not None:
+            if result.fetch_one() is not None:
+                # If the module already exists, skip it
                 continue
 
             # Otherwise, add the module to the database
             _ = cursor.execute(
-                "INSERT INTO modules (name, description, orgID) VALUES (%s, %s, %s)",
+                StringStatement(
+                    "INSERT INTO modules (name, description, orgID) VALUES (%s, %s, %s)"
+                ),
                 (name, description, orgID),
             )
 
     @staticmethod
-    def module_exists(conn: Connection[TupleRow], module_id: int) -> bool:
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute("SELECT 1 FROM modules WHERE moduleID = %s", (module_id,))
-        return cursor.fetchone() is not None
+    def module_exists(conn: SwapDB, module_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT 1 FROM modules WHERE moduleID = %s"), (module_id,)
+        )
+        return result.fetch_one() is not None
 
     @staticmethod
-    def module_owned_by_org(
-        conn: Connection[TupleRow], module_id: int, org_id: int
-    ) -> bool:
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute(
-            "SELECT 1 FROM modules WHERE moduleID = %s AND orgID = %s",
+    def module_owned_by_org(conn: SwapDB, module_id: int, org_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT 1 FROM modules WHERE moduleID = %s AND orgID = %s"),
             (module_id, org_id),
         )
-        return cursor.fetchone() is not None
+        return result.fetch_one() is not None

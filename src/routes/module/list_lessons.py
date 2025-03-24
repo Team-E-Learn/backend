@@ -1,8 +1,7 @@
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 from backend.database.lessons import LessonsTable
 
+from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -31,7 +30,7 @@ class Lessons(Resource):
 
     # Get list of lessons for a specific module using module_id
     @Instil("db")
-    def get(self, module_id: int, service: Connection[TupleRow]):
+    def get(self, module_id: int, service: SwapDB):
         lessons: list[tuple[int, int, str, str]] = LessonsTable.get_lessons(
             service, module_id
         )
