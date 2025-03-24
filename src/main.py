@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from sys import stderr
 from flask.helpers import redirect
 from flask_restful import Resource
 from psycopg.connection import Connection
@@ -8,6 +9,7 @@ from psycopg import connect as psql_connect
 from werkzeug.wrappers import Response
 
 from backend.database.setup import initialise_tables, populate_dummy_data
+from backend.events.logevent import LogEvent, LogLevel
 from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
@@ -34,6 +36,18 @@ from routes.user.dashboard.home import HomeDashboard
 # create Front facade for Flask
 front: Front = Front(__name__)
 front.add_middleware(CORSMiddleware())  # apply middleware for CORS
+metro: MetroBus = MetroBus()
+
+
+def log_event(event: LogEvent) -> None:
+    if event.level != LogLevel.LOG:
+        # High log level issue report.
+        pass
+    print(event, file=stderr)
+
+
+metro.subscribe(LogEvent, log_event)
+
 
 # get Postgres connection
 conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
@@ -47,9 +61,11 @@ print("Initialized tables")
 Instil.add_service("db", conn)
 print("Registered database service")
 
+
 class Main(Resource):
 
     def get(self) -> Response:
+        _ = MetroBus().publish(LogEvent(LogLevel.LOG, "Accessed docs."))
         return redirect("/apidocs")
 
 
