@@ -10,11 +10,17 @@ from lib.dataswap.statement import IStatement
 
 
 class SwapCursor(ABC):
+    """
+    The abstract implementation for a cursor object for databases
+    """
 
     @abstractmethod
     def execute(
         self, statement: IStatement, params: AllowedParams = None
     ) -> SwapResult:
+        """
+        Execute a passed statement and return the query object
+        """
         pass
 
 
@@ -27,6 +33,10 @@ class PsqlCursor(SwapCursor):
     def execute(
         self, statement: IStatement, params: AllowedParams = None
     ) -> PsqlResult:
-        query: LiteralString = statement.to_string()
-        cursor: Cursor[TupleRow] = self.__conn.cursor().execute(query, params)
+        query: LiteralString = (
+            statement.to_string()
+        )  # convert the statement to a string
+        cursor: Cursor[TupleRow] = self.__conn.cursor().execute(
+            query, params
+        )  # run the query with psql
         return PsqlResult(cursor)
