@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
+from sys import stderr
 from flask.helpers import redirect
 from flask_restful import Resource
 from werkzeug.wrappers import Response
 
 from backend.database.setup import initialise_tables, populate_dummy_data
+from backend.events.logevent import LogEvent, LogLevel
 from lib.dataswap.database import PsqlDatabase, SwapDB
 from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
 
+from lib.metro.metro import MetroBus
 from lib.swagdoc.swagtag import SwagTag
 from routes.auth.email import CheckEmail
 from routes.auth.register import Register
@@ -33,6 +36,21 @@ from routes.user.dashboard.home import HomeDashboard
 front: Front = Front(__name__)
 front.add_middleware(CORSMiddleware())  # Apply middleware for CORS
 
+
+def log_event(event: LogEvent) -> None:
+    """
+    An event handler for LogEvents
+    """
+    if (
+        event.level != LogLevel.LOG
+    ):  # We don't need to log low level messages, this is for debug purposes
+        return
+    print(event, file=stderr)
+
+
+MetroBus().subscribe(LogEvent, log_event)  # subscribe log_event to the event bus
+
+
 # get Postgres connection
 # conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
 conn: SwapDB = PsqlDatabase(projenv.DB_URL)
@@ -50,6 +68,7 @@ print("Registered database service")
 class Main(Resource):
 
     def get(self) -> Response:
+        _ = MetroBus().publish(LogEvent(LogLevel.LOG, "Accessed docs."))
         return redirect("/apidocs")
 
 
