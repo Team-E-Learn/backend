@@ -3,13 +3,11 @@
 from sys import stderr
 from flask.helpers import redirect
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
-from psycopg import connect as psql_connect
 from werkzeug.wrappers import Response
 
 from backend.database.setup import initialise_tables, populate_dummy_data
 from backend.events.logevent import LogEvent, LogLevel
+from lib.dataswap.database import PsqlDatabase, SwapDB
 from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
@@ -28,14 +26,15 @@ from routes.auth.verify2fa import Verify2FA
 
 import projenv
 from routes.module.lessons.lesson import Lesson
+from routes.module.lessons.block import Block
 from routes.module.list_lessons import Lessons
 
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
-# create Front facade for Flask
+# Create Front facade for Flask
 front: Front = Front(__name__)
-front.add_middleware(CORSMiddleware())  # apply middleware for CORS
+front.add_middleware(CORSMiddleware())  # Apply middleware for CORS
 
 
 def log_event(event: LogEvent) -> None:
@@ -53,14 +52,15 @@ MetroBus().subscribe(LogEvent, log_event)  # subscribe log_event to the event bu
 
 
 # get Postgres connection
-conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
+# conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
+conn: SwapDB = PsqlDatabase(projenv.DB_URL)
 print("Database connected")
 
-# initialise tables for project
-initialise_tables(conn)  # create tables if they don't exist
+# Initialise tables for project
+initialise_tables(conn)  # Create tables if they don't exist
 print("Initialized tables")
 
-# add database service for Instil
+# Add database service for Instil
 Instil.add_service("db", conn)
 print("Registered database service")
 
@@ -72,8 +72,10 @@ class Main(Resource):
         return redirect("/apidocs")
 
 
+# Register main route
 front.register(Main, "/", docs=False)
 
+# Register routes
 front.add_tag(SwagTag("Organisation", "Organisation related endpoints"))
 front.add_tag(SwagTag("Module", "Module related endpoints"))
 front.add_tag(SwagTag("User", "User related endpoints"))
@@ -87,18 +89,19 @@ front.register(Login, "/v1/auth/login")
 front.register(Verify2FA, "/v1/auth/2fa")
 front.register(VerifyEmail, "/v1/auth/verify-email")
 front.register(Lessons, "/v1/module/<int:module_id>/lessons")
-front.register(Lesson, "/v1/module/lesson/<int:lesson_id>")
+front.register(Lesson, "/v1/module/lesson/")
+front.register(Block, "/v1/module/lesson/<int:lesson_id>/block")
 front.register(HomeDashboard, "/v1/user/<int:user_id>/dashboard")
 front.register(
     ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>"
 )
 
 
-# start app
+# Start app
 if __name__ == "__main__":
     debug_mode: bool = projenv.project_mode == projenv.ProjectMode.DEVELOPMENT
     if debug_mode:
-        # write dummy data
+        # Write dummy data
         populate_dummy_data(conn)
 
     front.start(debug=debug_mode)
