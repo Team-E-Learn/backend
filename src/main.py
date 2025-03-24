@@ -33,8 +33,14 @@ from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
 # Create Front facade for Flask
-front: Front = Front(__name__)
-front.add_middleware(CORSMiddleware())  # Apply middleware for CORS
+front: Front = Front(
+    __name__,
+    "Team Software Engineering Back-End API",
+    "This API is for the prototype of a E-Learning platform that has been"
+    + " developed for the Team Software Engineering module at the University of Lincoln.",
+    "0.0.0",
+)
+front.add_middleware(CORSMiddleware())  # apply middleware for CORS
 
 
 def log_event(event: LogEvent) -> None:
@@ -49,7 +55,6 @@ def log_event(event: LogEvent) -> None:
 
 
 MetroBus().subscribe(LogEvent, log_event)  # subscribe log_event to the event bus
-
 
 # get Postgres connection
 # conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
