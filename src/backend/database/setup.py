@@ -1,5 +1,8 @@
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
+"""
+Central module for database initialization and setup.
+Coordinates the creation of all database tables and populates them with sample data.
+Ensures proper order of operations to respect foreign key constraints during setup.
+"""
 
 from backend.database.user import UserTable
 from backend.database.email_codes import EmailCodesTable
@@ -14,10 +17,18 @@ from backend.database.subscriptions import SubscriptionsTable
 from backend.database.dashboard import DashboardTable
 from backend.database.module_dashboard import ModuleDashboardTable
 from backend.database.progress import ProgressTable
+from lib.dataswap.database import SwapDB
 
 
 # create all tables if they don't exist
-def initialise_tables(conn: Connection[TupleRow]) -> None:
+def initialise_tables(conn: SwapDB) -> None:
+    """Initialize all the database tables in the correct order.
+
+    Creates all tables if they don't exist, ensuring proper sequencing
+    to maintain foreign key integrity. Tables are created in an order
+    that respects their dependencies (e.g., users table before tables
+    that reference user IDs).
+    """
     UserTable.create(conn)
     EmailCodesTable.create(conn)
     OrganisationsTable.create(conn)
@@ -35,7 +46,17 @@ def initialise_tables(conn: Connection[TupleRow]) -> None:
 
 
 # populate the tables with dummy data
-def populate_dummy_data(conn: Connection[TupleRow]) -> None:
+def populate_dummy_data(conn: SwapDB) -> None:
+    """
+    Populate all tables with sample data for development and testing.
+
+    Inserts sample records into each table, maintaining proper order to
+    respect foreign key constraints. Each operation is committed separately
+    to ensure database consistency between steps.
+
+    This function supports development, testing, and demonstration purposes
+    by creating a realistic dataset across all application entities.
+    """
     UserTable.write_users(conn)
     conn.commit()
     OrganisationsTable.write_orgs(conn)

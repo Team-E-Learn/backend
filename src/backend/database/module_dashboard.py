@@ -1,14 +1,27 @@
-from psycopg import Cursor
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
-
+from lib.dataswap.cursor import SwapCursor
+from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
+from lib.dataswap.statement import StringStatement
+"""
+Module for managing module-specific dashboard widgets in the database.
+Provides operations for creating, populating, and retrieving dashboard widget data
+that defines the personalized UI layout for each user within specific modules.
+"""
 
 class ModuleDashboardTable:
+    """Manages database operations for the module_dashboard table.
+
+    This class provides methods to create the module_dashboard table and manage
+    widget positions for user dashboards within specific modules. Each record
+    represents a widget positioned on a user's personalized interface for a particular
+    module.
+    """
 
     @staticmethod
-    def create(conn: Connection[TupleRow]) -> None:
-        _ = conn.cursor().execute(
-            """
+    def create(conn: SwapDB) -> None:
+        _ = conn.get_cursor().execute(
+            StringStatement(
+                """
     CREATE TABLE IF NOT EXISTS module_dashboard (
         userID INT REFERENCES users(userID) NOT NULL,
         moduleID INT REFERENCES modules(moduleID) NOT NULL,
@@ -17,12 +30,13 @@ class ModuleDashboardTable:
         x INT NOT NULL,
         y INT NOT NULL
     );"""
+            )
         )
 
-    # for http://127.0.0.1:5000/v1/user/1234/dashboard/module/5678
-    # no alternative API call to add module dashboard data, so this is the only way to add it
+    # For http://127.0.0.1:5000/v1/user/1234/dashboard/module/5678
+    # No alternative API call to add module dashboard data, so this is the only way to add it
     @staticmethod
-    def write_module_dashboard(conn: Connection[TupleRow]) -> None:
+    def write_module_dashboard(conn: SwapDB) -> None:
         # format is (userID, moduleID, widgetID, widgetType, x, y)
         module_dashboard: list[tuple[int, int, str, str, int, int]] = [
             (1, 1, "announcements_widget", "announcements", 10, 20),
@@ -43,21 +57,29 @@ class ModuleDashboardTable:
             (4, 1, "calendar_widget", "calendar", 10, 40),
         ]
 
-        cursor: Cursor[TupleRow] = conn.cursor()
+        cursor: SwapCursor = conn.get_cursor()
+        # Write sample module dashboard data to the database
         for user_id, module_id, widget_id, widget_type, x, y in module_dashboard:
             _ = cursor.execute(
-                "INSERT INTO module_dashboard (userID, moduleID, widgetID, widgetType, x, y)"
-                + " VALUES (%s, %s, %s, %s, %s, %s)",
+                StringStatement(
+                    "INSERT INTO module_dashboard (userID, moduleID, widgetID, widgetType, x, y)"
+                    + " VALUES (%s, %s, %s, %s, %s, %s)"
+                ),
                 (user_id, module_id, widget_id, widget_type, x, y),
             )
 
     @staticmethod
     def get_dashboard(
-        conn: Connection[TupleRow], user_id: int, module_id: int
+        conn: SwapDB, user_id: int, module_id: int
     ) -> list[tuple[int, int, str, str, int, int]]:
-        cursor: Cursor[TupleRow] = conn.cursor()
-        _ = cursor.execute(
-            "SELECT * FROM module_dashboard WHERE userID = %s AND moduleID = %s",
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement(
+                "SELECT * FROM module_dashboard WHERE userID = %s AND moduleID = %s"
+            ),
             (user_id, module_id),
         )
-        return cursor.fetchall()
+        tuple_res: list[tuple[int, int, str, str, int, int]] | None = result.fetch_all()
+        if tuple_res is None:
+            return []
+        return tuple_res

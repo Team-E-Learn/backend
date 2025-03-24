@@ -1,8 +1,7 @@
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 from backend.database.dashboard import DashboardTable
 
+from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -29,8 +28,8 @@ class HomeDashboard(Resource):
         )
     )
     @Instil("db")
-    def get(self, user_id: int, service: Connection[TupleRow]):
-        # get home dashboard for a specific user using user_id
+    def get(self, user_id: int, service: SwapDB):
+        # Get home dashboard for a specific user using user_id
         dashboard: list[tuple[int, str, str, int, int]] = DashboardTable.get_dashboard(
             service, user_id
         )

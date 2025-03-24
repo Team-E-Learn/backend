@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from flask_restful import Resource
-from psycopg import Cursor
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 
+from lib.dataswap.cursor import SwapCursor
+from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
+from lib.dataswap.statement import StringStatement
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
@@ -76,11 +77,12 @@ class Subscriptions(Resource):
         )
     )
     @Instil("db")
-    def get(self, user_id: int, service: Connection[TupleRow]) -> list[OrgJson]:
-        # get the user's subscriptions
-        cur: Cursor[TupleRow] = service.cursor()
-        _ = cur.execute(
-            """
+    def get(self, user_id: int, service: SwapDB) -> list[OrgJson]:
+        # Get the user's subscriptions
+        cur: SwapCursor = service.get_cursor()
+        result: SwapResult = cur.execute(
+            StringStatement(
+                """
             SELECT organisations.orgID, organisations.name AS orgName,
                    bundles.bundleID, bundles.name AS bundleName,
                    modules.moduleID, modules.name AS moduleName
@@ -90,15 +92,16 @@ class Subscriptions(Resource):
             LEFT JOIN bundles ON bundle_modules.bundleID = bundles.bundleID
             JOIN organisations ON modules.orgID = organisations.orgID
             WHERE subscriptions.userID = %s
-        """,
+        """
+            ),
             (user_id,),
         )
-        subscriptions: list[TupleRow] = cur.fetchall()
+        subscriptions: list[tuple[Any, ...]] | None = result.fetch_all()
 
-        if len(subscriptions) == 0:
+        if subscriptions is None or len(subscriptions) == 0:
             return []
 
-        # convert the subscriptions into a more readable format
+        # Convert the subscriptions into a more readable format
         orgs: list[Org] = []
         for sub in subscriptions:
             org_id: int = sub[0]
@@ -108,29 +111,33 @@ class Subscriptions(Resource):
             module_id: int = sub[4]
             module_name: str = sub[5]
 
-            # check if the org is already in the list
+            # Check if the org is already in the list
             org: Org | None = next((org for org in orgs if org.org_id == org_id), None)
 
+            # If the org is not in the list, add it
             if org is None:
                 org = Org(org_id, org_name, [], [])
                 orgs.append(org)
 
+            # Check if the module is a standalone module
             if bundle_id is None or bundle_name is None:
-                # add module directly to the orgs modules list
+                # Add module directly to the orgs modules list
                 org.modules.append(Module(module_id, module_name))
                 continue
 
-            # check if the bundle is already in the list
+            # Check if the bundle is already in the list
             bundle: Bundle | None = next(
                 (bundle for bundle in org.bundles if bundle.bundle_id == bundle_id),
                 None,
             )
 
+            # If the bundle is not in the list, add it
             if bundle is None:
                 bundle = Bundle(bundle_id, bundle_name, [])
                 org.bundles.append(bundle)
 
-            # add module to the bundle
+            # Add module to the bundle
             bundle.modules.append(Module(module_id, module_name))
 
+        # Convert the orgs list to a list of dictionaries
         return [org.to_dict() for org in orgs]
