@@ -36,17 +36,20 @@ from routes.user.dashboard.home import HomeDashboard
 # create Front facade for Flask
 front: Front = Front(__name__)
 front.add_middleware(CORSMiddleware())  # apply middleware for CORS
-metro: MetroBus = MetroBus()
 
 
 def log_event(event: LogEvent) -> None:
-    if event.level != LogLevel.LOG:
-        # High log level issue report.
-        pass
+    """
+    An event handler for LogEvents
+    """
+    if (
+        event.level != LogLevel.LOG
+    ):  # We don't need to log low level messages, this is for debug purposes
+        return
     print(event, file=stderr)
 
 
-metro.subscribe(LogEvent, log_event)
+MetroBus().subscribe(LogEvent, log_event)  # subscribe log_event to the event bus
 
 
 # get Postgres connection
