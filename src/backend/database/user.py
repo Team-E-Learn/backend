@@ -3,8 +3,22 @@ from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
 
+"""
+Module for managing user accounts in the database.
+Provides operations for creating, authenticating, retrieving and validating user accounts
+that can own organizations, access modules, and track educational progress.
+"""
+from werkzeug.security import generate_password_hash
+
 
 class UserTable:
+    """Manages database operations for the users table.
+
+    This class provides methods to create the users table and manage user account data.
+    Each user has an account type (user/admin), personal information, authentication
+    credentials, and a TOTP secret for two-factor authentication. Users represent the
+    primary actors in the system who interact with educational content.
+    """
 
     @staticmethod
     def create(conn: SwapDB) -> None:
@@ -18,7 +32,8 @@ class UserTable:
         lastName VARCHAR(48) NOT NULL,
         username VARCHAR(64) UNIQUE NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
-        password VARCHAR(256) NOT NULL
+        password VARCHAR(256) NOT NULL,
+        totpSecret VARCHAR(16) NOT NULL
     );"""
             )
         )
@@ -39,19 +54,20 @@ class UserTable:
         )
         return result.fetch_one()
 
-    # this populates user_ids 1-4 with dummy data
-    # no alternative API call to add users, so this is the only way to add them
+    # This populates user_ids 1-4 with dummy data
+    # No alternative API call to add users, so this is the only way to add them
     @staticmethod
     def write_users(conn: SwapDB) -> None:
-        # format is (accountType, firstName, lastName, username, email)
-        users: list[tuple[str, str, str, str, str, str]] = [
+        # Format is (accountType, firstName, lastName, username, email)
+        users: list[tuple[str, str, str, str, str, str, str]] = [
             (
                 "user",
                 "Alice",
                 "Smith",
                 "alice.smith",
                 "alice.smith@example.com",
-                "example_password",
+                generate_password_hash("example_password"),
+                "WVTBSKRNKORNCBMI",
             ),
             (
                 "admin",
@@ -59,7 +75,8 @@ class UserTable:
                 "Johnson",
                 "bob.johnson",
                 "bob.johnson@example.com",
-                "example_password",
+                generate_password_hash("example_password"),
+                "KEQWOVVUJDIFQSJD",
             ),
             (
                 "user",
@@ -67,7 +84,8 @@ class UserTable:
                 "Williams",
                 "carol.williams",
                 "carol.williams@example.com",
-                "example_password",
+                generate_password_hash("example_password"),
+                "HARAUJMIXYGDSRLA",
             ),
             (
                 "admin",
@@ -75,12 +93,21 @@ class UserTable:
                 "Brown",
                 "david.brown",
                 "david.brown@example.com",
-                "example_password",
+                generate_password_hash("example_password"),
+                "OSQBCMPVGVZTUGPO",
             ),
         ]
 
         cursor: SwapCursor = conn.get_cursor()
-        for accountType, firstName, lastName, username, email, password in users:
+        for (
+            account_type,
+            firstName,
+            lastName,
+            username,
+            email,
+            password,
+            totp_secret,
+        ) in users:
             result: SwapResult = cursor.execute(
                 StringStatement(
                     "SELECT 1 FROM users WHERE username = %s OR email = %s"
@@ -91,15 +118,24 @@ class UserTable:
             if result.fetch_one() is not None:
                 continue
 
+            # Insert user into the database
             _ = cursor.execute(
                 StringStatement(
-                    "INSERT INTO users (accountType, firstName, lastName, username, email, password) "
-                    + "VALUES (%s, %s, %s, %s, %s, %s)"
+                    "INSERT INTO users (accountType, firstName, lastName, username, email, password, totpSecret) "
+                    + "VALUES (%s, %s, %s, %s, %s, %s, %s)",
                 ),
-                (accountType, firstName, lastName, username, email, password),
+                (
+                    account_type,
+                    firstName,
+                    lastName,
+                    username,
+                    email,
+                    password,
+                    totp_secret,
+                ),
             )
 
-    # this function is called from src/routes/user/profile.py
+    # This function is called from src/routes/user/profile.py
     @staticmethod
     def get_user_profile(
         conn: SwapDB, user_id: int
@@ -120,3 +156,13 @@ class UserTable:
             StringStatement("SELECT 1 FROM users WHERE userID = %s"), (user_id,)
         )
         return result.fetch_one() is not None
+
+    @staticmethod
+    def get_totp_secret(conn: SwapDB, user_id: int) -> str | None:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT totpSecret FROM users WHERE userID = %s"),
+            (user_id,),
+        )
+        result_tup: tuple[str] | None = result.fetch_one()
+        return None if result_tup is None else result_tup[0]

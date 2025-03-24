@@ -2,7 +2,10 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-
+"""
+Module for managing bundles in the database.
+Provides operations for creating and populating the bundles table and linking modules to bundles.
+"""
 
 def add_modules_to_bundle(
     bundle_name: str, module_names: list[str], conn: SwapDB
@@ -17,8 +20,10 @@ def add_modules_to_bundle(
     if bundle_result is None:
         return None
 
+    # Get the bundleID from the result
     bundle_id: int = bundle_result[0]
 
+    # For each module in the list, get the moduleID and add it to the bundle_modules table
     for module_name in module_names:
         mod_result: SwapResult = cursor.execute(
             StringStatement("SELECT moduleID FROM modules WHERE name = %s"),
@@ -40,6 +45,12 @@ def add_modules_to_bundle(
 
 
 class BundlesTable:
+    """Manages database operations for the bundles table.
+
+    This class provides methods to create the bundles table and populate
+    it with sample bundle data. Bundles are collections of modules that form
+    a complete educational program or certification.
+    """
 
     @staticmethod
     def create(conn: SwapDB) -> None:
@@ -55,8 +66,8 @@ class BundlesTable:
             )
         )
 
-    # adds 2 bundles to the DB, each bundle contains a different set of modules
-    # no alternative API call to add bundles, so this is the only way to add them
+    # Adds 2 bundles to the DB, each bundle contains a different set of modules
+    # No alternative API call to add bundles, so this is the only way to add them
     @staticmethod
     def write_bundles(conn: SwapDB) -> None:
         # format is (name, description, orgID)
@@ -74,6 +85,8 @@ class BundlesTable:
         ]
 
         cursor: SwapCursor = conn.get_cursor()
+
+        # Add each bundle to the bundles table
         for name, description, orgID in bundles:
             result = cursor.execute(
                 StringStatement("SELECT 1 FROM bundles WHERE name = %s"), (name,)
@@ -82,6 +95,7 @@ class BundlesTable:
             if result.fetch_one() is not None:
                 continue
 
+            # Add the bundle to the bundles table
             _ = cursor.execute(
                 StringStatement(
                     "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)"
@@ -89,7 +103,7 @@ class BundlesTable:
                 (name, description, orgID),
             )
 
-        # list of modules to add to the CS bundle from modules.py
+        # List of modules to add to the CS bundle from modules.py
         add_modules_to_bundle(
             "Computer Science BSc",
             [
@@ -101,7 +115,7 @@ class BundlesTable:
             conn,
         )
 
-        # list of modules to add to the Excel bundle from modules.py
+        # List of modules to add to the Excel bundle from modules.py
         add_modules_to_bundle(
             "Excel Certification",
             [

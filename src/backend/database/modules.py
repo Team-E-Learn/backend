@@ -3,8 +3,20 @@ from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
 
+"""
+Module for managing modules in the database.
+Provides operations for creating, populating, and validating modules
+that are owned by organisations and contain lessons and other content.
+"""
+
 
 class ModulesTable:
+    """Manages database operations for the modules table.
+
+    This class provides methods to create the modules table and manage modules
+    within the system. Each module has a name, description, and belongs to an organisation.
+    Modules serve as containers for lessons and other content.
+    """
 
     @staticmethod
     def create(conn: SwapDB) -> None:
@@ -20,8 +32,8 @@ class ModulesTable:
             )
         )
 
-    # adds 8 modules to the DB, 4 are owned by org_id 1, 2 are owned by org_id 2, 2 are owned by org_id 3
-    # no alternative API call to add modules, so this is the only way to add them
+    # Adds 8 modules to the DB, 4 are owned by org_id 1, 2 are owned by org_id 2, 2 are owned by org_id 3
+    # No alternative API call to add modules, so this is the only way to add them
     @staticmethod
     def write_modules(conn: SwapDB) -> None:
         # format is (name, description, orgID)
@@ -37,14 +49,17 @@ class ModulesTable:
         ]
 
         cursor: SwapCursor = conn.get_cursor()
+        # Write sample modules to the database
         for name, description, orgID in modules:
             result: SwapResult = cursor.execute(
                 StringStatement("SELECT 1 FROM modules WHERE name = %s"), (name,)
             )
 
             if result.fetch_one() is not None:
+                # If the module already exists, skip it
                 continue
 
+            # Otherwise, add the module to the database
             _ = cursor.execute(
                 StringStatement(
                     "INSERT INTO modules (name, description, orgID) VALUES (%s, %s, %s)"

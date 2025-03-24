@@ -35,6 +35,7 @@ class CheckUsername(Resource):
     def get(self, service: SwapDB):
         username: str | None = request.args.get("username")
 
+        # Check if username, if not return 400
         if not username:
             return {"message": "Bad Request"}, 400
 
@@ -42,4 +43,5 @@ class CheckUsername(Resource):
         if UserTable.get_by_username(service, username):
             return {"message": "Username exists"}, 200
 
+        # Return 200 on valid username
         return {"message": "Valid username"}, 200
