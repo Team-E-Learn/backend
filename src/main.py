@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from sys import stderr
+from testing import run_tests
 from flask.helpers import redirect
 from flask_restful import Resource
 from werkzeug.wrappers import Response
@@ -108,5 +109,7 @@ if __name__ == "__main__":
     if debug_mode:
         # Write dummy data
         populate_dummy_data(conn)
+        # Run tests
+        #run_tests(conn)
 
     front.start(debug=debug_mode)
