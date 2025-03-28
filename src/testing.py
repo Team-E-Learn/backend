@@ -1,5 +1,3 @@
-from json import dumps
-
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
@@ -93,7 +91,7 @@ def write_block_test(conn: SwapDB) -> None:
     # write blocks to the database
     cursor: SwapCursor = conn.get_cursor()
     for lesson_id, block_type, order, data in blocks:
-        data = dumps(data)
+        data = json.dumps(data)
         _ = cursor.execute(
             StringStatement(
                 "INSERT INTO blocks (lessonID, blockType, blockOrder, data) VALUES (%s, %s, %s, %s)"

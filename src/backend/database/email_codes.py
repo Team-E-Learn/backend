@@ -1,10 +1,7 @@
-from typing import Any
-
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing email verification codes in the database.
 Provides operations for creating, storing, retrieving, and validating email verification codes.

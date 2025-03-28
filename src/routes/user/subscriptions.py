@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, TypeAlias
-
 from flask_restful import Resource
-
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult

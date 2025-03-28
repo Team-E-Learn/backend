@@ -1,6 +1,5 @@
 from lib.dataswap.database import SwapDB
 from lib.dataswap.statement import StringStatement
-
 """
 Module for tracking and managing user progress through modules in the database.
 Provides the operation for creating progress records that store

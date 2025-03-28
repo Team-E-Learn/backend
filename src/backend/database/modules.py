@@ -2,7 +2,6 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing modules in the database.
 Provides operations for creating, populating, and validating modules

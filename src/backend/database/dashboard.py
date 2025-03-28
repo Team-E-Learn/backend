@@ -2,7 +2,6 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing user dashboard widgets in the database.
 Provides operations for creating, populating, and retrieving dashboard widget data

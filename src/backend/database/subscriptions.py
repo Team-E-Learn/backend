@@ -1,7 +1,6 @@
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing user subscriptions to modules in the database.
 Provides operations for creating, populating, and managing the many-to-many

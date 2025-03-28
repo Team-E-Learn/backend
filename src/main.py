@@ -5,14 +5,12 @@ from testing import run_tests
 from flask.helpers import redirect
 from flask_restful import Resource
 from werkzeug.wrappers import Response
-
 from backend.database.setup import initialise_tables, populate_dummy_data
 from backend.events.logevent import LogEvent, LogLevel
 from lib.dataswap.database import PsqlDatabase, SwapDB
 from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
-
 from lib.metro.metro import MetroBus
 from lib.swagdoc.swagtag import SwagTag
 from routes.auth.email import CheckEmail
@@ -29,7 +27,6 @@ import projenv
 from routes.module.lessons.lesson import Lesson
 from routes.module.lessons.block import Block
 from routes.module.list_lessons import Lessons
-
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 

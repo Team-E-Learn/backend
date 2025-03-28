@@ -1,6 +1,5 @@
 from lib.dataswap.database import SwapDB
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing relationships between teachers and modules in the database.
 Provides operations for establishing and maintaining the many-to-many relationship

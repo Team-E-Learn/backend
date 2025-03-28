@@ -3,7 +3,6 @@ from backend.database.user import UserTable
 from backend.database.organisations import OrganisationsTable
 from backend.database.modules import ModulesTable
 from backend.database.subscriptions import SubscriptionsTable
-
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagParam, SwagMethod, SwagResp
@@ -16,14 +15,14 @@ class User(Resource):
         SwagDoc(
             SwagMethod.PUT,
             ["Module"],
-            "Adds a bundle or module to a user",
+            "Adds a module to a user",
             [
                 SwagParam(
                     "org_id",
                     "path",
                     "integer",
                     True,
-                    "The org id to add the module to",
+                    "The org id that the module is from",
                     "1",
                 ),
                 SwagParam(

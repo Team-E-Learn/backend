@@ -1,9 +1,3 @@
-"""
-Central module for database initialization and setup.
-Coordinates the creation of all database tables and populates them with sample data.
-Ensures proper order of operations to respect foreign key constraints during setup.
-"""
-
 from backend.database.user import UserTable
 from backend.database.email_codes import EmailCodesTable
 from backend.database.organisations import OrganisationsTable
@@ -18,6 +12,11 @@ from backend.database.dashboard import DashboardTable
 from backend.database.module_dashboard import ModuleDashboardTable
 from backend.database.progress import ProgressTable
 from lib.dataswap.database import SwapDB
+"""
+Central module for database initialization and setup.
+Coordinates the creation of all database tables and populates them with sample data.
+Ensures proper order of operations to respect foreign key constraints during setup.
+"""
 
 
 # create all tables if they don't exist

@@ -1,10 +1,8 @@
-import json
 import ast
 from flask import request
 from flask_restful import Resource
 from backend.database.blocks import BlocksTable
 from backend.database.lessons import LessonsTable
-
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp

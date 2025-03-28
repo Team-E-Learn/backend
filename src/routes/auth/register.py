@@ -1,10 +1,8 @@
 import random
 from time import time
-from tokenize import String
 from typing import Any
 from flask import request
 from flask_restful import Resource
-from werkzeug.datastructures.structures import ImmutableMultiDict
 from werkzeug.security import generate_password_hash
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB

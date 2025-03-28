@@ -1,9 +1,8 @@
-from json import dumps
+import json
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing educational lessons in the database.
 Provides operations for creating, populating, retrieving, and deleting lessons
@@ -41,7 +40,7 @@ class LessonsTable:
         title: str,
         sections: dict[str, str],
     ) -> None:
-        sections_json: str = dumps(sections)
+        sections_json: str = json.dumps(sections)
 
         cursor: SwapCursor = conn.get_cursor()
         _ = cursor.execute(

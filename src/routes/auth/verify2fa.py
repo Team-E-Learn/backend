@@ -1,13 +1,10 @@
 import base64
 import json
 from time import time
-
 from lib.dataswap.database import SwapDB
 from mintotp import totp
 from flask import request
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 from backend.database.user import UserTable
 from lib.instilled.instiled import Instil
 from lib.jwt.jwt import Jwt
