@@ -1,4 +1,4 @@
-from json import dumps
+import json
 
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
@@ -36,7 +36,7 @@ class BlocksTable:
 
     @staticmethod
     def write_block(
-        conn: SwapDB, lesson_id: int, block_type: int, order: int, data: dict[str, str]
+        conn: SwapDB, lesson_id: int, block_type: int, order: int, data: dict
     ) -> bool:
         cursor: SwapCursor = conn.get_cursor()
 
@@ -47,7 +47,7 @@ class BlocksTable:
             return False
 
         # Convert data dictionary to JSON string
-        data_json: str = dumps(data)
+        data_json: str = json.dumps(data)
 
         # Insert block into blocks table
         _ = cursor.execute(
@@ -66,8 +66,7 @@ class BlocksTable:
     # For http://127.0.0.1:5000/v1/module/lesson/
     @staticmethod
     def write_blocks(conn: SwapDB) -> None:
-        # Format is (lesson_id, block_type, order (of appearance on page), data)
-        blocks: list[tuple[int, int, int, dict[str, str]]] = [
+        blocks: list[tuple[int, int, int, dict]] = [
             (
                 1,
                 1,
@@ -120,12 +119,12 @@ class BlocksTable:
 
         cursor: SwapCursor = conn.get_cursor()
         for lesson_id, block_type, order, data in blocks:
-            data = dumps(data)
+            data_json: str = json.dumps(data)
             _ = cursor.execute(
                 StringStatement(
                     "INSERT INTO blocks (lessonID, blockType, blockOrder, data) VALUES (%s, %s, %s, %s)"
                 ),
-                (lesson_id, block_type, order, data),
+                (lesson_id, block_type, order, data_json),
             )
 
     @staticmethod

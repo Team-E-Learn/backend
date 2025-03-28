@@ -1,3 +1,5 @@
+import json
+import ast
 from flask import request
 from flask_restful import Resource
 from backend.database.blocks import BlocksTable
@@ -56,10 +58,11 @@ class Lesson(Resource):
     @Instil("db")
     def post(self, service: SwapDB):
         # Get lesson data from request
-        lesson_id: str | None = request.form.get("lesson_id")
-        module_id: str | None = request.form.get("module_id")
-        title: str | None = request.form.get("title")
-        sections: str | None = request.form.get("sections")
+        lesson_id = int(request.form.get("lesson_id", 0))
+        module_id = int(request.form.get("module_id", 0))
+        title = request.form.get("title", "")
+        sections = ast.literal_eval(request.form.get("sections", "{}"))
+
 
         # Create new lesson using module_id, title, and sections
         LessonsTable.create_lesson(service, lesson_id, module_id, title, sections)
@@ -86,7 +89,7 @@ class Lesson(Resource):
     @Instil("db")
     def delete(self, service: SwapDB):
         # Get lesson_id from request
-        lesson_id: str | None = request.form.get("lesson_id")
+        lesson_id = int(request.form.get("lesson_id", 0))
 
         # Delete lesson using lesson_id, if successful return a 200 response
         if LessonsTable.delete_lesson(service, lesson_id):

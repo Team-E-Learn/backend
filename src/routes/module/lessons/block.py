@@ -1,3 +1,5 @@
+import ast
+import json
 from flask import request
 from flask_restful import Resource
 from backend.database.blocks import BlocksTable
@@ -54,10 +56,10 @@ class Block(Resource):
     )
     @Instil("db")
     def post(self, lesson_id: int, service: SwapDB):
-        # Get block data from request
-        block_type: str | None = request.form.get("block_type")
-        order: str | None = request.form.get("order")
-        data: str | None = request.form.get("data")
+        # Get block data from request and convert to appropriate types
+        block_type = int(request.form.get("block_type", 0))
+        order = int(request.form.get("order", 0))
+        data = ast.literal_eval(request.form.get("data"))
 
         # Try to create a block, if successful return a 200 response
         if BlocksTable.write_block(service, lesson_id, block_type, order, data):
@@ -102,9 +104,9 @@ class Block(Resource):
     )
     @Instil("db")
     def delete(self, lesson_id: int, service: SwapDB):
-        # Get block data from request
-        block_type: str | None = request.form.get("block_type")
-        order: str | None = request.form.get("order")
+        # Get block data from request and convert to integers
+        block_type: int = int(request.form.get("block_type", 0))
+        order: int = int(request.form.get("order", 0))
 
         # Try to delete a block, if successful return a 200 response
         if BlocksTable.delete_block(service, lesson_id, block_type, order):
