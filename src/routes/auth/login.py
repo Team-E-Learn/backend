@@ -36,7 +36,8 @@ class Login(Resource):
                     "example_password",
                 ),
             ],
-            [SwagResp(200, "Login successful"), SwagResp(401, "Unauthorized")],
+            [SwagResp(200, "Login successful"), SwagResp(400, "Bad request"),
+             SwagResp(401, "Unauthorized")],
         )
     )
     @Instil("db")

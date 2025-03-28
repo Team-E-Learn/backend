@@ -50,7 +50,7 @@ class Lesson(Resource):
                     "{'section1': ['content1', 'content2'], 'section2': ['content3', 'content4']}",
                 ),
             ],
-            [SwagResp(200, "Lesson created")],
+            [SwagResp(200, "Lesson created"), SwagResp(404, "Lesson not found")],
         )
     )
     @Instil("db")

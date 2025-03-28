@@ -38,4 +38,4 @@ class Lessons(Resource):
                 {"id": row[0], "title": row[2], "sections": row[3]}
                 for row in lessons
             ]
-        }
+        }, 200

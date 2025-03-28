@@ -75,7 +75,7 @@ class Subscriptions(Resource):
         )
     )
     @Instil("db")
-    def get(self, user_id: int, service: SwapDB) -> list[OrgJson]:
+    def get(self, user_id: int, service: SwapDB) -> [list[OrgJson], int]:
         # Get the user's subscriptions
         cur: SwapCursor = service.get_cursor()
         result: SwapResult = cur.execute(
@@ -138,4 +138,4 @@ class Subscriptions(Resource):
             bundle.modules.append(Module(module_id, module_name))
 
         # Convert the orgs list to a list of dictionaries
-        return [org.to_dict() for org in orgs]
+        return [org.to_dict() for org in orgs], 200

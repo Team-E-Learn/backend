@@ -20,6 +20,7 @@ from routes.auth.verify_email import VerifyEmail
 from routes.user.profile import Profile
 from routes.user.subscriptions import Subscriptions
 from routes.org.module.user import User
+from routes.org.organisation import Organisation
 from routes.auth.login import Login
 from routes.auth.verify2fa import Verify2FA
 
@@ -94,6 +95,7 @@ front.register(VerifyEmail, "/v1/auth/verify-email")
 front.register(Lessons, "/v1/module/<int:module_id>/lessons")
 front.register(Lesson, "/v1/module/lesson/")
 front.register(Block, "/v1/module/lesson/<int:lesson_id>/block")
+#front.register(Organisation, "/v1/org/")
 front.register(HomeDashboard, "/v1/user/<int:user_id>/dashboard")
 front.register(
     ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>"

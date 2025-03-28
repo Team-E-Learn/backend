@@ -49,7 +49,7 @@ class Block(Resource):
                     "{}",
                 ),
             ],
-            [SwagResp(200, "Block created")],
+            [SwagResp(200, "Block created"), SwagResp(400, "Block not created")],
         )
     )
     @Instil("db")
@@ -97,7 +97,7 @@ class Block(Resource):
                     "1",
                 ),
             ],
-            [SwagResp(200, "Block deleted")],
+            [SwagResp(200, "Block deleted"), SwagResp(404, "Block not found")],
         )
     )
     @Instil("db")
@@ -139,4 +139,4 @@ class Block(Resource):
             blocks.append(
                 {"block_type": block_type, "block_order": block_order, "data": data}
             )
-        return {"blocks": blocks}
+        return {"blocks": blocks}, 200

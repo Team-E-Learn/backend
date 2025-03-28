@@ -51,6 +51,7 @@ class Register(Resource):
             [
                 SwagResp(200, "Registration successful"),
                 SwagResp(400, "Bad Request"),
+                SwagResp(404, "Error finding user"),
                 SwagResp(409, "Email or username already exists"),
             ],
         )
@@ -108,7 +109,7 @@ class Register(Resource):
         service.commit()
 
         if not user:
-            return {"message": "Error finding user"}, 500
+            return {"message": "Error finding user"}, 404
 
         # Generate expiry time for JWT
         expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now

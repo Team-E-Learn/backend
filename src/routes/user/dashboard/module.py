@@ -45,4 +45,4 @@ class ModuleDashboard(Resource):
                 {"id": row[2], "type": row[3], "position": {"x": row[4], "y": row[5]}}
                 for row in dashboard
             ]
-        }
+        }, 200

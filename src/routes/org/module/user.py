@@ -42,38 +42,43 @@ class User(Resource):
                     "1",
                 ),
             ],
-            [SwagResp(200, "Module added to user")],
+            [
+                SwagResp(200, "Module added to user"),
+                SwagResp(400, "Failed to add subscription"),
+                SwagResp(403, "Organization does not own the module"),
+                SwagResp(404, "User, Organization, or Module not found"),
+                SwagResp(500, "Server error")
+            ],
         )
     )
     @Instil("db")
-    def put(
-        self, org_id: int, module_id: int, user_id: int, service: SwapDB 
-    ) -> dict[str, str | bool]:
+    def put(self, org_id: int, module_id: int, user_id: int, service: SwapDB
+    ) -> tuple[dict[str, str | bool], int]:
         # Add a module to a user using org_id, module_id and user_id
         # Check user_id exists in the users table
         if not UserTable.user_exists(service, user_id):
-            return {"success": False, "error": "User not found"}
+            return {"success": False, "error": "User not found"}, 404
 
         # Check org_id exists
         if not OrganisationsTable.org_exists(service, org_id):
-            return {"success": False, "error": "Organisation not found"}
+            return {"success": False, "error": "Organisation not found"}, 404
 
         # Check module_id exists
         if not ModulesTable.module_exists(service, module_id):
-            return {"success": False, "error": "Module not found"}
+            return {"success": False, "error": "Module not found"}, 404
 
         # Check org owns module
         if not ModulesTable.module_owned_by_org(service, module_id, org_id):
-            return {"success": False, "error": "Organisation does not own the module"}
+            return {"success": False, "error": "Organisation does not own the module"}, 403
 
         # Insert into subscriptions user_id and module_id
         try:
             # Return error if subscription already exists
             if not SubscriptionsTable.add_subscription(service, user_id, module_id):
-                return {"success": False, "error": "Failed to add subscription"}
+                return {"success": False, "error": "Failed to add subscription"}, 400
         except Exception as e:
             # Return error if exception is raised
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": str(e)}, 500
 
         # If subscription is added successfully, return success message
-        return {"success": True, "message": "Successfully added subscription to user"}
+        return {"success": True, "message": "Successfully added subscription to user"}, 200

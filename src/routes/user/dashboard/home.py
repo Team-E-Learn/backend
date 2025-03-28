@@ -37,4 +37,4 @@ class HomeDashboard(Resource):
                 {"id": row[1], "type": row[2], "position": {"x": row[3], "y": row[4]}}
                 for row in dashboard
             ]
-        }
+        }, 200

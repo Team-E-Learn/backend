@@ -38,7 +38,8 @@ class Verify2FA(Resource):
                     "123456",
                 ),
             ],
-            [SwagResp(200, "Verification successful"), SwagResp(401, "Unauthorized")],
+            [SwagResp(200, "Verification successful"), SwagResp(400, "Bad Request"),
+             SwagResp(401, "Unauthorized")],
         )
     )
     @Instil("db")
