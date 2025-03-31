@@ -62,7 +62,7 @@ class DashboardTable:
         for user_id, widget_type, x, y in dashboard:
             cursor.execute(
                 StringStatement(
-                    "INSERT INTO dashboard ( userID, widgetType, x, y) VALUES (%s, %s, %s, %s)"
+                    "INSERT INTO dashboard (userID, widgetType, x, y) VALUES (%s, %s, %s, %s)"
                 ),
                 (user_id, widget_type, x, y),
             )

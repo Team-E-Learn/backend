@@ -112,6 +112,6 @@ if __name__ == "__main__":
         # Write dummy data
         populate_dummy_data(conn)
         # Run tests
-        #run_tests(conn)
+        run_tests(conn) # Only works if dummy data is populated
 
     front.start(debug=debug_mode)
