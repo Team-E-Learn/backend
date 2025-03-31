@@ -46,7 +46,7 @@ class Verify2FA(Resource):
     def post(self, service: SwapDB):
         # Get limited JWT and 2FA code from request
         limited_jwt: str | None = request.form.get("Limited JWT")
-        code: int | None = request.form.get("code")
+        code: int | None = int(request.form.get("code"))
 
         # Check if limited JWT and 2FA code are present, if not return 400
         if not limited_jwt or not code:

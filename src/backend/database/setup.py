@@ -11,6 +11,7 @@ from backend.database.subscriptions import SubscriptionsTable
 from backend.database.dashboard import DashboardTable
 from backend.database.module_dashboard import ModuleDashboardTable
 from backend.database.progress import ProgressTable
+from backend.database.module_codes import ModuleCodesTable
 from lib.dataswap.database import SwapDB
 """
 Central module for database initialization and setup.
@@ -41,6 +42,7 @@ def initialise_tables(conn: SwapDB) -> None:
     DashboardTable.create(conn)
     ModuleDashboardTable.create(conn)
     ProgressTable.create(conn)
+    ModuleCodesTable.create(conn)
     conn.commit()
 
 
@@ -73,4 +75,6 @@ def populate_dummy_data(conn: SwapDB) -> None:
     DashboardTable.write_dashboard(conn)
     conn.commit()
     ModuleDashboardTable.write_module_dashboard(conn)
+    conn.commit()
+    ModuleCodesTable.write_codes(conn)
     conn.commit()

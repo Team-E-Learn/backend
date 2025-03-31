@@ -44,7 +44,6 @@ class User(Resource):
             ],
             [
                 SwagResp(200, "Module added to user"),
-                SwagResp(400, "Failed to add subscription"),
                 SwagResp(403, "Organization does not own the module"),
                 SwagResp(404, "User, Organization, or Module not found"),
                 SwagResp(500, "Server error")
@@ -73,12 +72,10 @@ class User(Resource):
 
         # Insert into subscriptions user_id and module_id
         try:
-            # Return error if subscription already exists
-            if not SubscriptionsTable.add_subscription(service, user_id, module_id):
-                return {"success": False, "error": "Failed to add subscription"}, 400
+            SubscriptionsTable.add_subscription(service, user_id, module_id)
         except Exception as e:
             # Return error if exception is raised
             return {"success": False, "error": str(e)}, 500
 
-        # If subscription is added successfully, return success message
+        # If subscription is added without error, return success message
         return {"success": True, "message": "Successfully added subscription to user"}, 200

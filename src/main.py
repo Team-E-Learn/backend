@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from sys import stderr
+
 from testing import run_tests
 from flask.helpers import redirect
 from flask_restful import Resource
@@ -28,6 +29,7 @@ import projenv
 from routes.module.lessons.lesson import Lesson
 from routes.module.lessons.block import Block
 from routes.module.list_lessons import Lessons
+from routes.module.lessons.module_codes import ModuleCode
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
@@ -95,6 +97,7 @@ front.register(VerifyEmail, "/v1/auth/verify-email")
 front.register(Lessons, "/v1/module/<int:module_id>/lessons")
 front.register(Lesson, "/v1/module/lesson/")
 front.register(Block, "/v1/module/lesson/<int:lesson_id>/block")
+front.register(ModuleCode, "/v1/module/code/<int:user_id>")
 front.register(Organisation, "/v1/org/")
 front.register(HomeDashboard, "/v1/user/<int:user_id>/dashboard")
 front.register(

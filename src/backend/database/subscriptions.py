@@ -56,13 +56,16 @@ class SubscriptionsTable:
             )
 
     @staticmethod
-    def add_subscription(conn: SwapDB, user_id: int, module_id: int) -> bool:
+    def add_subscription(conn: SwapDB, user_id: int, module_id: int) -> None:
         cursor: SwapCursor = conn.get_cursor()
         cursor.execute(
             StringStatement(
-                "INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)"
+                """
+                INSERT INTO subscriptions (userID, moduleID) 
+                VALUES (%s, %s)
+                ON CONFLICT (userID, moduleID) DO NOTHING
+                """
             ),
             (user_id, module_id),
         )
         conn.commit()
-        return True
