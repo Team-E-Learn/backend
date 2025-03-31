@@ -95,7 +95,7 @@ front.register(VerifyEmail, "/v1/auth/verify-email")
 front.register(Lessons, "/v1/module/<int:module_id>/lessons")
 front.register(Lesson, "/v1/module/lesson/")
 front.register(Block, "/v1/module/lesson/<int:lesson_id>/block")
-#front.register(Organisation, "/v1/org/")
+front.register(Organisation, "/v1/org/")
 front.register(HomeDashboard, "/v1/user/<int:user_id>/dashboard")
 front.register(
     ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>"

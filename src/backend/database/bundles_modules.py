@@ -17,7 +17,7 @@ class BundlesModulesTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS bundle_modules (

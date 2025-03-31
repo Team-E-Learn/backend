@@ -18,7 +18,7 @@ class BlocksTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS blocks (
@@ -48,7 +48,7 @@ class BlocksTable:
         data_json: str = json.dumps(data)
 
         # Insert block into blocks table
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement(
                 """
             INSERT INTO blocks (lessonID, blockType, blockOrder, data)
@@ -118,7 +118,7 @@ class BlocksTable:
         cursor: SwapCursor = conn.get_cursor()
         for lesson_id, block_type, order, data in blocks:
             data_json: str = json.dumps(data)
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO blocks (lessonID, blockType, blockOrder, data) VALUES (%s, %s, %s, %s)"
                 ),
@@ -140,7 +140,7 @@ class BlocksTable:
             return False
 
         # If block exists, delete it, then return True
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement(
                 "DELETE FROM blocks WHERE lessonID = %s AND blockType = %s AND blockOrder = %s"
             ),

@@ -21,7 +21,7 @@ class UserTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS users (
@@ -118,7 +118,7 @@ class UserTable:
                 continue
 
             # Insert user into the database
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO users (accountType, firstName, lastName, username, email, password, totpSecret) "
                     + "VALUES (%s, %s, %s, %s, %s, %s, %s)",

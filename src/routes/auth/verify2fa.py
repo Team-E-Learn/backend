@@ -32,7 +32,7 @@ class Verify2FA(Resource):
                 SwagParam(
                     "code",
                     "formData",
-                    "string",
+                    "number",
                     True,
                     "The 6-digit 2FA code",
                     "123456",
@@ -46,7 +46,7 @@ class Verify2FA(Resource):
     def post(self, service: SwapDB):
         # Get limited JWT and 2FA code from request
         limited_jwt: str | None = request.form.get("Limited JWT")
-        code: str | None = request.form.get("code")
+        code: int | None = request.form.get("code")
 
         # Check if limited JWT and 2FA code are present, if not return 400
         if not limited_jwt or not code:
@@ -75,7 +75,7 @@ class Verify2FA(Resource):
             return {"message": "Unauthorized"}, 401
 
         # Logic to verify 2FA code and generate full access JWT
-        if totp(user_secret) != code:
+        if int(totp(user_secret)) != code:
             return {"message": "Unauthorized"}, 401
 
         # Set expiry time for full access JWT

@@ -19,7 +19,7 @@ class DashboardTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS dashboard (
@@ -60,7 +60,7 @@ class DashboardTable:
         # Write sample dashboard data to the dashboard table
 
         for user_id, widget_type, x, y in dashboard:
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO dashboard ( userID, widgetType, x, y) VALUES (%s, %s, %s, %s)"
                 ),

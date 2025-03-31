@@ -20,7 +20,7 @@ class LessonsTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS lessons (
@@ -43,7 +43,7 @@ class LessonsTable:
         sections_json: str = json.dumps(sections)
 
         cursor: SwapCursor = conn.get_cursor()
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement(
                 "INSERT INTO lessons (lessonID, moduleID, title, sections) VALUES (%s, %s, %s, %s) "
                 + "ON CONFLICT (lessonID) DO UPDATE SET title = EXCLUDED.title, sections = EXCLUDED.sections"
@@ -77,7 +77,7 @@ class LessonsTable:
         cursor: SwapCursor = conn.get_cursor()
         # Write sample lessons to the database
         for module_id, title, sections in lessons:
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO lessons (moduleID, title, sections) VALUES (%s, %s, %s)",
                 ),
@@ -96,12 +96,12 @@ class LessonsTable:
             return False
 
         # If lesson exists, delete blocks associated with lesson
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement("DELETE FROM blocks WHERE lessonID = %s"), (lesson_id,)
         )
 
         # Then delete lesson and return True
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement("DELETE FROM lessons WHERE lessonID = %s"), (lesson_id,)
         )
         conn.commit()

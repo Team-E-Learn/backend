@@ -31,6 +31,21 @@ class ModulesTable:
             )
         )
 
+    @staticmethod
+    def write_module(conn: SwapDB, org_id: int, name: str, description: str) -> int:
+        cursor: SwapCursor = conn.get_cursor()
+
+        # Insert new module
+        result = cursor.execute(
+            StringStatement(
+                "INSERT INTO modules (name, description, orgID) VALUES (%s, %s, %s) RETURNING moduleID"
+            ),
+            (name, description, org_id)
+        )
+
+        # Return the moduleID of the newly created module
+        return result.fetch_one()[0]
+
     # Adds 8 modules to the DB, 4 are owned by org_id 1, 2 are owned by org_id 2, 2 are owned by org_id 3
     # No alternative API call to add modules, so this is the only way to add them
     @staticmethod

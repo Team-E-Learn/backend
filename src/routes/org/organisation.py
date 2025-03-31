@@ -35,24 +35,32 @@ class Organisation(Resource):
                 SwagParam(
                     "modules",
                     "formData",
-                    "object",
+                    "string",
                     True,
                     "List of modules to create for this Organisation",
                     "[{'name': 'Module 1', 'description': 'Description for module 1'}]",
+                ),
+                SwagParam(
+                    "owner_id",
+                    "formData",
+                    "number",
+                    True,
+                    "The ID of the owner of the Organisation",
+                    1,
                 ),
             ],
             [
                 SwagResp(200, "Organisation created successfully"),
                 SwagResp(400, "Invalid request data"),
-                SwagResp(409, "Organisation already exists")
             ],
         )
     )
     @Instil("db")
     def post(self, service: SwapDB):
         # Get Organisation data from request
-        name = request.form.get("name")
-        description = request.form.get("description", "")
+        name: str | None = request.form.get("name")
+        description: str | None = request.form.get("description", "")
+        owner_id: int | None = int(request.form.get("owner_id"))
 
         # Parse modules list
         try:
@@ -63,15 +71,13 @@ class Organisation(Resource):
         # Validate required fields
         if not name:
             return {"message": "Organisation name is required"}, 400
-
+        if not owner_id:
+            return {"message": "Owner ID is required"}, 400
         if not isinstance(modules, list):
             return {"message": "Modules must be a list"}, 400
 
-        # Create Organisation
-        org_id = OrganisationsTable.create_Organisation(service, name, description)
-
-        if not org_id:
-            return {"message": "Organisation already exists"}, 409
+        # Create/Update Organisation
+        org_id = OrganisationsTable.write_org(service, name, description, owner_id)
 
         # Create modules for the Organisation
         created_modules = []
@@ -83,7 +89,7 @@ class Organisation(Resource):
             module_description = module.get("description", "")
 
             # Overwriting happens automatically in the database
-            module_id = ModulesTable.create_module(
+            module_id = ModulesTable.write_module(
                 service,
                 org_id,
                 module_name,

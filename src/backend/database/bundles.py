@@ -36,7 +36,7 @@ def add_modules_to_bundle(
 
         module_id: int = module_result[0]
 
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement(
                 "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)"
             ),
@@ -54,7 +54,7 @@ class BundlesTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS bundles (
@@ -96,7 +96,7 @@ class BundlesTable:
                 continue
 
             # Add the bundle to the bundles table
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)"
                 ),

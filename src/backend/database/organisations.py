@@ -20,7 +20,7 @@ class OrganisationsTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS organisations (
@@ -31,6 +31,37 @@ class OrganisationsTable:
     );"""
             )
         )
+
+    @staticmethod
+    def write_org(conn: SwapDB, name: str, description: str, owner_id: int) -> int | None:
+        cursor: SwapCursor = conn.get_cursor()
+
+        # Check if the organization already exists
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT orgID FROM organisations WHERE name = %s"), (name,)
+        )
+        orgID = result.fetch_one()
+
+        # If it does, delete its modules
+        if orgID is not None:
+            cursor.execute(
+                StringStatement("DELETE FROM modules WHERE orgID = %s"),
+                (orgID[0],)
+            )
+            conn.commit()
+            # Return the orgID of the organisation
+            return orgID[0]
+
+        # Else, Insert the organization
+        else:
+            result = cursor.execute(
+                StringStatement(
+                    "INSERT INTO organisations (name, description, ownerID) VALUES (%s, %s, %s) RETURNING orgID"
+                ),
+                (name, description, owner_id),
+            )
+            # Return the orgID of the organisation
+            return result.fetch_one()[0]
 
     # Adds 3 orgs to the DB, user_id 3 is the owner of the first org, user_id 2 is the owner of the other two
     # No alternative API call to add organisations, so this is the only way to add them
@@ -55,7 +86,7 @@ class OrganisationsTable:
                 continue
 
             # Insert organisation into organisations table
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO organisations (name, description, ownerID) VALUES (%s, %s, %s)"
                 ),

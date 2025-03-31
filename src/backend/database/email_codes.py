@@ -18,7 +18,7 @@ class EmailCodesTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS email_codes (
@@ -32,7 +32,7 @@ class EmailCodesTable:
     @staticmethod
     def add_code(conn: SwapDB, email: str, code: str) -> None:
         cursor: SwapCursor = conn.get_cursor()
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement("INSERT INTO email_codes (email, code) VALUES (%s, %s)"),
             (email, code),
         )
@@ -50,7 +50,7 @@ class EmailCodesTable:
     @staticmethod
     def set_verified(conn: SwapDB, email: str) -> None:
         cursor: SwapCursor = conn.get_cursor()
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement("UPDATE email_codes SET verified = TRUE WHERE email = %s"),
             (email,),
         )
