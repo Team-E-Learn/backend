@@ -2,6 +2,7 @@
 
 from sys import stderr
 
+from routes.module.module import Module
 from testing import run_tests
 from flask.helpers import redirect
 from flask_restful import Resource
@@ -103,6 +104,7 @@ front.register(HomeDashboard, "/v1/user/<int:user_id>/dashboard")
 front.register(
     ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>"
 )
+front.register(Module, "/v1/module/<int:module_id>/")
 
 
 # Start app
@@ -112,6 +114,6 @@ if __name__ == "__main__":
         # Write dummy data
         populate_dummy_data(conn)
         # Run tests
-        run_tests(conn) # Only works if dummy data is populated
+        run_tests(conn)  # Only works if dummy data is populated
 
     front.start(debug=debug_mode)
