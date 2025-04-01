@@ -71,11 +71,7 @@ class User(Resource):
             return {"success": False, "error": "Organisation does not own the module"}, 403
 
         # Insert into subscriptions user_id and module_id
-        try:
-            SubscriptionsTable.add_subscription(service, user_id, module_id)
-        except Exception as e:
-            # Return error if exception is raised
-            return {"success": False, "error": str(e)}, 500
+        SubscriptionsTable.add_subscription(service, user_id, module_id)
 
         # If subscription is added without error, return success message
         return {"success": True, "message": "Successfully added subscription to user"}, 200

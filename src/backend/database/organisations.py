@@ -53,16 +53,15 @@ class OrganisationsTable:
             # Return the orgID of the organisation
             return orgID[0]
 
-        # Else, Insert the organization
-        else:
-            result = cursor.execute(
-                StringStatement(
-                    "INSERT INTO organisations (name, description, ownerID) VALUES (%s, %s, %s) RETURNING orgID"
-                ),
-                (name, description, owner_id),
-            )
-            # Return the orgID of the organisation
-            return result.fetch_one()[0]
+        # Insert the organization
+        result = cursor.execute(
+            StringStatement(
+                "INSERT INTO organisations (name, description, ownerID) VALUES (%s, %s, %s) RETURNING orgID"
+            ),
+            (name, description, owner_id),
+        )
+        # Return the orgID of the organisation
+        return result.fetch_one()[0]
 
     # Adds 3 orgs to the DB, user_id 3 is the owner of the first org, user_id 2 is the owner of the other two
     # No alternative API call to add organisations, so this is the only way to add them
