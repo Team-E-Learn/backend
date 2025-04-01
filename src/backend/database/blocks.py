@@ -1,8 +1,9 @@
-import json
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+from json import dumps as json_dumps
+
 """
 Module for managing lesson blocks in the database.
 Provides CRUD operations for the blocks table which stores different types of content blocks.
@@ -45,7 +46,7 @@ class BlocksTable:
             return False
 
         # Convert data dictionary to JSON string
-        data_json: str = json.dumps(data)
+        data_json: str = json_dumps(data)
 
         # Insert block into blocks table
         cursor.execute(
@@ -117,7 +118,7 @@ class BlocksTable:
 
         cursor: SwapCursor = conn.get_cursor()
         for lesson_id, block_type, order, data in blocks:
-            data_json: str = json.dumps(data)
+            data_json: str = json_dumps(data)
             cursor.execute(
                 StringStatement(
                     "INSERT INTO blocks (lessonID, blockType, blockOrder, data) VALUES (%s, %s, %s, %s)"

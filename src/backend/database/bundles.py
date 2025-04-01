@@ -2,10 +2,12 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+
 """
 Module for managing bundles in the database.
 Provides operations for creating and populating the bundles table and linking modules to bundles.
 """
+
 
 def add_modules_to_bundle(
     bundle_name: str, module_names: list[str], conn: SwapDB
