@@ -1,6 +1,7 @@
 import ast
 from flask import request
 from flask_restful import Resource
+from typing import Any, Optional
 from backend.database.organisations import OrganisationsTable
 from backend.database.modules import ModulesTable
 from lib.dataswap.database import SwapDB
@@ -37,7 +38,7 @@ class Organisation(Resource):
                     "formData",
                     "string",
                     True,
-                    "List of modules to create for this Organisation",
+                    "list of modules to create for this Organisation",
                     "[{'name': 'Module 1', 'description': 'Description for module 1'}]",
                 ),
                 SwagParam(
@@ -56,7 +57,7 @@ class Organisation(Resource):
         )
     )
     @Instil("db")
-    def post(self, service: SwapDB):
+    def post(self, service: SwapDB) -> tuple[dict[str, Any], int]:
         # Get Organisation data from request
         name: str | None = request.form.get("name")
         description: str | None = request.form.get("description", "")
@@ -64,7 +65,8 @@ class Organisation(Resource):
 
         # Parse modules list
         try:
-            modules = ast.literal_eval(request.form.get("modules", "[]"))
+            modules_str: Optional[str] = request.form.get("modules", "[]")
+            modules: list[dict[str, Any]] = ast.literal_eval(modules_str)
         except (SyntaxError, ValueError):
             return {"message": "Invalid modules format"}, 400
 
@@ -77,19 +79,19 @@ class Organisation(Resource):
             return {"message": "Modules must be a list"}, 400
 
         # Create/Update Organisation
-        org_id = OrganisationsTable.write_org(service, name, description, owner_id)
+        org_id: Optional[int] = OrganisationsTable.write_org(service, name, description, owner_id)
 
         # Create modules for the Organisation
-        created_modules = []
+        created_modules: list[dict[str, Any]] = []
         for module in modules:
             if not isinstance(module, dict) or "name" not in module:
                 continue
 
-            module_name = module.get("name")
-            module_description = module.get("description", "")
+            module_name: str = module.get("name")
+            module_description: str = module.get("description", "")
 
             # Overwriting happens automatically in the database
-            module_id = ModulesTable.write_module(
+            module_id: Optional[int] = ModulesTable.write_module(
                 service,
                 org_id,
                 module_name,

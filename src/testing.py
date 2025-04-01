@@ -1,6 +1,8 @@
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+from typing import Any
 
 # todo a progress test will need to be build in the future
 
@@ -48,9 +50,10 @@ def user_test(conn: SwapDB) -> None:
 
     # Read users from the database
     cursor: SwapCursor = conn.get_cursor()
-    users = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT accountType, firstName, lastName, username, email, totpSecret FROM users")
-    ).fetch_all()
+    )
+    users: list[tuple[str, str, str, str, str, str]] | None = result.fetch_all()
 
     # Compare expected and retrieved users
     assert users == expected_users, f"Expected: {expected_users}, Got: {users}"
@@ -66,9 +69,10 @@ def organisations_test(conn: SwapDB) -> None:
 
     # read organisations from the database
     cursor: SwapCursor = conn.get_cursor()
-    orgs = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT name, description, ownerID FROM organisations")
-    ).fetch_all()
+    )
+    orgs: list[tuple[str, str, int]] | None = result.fetch_all()
 
     # compare expected and retrieved organisations
     assert orgs == expected_orgs, f"Original organisations: {expected_orgs},\n Retrieved organisations: {orgs}"
@@ -90,9 +94,10 @@ def modules_test(conn: SwapDB) -> None:
 
     # Read modules from the database
     cursor: SwapCursor = conn.get_cursor()
-    modules = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT name, description, orgID FROM modules")
-    ).fetch_all()
+    )
+    modules: list[tuple[str, str, int]] | None = result.fetch_all()
 
     # Compare expected and retrieved modules
     assert modules == expected_modules, f"Original modules: {expected_modules},\n Retrieved modules: {modules}"
@@ -101,7 +106,7 @@ def modules_test(conn: SwapDB) -> None:
 
 def lessons_test(conn: SwapDB) -> None:
     # Expected lessons
-    expected_lessons: list[tuple[int, str, str]] = [
+    expected_lessons: list[tuple[int, str, dict[str, Any]]] = [
         (1, "Introduction", {"content": "Welcome to the introduction"}),
         (1, "Lesson 1", {"content": "This is lesson 1"}),
         (1, "Lesson 2", {"content": "This is lesson 2"}),
@@ -122,9 +127,10 @@ def lessons_test(conn: SwapDB) -> None:
 
     # Read lessons from the database
     cursor: SwapCursor = conn.get_cursor()
-    lessons = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT moduleID, title, sections FROM lessons")
-    ).fetch_all()
+    )
+    lessons: list[tuple[int, str, dict[str, Any]]] | None = result.fetch_all()
 
     # Compare expected and retrieved lessons
     assert lessons == expected_lessons, f"Original lessons: {expected_lessons},\n Retrieved lessons: {lessons}"
@@ -140,9 +146,10 @@ def bundle_test(conn: SwapDB) -> None:
 
     # Read bundles from the database
     cursor: SwapCursor = conn.get_cursor()
-    bundles = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT name, description FROM bundles")
-    ).fetch_all()
+    )
+    bundles: list[tuple[str, str]] | None = result.fetch_all()
 
     # Compare expected and retrieved bundles
     assert bundles == expected_bundles, f"Original bundles: {expected_bundles},\n Retrieved bundles: {bundles}"
@@ -151,7 +158,7 @@ def bundle_test(conn: SwapDB) -> None:
 
 def bundle_modules_test(conn: SwapDB) -> None:
     # Expected modules in bundles
-    expected_modules = [
+    expected_modules: list[tuple[str,]] = [
         ("Applied Programming Paradigms",),
         ("Networking Fundamentals",),
         ("Personal Development",),
@@ -160,7 +167,7 @@ def bundle_modules_test(conn: SwapDB) -> None:
 
     # Get modules in Computer Science BSc bundle
     cursor: SwapCursor = conn.get_cursor()
-    modules = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("""
             SELECT m.name FROM modules m
             JOIN bundle_modules bm ON m.moduleID = bm.moduleID
@@ -168,7 +175,8 @@ def bundle_modules_test(conn: SwapDB) -> None:
             WHERE b.name = 'Computer Science BSc'
             ORDER BY m.name
         """)
-    ).fetch_all()
+    )
+    modules: list[tuple[str,]] | None = result.fetch_all()
 
     # Compare expected and retrieved modules
     assert modules == expected_modules, f"Expected: {expected_modules}, Got: {modules}"
@@ -177,7 +185,7 @@ def bundle_modules_test(conn: SwapDB) -> None:
 
 def block_test(conn: SwapDB) -> None:
     # Expected blocks
-    expected_blocks: list[tuple[int, int, int, dict]] = [
+    expected_blocks: list[tuple[int, int, int, dict[str, str]]] = [
         (1,1,1,
             {
                 "question_content": "what is the colour of the sky?",
@@ -191,14 +199,15 @@ def block_test(conn: SwapDB) -> None:
 
     # Read blocks from the database
     cursor: SwapCursor = conn.get_cursor()
-    result = cursor.execute(StringStatement(
+    result: SwapResult = cursor.execute(StringStatement(
             "SELECT blockType, blockOrder, data FROM blocks WHERE lessonID = 1"
         )
-    ).fetch_all()
+    )
+    block_results: list[tuple[int, int, dict[str, str]]] | None = result.fetch_all()
 
     # Recreate blocks list for comparison
-    blocks = []
-    for block_type, order, data_dict in result:
+    blocks: list[tuple[int, int, int, dict[str, str]]] = []
+    for block_type, order, data_dict in block_results:
         blocks.append((1, block_type, order, data_dict))
 
     # Compare expected and retrieved blocks
@@ -212,9 +221,10 @@ def subscriptions_table_test(conn: SwapDB) -> None:
 
     # Query database
     cursor: SwapCursor = conn.get_cursor()
-    subs = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT userID, moduleID FROM subscriptions WHERE userID = 3")
-    ).fetch_all()
+    )
+    subs: list[tuple[int, int]] | None = result.fetch_all()
 
     # Compare expected and retrieved subscriptions
     assert subs == expected_subs, f"Expected: {expected_subs}, Got: {subs}"
@@ -244,9 +254,10 @@ def module_dashboard_test(conn: SwapDB) -> None:
 
     # Read dashboard settings from the database
     cursor: SwapCursor = conn.get_cursor()
-    dashboard = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT userID, moduleID, widgetID, widgetType, x, y FROM module_dashboard")
-    ).fetch_all()
+    )
+    dashboard: list[tuple[int, int, str, str, int, int]] | None = result.fetch_all()
 
     # Recreate module dashboard settings list for comparison
     assert dashboard == expected_module_dashboard, f"Expected: {expected_module_dashboard}, Got: {dashboard}"
@@ -255,13 +266,18 @@ def module_dashboard_test(conn: SwapDB) -> None:
 
 def module_codes_test(conn: SwapDB) -> None:
     # Expected module codes
-    expected_codes = [(1, 'INTRO1', [1, 2, 3]), (2, 'ADVMOD', [4, 5, 6]), (3, 'ALLMOD', [1, 2, 3, 4, 5, 6, 7, 8])]
+    expected_codes: list[tuple[int, str, list[int]]] = [
+        (1, 'INTRO1', [1, 2, 3]),
+        (2, 'ADVMOD', [4, 5, 6]),
+        (3, 'ALLMOD', [1, 2, 3, 4, 5, 6, 7, 8])
+    ]
 
     # Read module codes from the database
     cursor: SwapCursor = conn.get_cursor()
-    codes = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT code_id, code, module_ids FROM module_codes")
-    ).fetch_all()
+    )
+    codes: list[tuple[int, str, list[int]]] | None = result.fetch_all()
 
     # Recreate module codes list for comparison
     assert codes == expected_codes, f"Expected: {expected_codes}, Got: {codes}"
@@ -291,16 +307,17 @@ def dashboard_test(conn: SwapDB) -> None:
 
     # Read dashboards from the database
     cursor: SwapCursor = conn.get_cursor()
-    dashboard = cursor.execute(
+    result: SwapResult = cursor.execute(
         StringStatement("SELECT userID, widgetType, x, y FROM dashboard")
-    ).fetch_all()
+    )
+    dashboard: list[tuple[int, str, int, int]] | None = result.fetch_all()
 
     # Compare expected and retrieved dashboards
     assert dashboard == expected_dashboard, f"Expected: {expected_dashboard}, Got: {dashboard}"
     print(">> Module dashboard write and read test passed!")
 
 
-# todo then I’m also going to check the same read-out data can then be read from the API as correct as well.
+# todo then I'm also going to check the same read-out data can then be read from the API as correct as well.
 
 
 def run_tests(conn: SwapDB) -> None:
@@ -319,5 +336,3 @@ def run_tests(conn: SwapDB) -> None:
         print("All tests passed!\n")
     except AssertionError as e:
         input(f"Test failed: {e}")
-
-

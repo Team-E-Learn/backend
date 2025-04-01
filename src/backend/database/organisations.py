@@ -20,7 +20,8 @@ class OrganisationsTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        conn.get_cursor().execute(
+        cursor: SwapCursor = conn.get_cursor()
+        cursor.execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS organisations (

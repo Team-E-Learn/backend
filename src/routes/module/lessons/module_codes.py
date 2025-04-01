@@ -1,5 +1,6 @@
 from flask import request
 from flask_restful import Resource
+from typing import Union
 from backend.database.module_codes import ModuleCodesTable
 from backend.database.subscriptions import SubscriptionsTable
 from lib.dataswap.database import SwapDB
@@ -40,7 +41,7 @@ class ModuleCode(Resource):
         )
     )
     @Instil("db")
-    def put(self, user_id: int, service: SwapDB):
+    def put(self, user_id: int, service: SwapDB) -> tuple[dict[str, Union[str, list[int]]], int]:
         code: str = request.form.get("code")
 
         if not user_id:
@@ -51,12 +52,12 @@ class ModuleCode(Resource):
             return {"message": "Code must be 6 characters long"}, 404
 
         # Get module IDs for this code
-        module_ids = ModuleCodesTable.get_code_modules(service, code)
+        module_ids: list[int] = ModuleCodesTable.get_code_modules(service, code)
         if not module_ids:
             return {"message": "Code not found"}, 404
 
         # Subscribe the user to each module individually
-        subscribed_modules = []
+        subscribed_modules: list[int] = []
         for module_id in module_ids:
             # Process each module ID individually, not as an array
             SubscriptionsTable.add_subscription(service, user_id, int(module_id))
