@@ -1,6 +1,5 @@
 from lib.dataswap.database import SwapDB
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing the relationships between bundles and modules.
 Provides the operation for creating the bundle_modules junction table that establishes
@@ -18,7 +17,7 @@ class BundlesModulesTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS bundle_modules (

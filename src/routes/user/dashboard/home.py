@@ -1,6 +1,5 @@
 from flask_restful import Resource
 from backend.database.dashboard import DashboardTable
-
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -38,4 +37,4 @@ class HomeDashboard(Resource):
                 {"id": row[1], "type": row[2], "position": {"x": row[3], "y": row[4]}}
                 for row in dashboard
             ]
-        }
+        }, 200

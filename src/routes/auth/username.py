@@ -27,7 +27,6 @@ class CheckUsername(Resource):
             [
                 SwagResp(200, "Username exists"),
                 SwagResp(400, "Bad Request"),
-                SwagResp(404, "Username not found"),
             ],
         )
     )

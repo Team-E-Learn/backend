@@ -2,7 +2,6 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing modules in the database.
 Provides operations for creating, populating, and validating modules
@@ -31,6 +30,21 @@ class ModulesTable:
     );"""
             )
         )
+
+    @staticmethod
+    def write_module(conn: SwapDB, org_id: int, name: str, description: str) -> int:
+        cursor: SwapCursor = conn.get_cursor()
+
+        # Insert new module
+        result = cursor.execute(
+            StringStatement(
+                "INSERT INTO modules (name, description, orgID) VALUES (%s, %s, %s) RETURNING moduleID"
+            ),
+            (name, description, org_id),
+        )
+
+        # Return the moduleID of the newly created module
+        return result.fetch_one()[0]
 
     # Adds 8 modules to the DB, 4 are owned by org_id 1, 2 are owned by org_id 2, 2 are owned by org_id 3
     # No alternative API call to add modules, so this is the only way to add them
@@ -83,3 +97,16 @@ class ModulesTable:
             (module_id, org_id),
         )
         return result.fetch_one() is not None
+
+    @staticmethod
+    def get_info(conn: SwapDB, module_id: int) -> tuple[int, str, str, int] | None:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement(
+                "SELECT moduleID, name, description, orgID FROM modules WHERE moduleID = %s"
+            ),
+            (module_id,),
+        )
+
+        tuple_result: tuple[int, str, str, int] | None = result.fetch_one()
+        return tuple_result

@@ -1,6 +1,5 @@
 from lib.dataswap.database import SwapDB
 from lib.dataswap.statement import StringStatement
-
 """
 Module for tracking and managing user progress through modules in the database.
 Provides the operation for creating progress records that store
@@ -19,7 +18,7 @@ class ProgressTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS progress (

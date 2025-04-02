@@ -1,8 +1,6 @@
 from time import time
 from flask import request
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 from werkzeug.security import check_password_hash
 from backend.database.user import UserTable
 from lib.dataswap.database import SwapDB
@@ -38,7 +36,8 @@ class Login(Resource):
                     "example_password",
                 ),
             ],
-            [SwagResp(200, "Login successful"), SwagResp(401, "Unauthorized")],
+            [SwagResp(200, "Login successful"), SwagResp(400, "Bad request"),
+             SwagResp(401, "Unauthorized")],
         )
     )
     @Instil("db")

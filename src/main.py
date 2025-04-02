@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 
 from sys import stderr
+
+from routes.module.module import Module
+from testing import run_tests
 from flask.helpers import redirect
 from flask_restful import Resource
 from werkzeug.wrappers import Response
-
 from backend.database.setup import initialise_tables, populate_dummy_data
 from backend.events.logevent import LogEvent, LogLevel
 from lib.dataswap.database import PsqlDatabase, SwapDB
 from lib.front.front import Front
 from lib.front.middleware import CORSMiddleware
 from lib.instilled.instiled import Instil
-
 from lib.metro.metro import MetroBus
 from lib.swagdoc.swagtag import SwagTag
 from routes.auth.email import CheckEmail
@@ -21,6 +22,7 @@ from routes.auth.verify_email import VerifyEmail
 from routes.user.profile import Profile
 from routes.user.subscriptions import Subscriptions
 from routes.org.module.user import User
+from routes.org.organisation import Organisation
 from routes.auth.login import Login
 from routes.auth.verify2fa import Verify2FA
 
@@ -28,7 +30,7 @@ import projenv
 from routes.module.lessons.lesson import Lesson
 from routes.module.lessons.block import Block
 from routes.module.list_lessons import Lessons
-
+from routes.module.lessons.module_codes import ModuleCode
 from routes.user.dashboard.module import ModuleDashboard
 from routes.user.dashboard.home import HomeDashboard
 
@@ -96,10 +98,13 @@ front.register(VerifyEmail, "/v1/auth/verify-email")
 front.register(Lessons, "/v1/module/<int:module_id>/lessons")
 front.register(Lesson, "/v1/module/lesson/")
 front.register(Block, "/v1/module/lesson/<int:lesson_id>/block")
+front.register(ModuleCode, "/v1/module/code/<int:user_id>")
+front.register(Organisation, "/v1/org/")
 front.register(HomeDashboard, "/v1/user/<int:user_id>/dashboard")
 front.register(
     ModuleDashboard, "/v1/user/<int:user_id>/dashboard/module/<int:module_id>"
 )
+front.register(Module, "/v1/module/<int:module_id>/")
 
 
 # Start app
@@ -108,5 +113,7 @@ if __name__ == "__main__":
     if debug_mode:
         # Write dummy data
         populate_dummy_data(conn)
+        # Run tests
+        run_tests(conn)  # Only works if dummy data is populated
 
     front.start(debug=debug_mode)

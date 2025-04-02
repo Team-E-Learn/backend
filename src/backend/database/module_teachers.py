@@ -1,6 +1,5 @@
 from lib.dataswap.database import SwapDB
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing relationships between teachers and modules in the database.
 Provides operations for establishing and maintaining the many-to-many relationship
@@ -19,7 +18,7 @@ class ModuleTeachersTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS module_teachers (

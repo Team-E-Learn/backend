@@ -3,7 +3,6 @@ from backend.database.user import UserTable
 from backend.database.organisations import OrganisationsTable
 from backend.database.modules import ModulesTable
 from backend.database.subscriptions import SubscriptionsTable
-
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagParam, SwagMethod, SwagResp
@@ -16,14 +15,14 @@ class User(Resource):
         SwagDoc(
             SwagMethod.PUT,
             ["Module"],
-            "Adds a bundle or module to a user",
+            "Adds a module to a user",
             [
                 SwagParam(
                     "org_id",
                     "path",
                     "integer",
                     True,
-                    "The org id to add the module to",
+                    "The org id that the module is from",
                     "1",
                 ),
                 SwagParam(
@@ -43,38 +42,36 @@ class User(Resource):
                     "1",
                 ),
             ],
-            [SwagResp(200, "Module added to user")],
+            [
+                SwagResp(200, "Module added to user"),
+                SwagResp(403, "Organization does not own the module"),
+                SwagResp(404, "User, Organization, or Module not found"),
+                SwagResp(500, "Server error")
+            ],
         )
     )
     @Instil("db")
-    def put(
-        self, org_id: int, module_id: int, user_id: int, service: SwapDB 
-    ) -> dict[str, str | bool]:
+    def put(self, org_id: int, module_id: int, user_id: int, service: SwapDB
+    ) -> tuple[dict[str, str | bool], int]:
         # Add a module to a user using org_id, module_id and user_id
         # Check user_id exists in the users table
         if not UserTable.user_exists(service, user_id):
-            return {"success": False, "error": "User not found"}
+            return {"success": False, "error": "User not found"}, 404
 
         # Check org_id exists
         if not OrganisationsTable.org_exists(service, org_id):
-            return {"success": False, "error": "Organisation not found"}
+            return {"success": False, "error": "Organisation not found"}, 404
 
         # Check module_id exists
         if not ModulesTable.module_exists(service, module_id):
-            return {"success": False, "error": "Module not found"}
+            return {"success": False, "error": "Module not found"}, 404
 
         # Check org owns module
         if not ModulesTable.module_owned_by_org(service, module_id, org_id):
-            return {"success": False, "error": "Organisation does not own the module"}
+            return {"success": False, "error": "Organisation does not own the module"}, 403
 
         # Insert into subscriptions user_id and module_id
-        try:
-            # Return error if subscription already exists
-            if not SubscriptionsTable.add_subscription(service, user_id, module_id):
-                return {"success": False, "error": "Failed to add subscription"}
-        except Exception as e:
-            # Return error if exception is raised
-            return {"success": False, "error": str(e)}
+        SubscriptionsTable.add_subscription(service, user_id, module_id)
 
-        # If subscription is added successfully, return success message
-        return {"success": True, "message": "Successfully added subscription to user"}
+        # If subscription is added without error, return success message
+        return {"success": True, "message": "Successfully added subscription to user"}, 200

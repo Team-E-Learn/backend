@@ -1,10 +1,8 @@
 import random
 from time import time
-from tokenize import String
 from typing import Any
 from flask import request
 from flask_restful import Resource
-from werkzeug.datastructures.structures import ImmutableMultiDict
 from werkzeug.security import generate_password_hash
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
@@ -53,6 +51,7 @@ class Register(Resource):
             [
                 SwagResp(200, "Registration successful"),
                 SwagResp(400, "Bad Request"),
+                SwagResp(404, "Error finding user"),
                 SwagResp(409, "Email or username already exists"),
             ],
         )
@@ -110,7 +109,7 @@ class Register(Resource):
         service.commit()
 
         if not user:
-            return {"message": "Error finding user"}, 500
+            return {"message": "Error finding user"}, 404
 
         # Generate expiry time for JWT
         expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now

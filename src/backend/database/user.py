@@ -2,13 +2,12 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-
+from werkzeug.security import generate_password_hash
 """
 Module for managing user accounts in the database.
 Provides operations for creating, authenticating, retrieving and validating user accounts
 that can own organizations, access modules, and track educational progress.
 """
-from werkzeug.security import generate_password_hash
 
 
 class UserTable:
@@ -22,7 +21,7 @@ class UserTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS users (
@@ -119,7 +118,7 @@ class UserTable:
                 continue
 
             # Insert user into the database
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO users (accountType, firstName, lastName, username, email, password, totpSecret) "
                     + "VALUES (%s, %s, %s, %s, %s, %s, %s)",

@@ -2,10 +2,12 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+
 """
 Module for managing bundles in the database.
 Provides operations for creating and populating the bundles table and linking modules to bundles.
 """
+
 
 def add_modules_to_bundle(
     bundle_name: str, module_names: list[str], conn: SwapDB
@@ -36,7 +38,7 @@ def add_modules_to_bundle(
 
         module_id: int = module_result[0]
 
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement(
                 "INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)"
             ),
@@ -54,7 +56,7 @@ class BundlesTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS bundles (
@@ -96,7 +98,7 @@ class BundlesTable:
                 continue
 
             # Add the bundle to the bundles table
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)"
                 ),

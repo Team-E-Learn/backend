@@ -1,7 +1,6 @@
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.statement import StringStatement
-
 """
 Module for managing user subscriptions to modules in the database.
 Provides operations for creating, populating, and managing the many-to-many
@@ -20,7 +19,7 @@ class SubscriptionsTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS subscriptions (
@@ -49,7 +48,7 @@ class SubscriptionsTable:
         cursor: SwapCursor = conn.get_cursor()
         # Write sample subscriptions to the database
         for user_id, module_id in subscriptions:
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)"
                 ),
@@ -57,13 +56,16 @@ class SubscriptionsTable:
             )
 
     @staticmethod
-    def add_subscription(conn: SwapDB, user_id: int, module_id: int) -> bool:
+    def add_subscription(conn: SwapDB, user_id: int, module_id: int) -> None:
         cursor: SwapCursor = conn.get_cursor()
-        _ = cursor.execute(
+        cursor.execute(
             StringStatement(
-                "INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)"
+                """
+                INSERT INTO subscriptions (userID, moduleID) 
+                VALUES (%s, %s)
+                ON CONFLICT (userID, moduleID) DO NOTHING
+                """
             ),
             (user_id, module_id),
         )
         conn.commit()
-        return True

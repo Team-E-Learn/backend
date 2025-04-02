@@ -1,7 +1,7 @@
+import ast
 from flask import request
 from flask_restful import Resource
 from backend.database.blocks import BlocksTable
-
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -49,15 +49,15 @@ class Block(Resource):
                     "{}",
                 ),
             ],
-            [SwagResp(200, "Block created")],
+            [SwagResp(200, "Block created"), SwagResp(400, "Block not created")],
         )
     )
     @Instil("db")
     def post(self, lesson_id: int, service: SwapDB):
-        # Get block data from request
-        block_type: str | None = request.form.get("block_type")
-        order: str | None = request.form.get("order")
-        data: str | None = request.form.get("data")
+        # Get block data from request and convert to appropriate types
+        block_type = int(request.form.get("block_type", 0))
+        order = int(request.form.get("order", 0))
+        data = ast.literal_eval(request.form.get("data"))
 
         # Try to create a block, if successful return a 200 response
         if BlocksTable.write_block(service, lesson_id, block_type, order, data):
@@ -97,14 +97,14 @@ class Block(Resource):
                     "1",
                 ),
             ],
-            [SwagResp(200, "Block deleted")],
+            [SwagResp(200, "Block deleted"), SwagResp(404, "Block not found")],
         )
     )
     @Instil("db")
     def delete(self, lesson_id: int, service: SwapDB):
-        # Get block data from request
-        block_type: str | None = request.form.get("block_type")
-        order: str | None = request.form.get("order")
+        # Get block data from request and convert to integers
+        block_type: int = int(request.form.get("block_type", 0))
+        order: int = int(request.form.get("order", 0))
 
         # Try to delete a block, if successful return a 200 response
         if BlocksTable.delete_block(service, lesson_id, block_type, order):
@@ -139,4 +139,4 @@ class Block(Resource):
             blocks.append(
                 {"block_type": block_type, "block_order": block_order, "data": data}
             )
-        return {"blocks": blocks}
+        return {"blocks": blocks}, 200

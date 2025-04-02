@@ -1,13 +1,10 @@
 import base64
 import json
 from time import time
-
 from lib.dataswap.database import SwapDB
 from mintotp import totp
 from flask import request
 from flask_restful import Resource
-from psycopg.connection import Connection
-from psycopg.rows import TupleRow
 from backend.database.user import UserTable
 from lib.instilled.instiled import Instil
 from lib.jwt.jwt import Jwt
@@ -35,20 +32,21 @@ class Verify2FA(Resource):
                 SwagParam(
                     "code",
                     "formData",
-                    "string",
+                    "number",
                     True,
                     "The 6-digit 2FA code",
                     "123456",
                 ),
             ],
-            [SwagResp(200, "Verification successful"), SwagResp(401, "Unauthorized")],
+            [SwagResp(200, "Verification successful"), SwagResp(400, "Bad Request"),
+             SwagResp(401, "Unauthorized")],
         )
     )
     @Instil("db")
     def post(self, service: SwapDB):
         # Get limited JWT and 2FA code from request
         limited_jwt: str | None = request.form.get("Limited JWT")
-        code: str | None = request.form.get("code")
+        code: int | None = int(request.form.get("code"))
 
         # Check if limited JWT and 2FA code are present, if not return 400
         if not limited_jwt or not code:
@@ -77,7 +75,7 @@ class Verify2FA(Resource):
             return {"message": "Unauthorized"}, 401
 
         # Logic to verify 2FA code and generate full access JWT
-        if totp(user_secret) != code:
+        if int(totp(user_secret)) != code:
             return {"message": "Unauthorized"}, 401
 
         # Set expiry time for full access JWT

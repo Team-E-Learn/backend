@@ -19,7 +19,7 @@ class ModuleDashboardTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        _ = conn.get_cursor().execute(
+        conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS module_dashboard (
@@ -60,7 +60,7 @@ class ModuleDashboardTable:
         cursor: SwapCursor = conn.get_cursor()
         # Write sample module dashboard data to the database
         for user_id, module_id, widget_id, widget_type, x, y in module_dashboard:
-            _ = cursor.execute(
+            cursor.execute(
                 StringStatement(
                     "INSERT INTO module_dashboard (userID, moduleID, widgetID, widgetType, x, y)"
                     + " VALUES (%s, %s, %s, %s, %s, %s)"

@@ -67,6 +67,10 @@ class Front:
 
         self.__app.run("0.0.0.0")
 
+    def get_test_client(self):
+        """Returns the Flask test client for testing purposes"""
+        return self.__app.test_client()
+
     def __apply_middleware(self) -> None:
         """
         Allows for the middleware to be ran.

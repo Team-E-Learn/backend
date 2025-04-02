@@ -1,6 +1,5 @@
 from flask_restful import Resource
 from backend.database.lessons import LessonsTable
-
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -39,4 +38,4 @@ class Lessons(Resource):
                 {"id": row[0], "title": row[2], "sections": row[3]}
                 for row in lessons
             ]
-        }
+        }, 200

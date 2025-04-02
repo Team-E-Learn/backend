@@ -1,6 +1,5 @@
 from flask_restful import Resource
 from backend.database.user import UserTable
-
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -43,4 +42,4 @@ class Profile(Resource):
             "firstName": user[2],
             "lastName": user[3],
             "accountType": user[4],
-        }
+        }, 200
