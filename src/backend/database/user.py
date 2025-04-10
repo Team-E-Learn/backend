@@ -14,7 +14,7 @@ class UserTable:
     """Manages database operations for the users table.
 
     This class provides methods to create the users table and manage user account data.
-    Each user has an account type (user/admin), personal information, authentication
+    Each user has an account type (user/teacher), personal information, authentication
     credentials, and a TOTP secret for two-factor authentication. Users represent the
     primary actors in the system who interact with educational content.
     """
@@ -69,7 +69,7 @@ class UserTable:
                 "WVTBSKRNKORNCBMI",
             ),
             (
-                "admin",
+                "teacher",
                 "Bob",
                 "Johnson",
                 "bob.johnson",
@@ -87,7 +87,7 @@ class UserTable:
                 "HARAUJMIXYGDSRLA",
             ),
             (
-                "admin",
+                "teacher",
                 "David",
                 "Brown",
                 "david.brown",

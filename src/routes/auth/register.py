@@ -47,6 +47,14 @@ class Register(Resource):
                     "The password of the user",
                     "example_password",
                 ),
+                SwagParam(
+                    "accountType",
+                    "formData",
+                    "string",
+                    True,
+                    "The account type of the user (user or teacher)",
+                    "user",
+                ),
             ],
             [
                 SwagResp(200, "Registration successful"),
@@ -62,10 +70,14 @@ class Register(Resource):
         email: str | None = request.form.get("email")
         username: str | None = request.form.get("username")
         password: str | None = request.form.get("password")
+        account_type: str | None = request.form.get("accountType")
 
         # Validate input
         if not email or not username or not password:
             return {"message": "Email, username, and password are required"}, 400
+
+        if account_type not in ["user", "teacher"]:
+            return {"message": "Invalid account type"}, 400
 
         # Check for existing user
         cursor: SwapCursor = service.get_cursor()
@@ -103,7 +115,7 @@ class Register(Resource):
                         RETURNING userID, email, username
                 """
             ),
-            ("user", email, "firstname", "lastname", username, hashed_password, secret),
+            (account_type, email, "firstname", "lastname", username, hashed_password, secret),
         )
         user: tuple[Any, ...] | None = insert_result.fetch_one()
         service.commit()

@@ -27,6 +27,7 @@ class BlocksTable:
         lessonID INT REFERENCES lessons(lessonID) NOT NULL,
         blockType INT NOT NULL,
         blockOrder INT NOT NULL,
+        blockName VARCHAR(64) NOT NULL,
         data JSON NOT NULL,
         UNIQUE (lessonID, blockType, blockOrder)
     );"""
@@ -35,7 +36,7 @@ class BlocksTable:
 
     @staticmethod
     def write_block(
-        conn: SwapDB, lesson_id: int, block_type: int, order: int, data: dict
+        conn: SwapDB, lesson_id: int, block_type: int, order: int, block_name: str, data: dict
     ) -> bool:
         cursor: SwapCursor = conn.get_cursor()
 
@@ -52,78 +53,82 @@ class BlocksTable:
         cursor.execute(
             StringStatement(
                 """
-            INSERT INTO blocks (lessonID, blockType, blockOrder, data)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO blocks (lessonID, blockType, blockOrder, blockName, data)
+            VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (lessonID, blockType, blockOrder)
-            DO UPDATE SET data = EXCLUDED.data
+            DO UPDATE SET data = EXCLUDED.data, blockName = EXCLUDED.blockName
             """
             ),
-            (lesson_id, block_type, order, data_json),
+            (lesson_id, block_type, order, block_name, data_json),
         )
         return True
 
     # For http://127.0.0.1:5000/v1/module/lesson/
     @staticmethod
     def write_blocks(conn: SwapDB) -> None:
-        blocks: list[tuple[int, int, int, dict]] = [
+        blocks: list[tuple[int, int, int, str, dict]] = [
             (
                 1,
                 1,
                 1,
+                "Sky Question",
                 {
                     "question_content": "what is the colour of the sky?",
                     "question_answer": "blue",
                 },
             ),
-            (1, 2, 2, {"text": "The sky is blue"}),
-            (1, 3, 3, {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (1, 4, 4, {"image_url": "https://www.example.com/image.jpg"}),
+            (1, 2, 2, "Sky Text", {"text": "The sky is blue"}),
+            (1, 3, 3, "Sky Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+            (1, 4, 4, "Sky Image", {"image_url": "https://www.example.com/image.jpg"}),
             (
                 2,
                 1,
                 1,
+                "Grass Question",
                 {
                     "question_content": "what is the colour of the grass?",
                     "question_answer": "green",
                 },
             ),
-            (2, 2, 2, {"text": "The grass is green"}),
-            (2, 3, 3, {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (2, 4, 4, {"image_url": "https://www.example.com/image.jpg"}),
+            (2, 2, 2, "Grass Text", {"text": "The grass is green"}),
+            (2, 3, 3, "Grass Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+            (2, 4, 4, "Grass Image", {"image_url": "https://www.example.com/image.jpg"}),
             (
                 3,
                 1,
                 1,
+                "Sea Question",
                 {
                     "question_content": "what is the colour of the sea?",
                     "question_answer": "blue",
                 },
             ),
-            (3, 2, 2, {"text": "The sea is blue"}),
-            (3, 3, 3, {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (3, 4, 4, {"image_url": "https://www.example.com/image.jpg"}),
+            (3, 2, 2, "Sea Text", {"text": "The sea is blue"}),
+            (3, 3, 3, "Sea Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+            (3, 4, 4, "Sea Image", {"image_url": "https://www.example.com/image.jpg"}),
             (
                 4,
                 1,
                 1,
+                "Sun Question",
                 {
                     "question_content": "what is the colour of the sun?",
                     "question_answer": "yellow",
                 },
             ),
-            (4, 2, 2, {"text": "The sun is yellow"}),
-            (4, 3, 3, {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (4, 4, 4, {"image_url": "https://www.example.com/image.jpg"}),
+            (4, 2, 2, "Sun Text", {"text": "The sun is yellow"}),
+            (4, 3, 3, "Sun Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+            (4, 4, 4, "Sun Image", {"image_url": "https://www.example.com/image.jpg"}),
         ]
 
         cursor: SwapCursor = conn.get_cursor()
-        for lesson_id, block_type, order, data in blocks:
+        for lesson_id, block_type, order, block_name, data in blocks:
             data_json: str = json_dumps(data)
             cursor.execute(
                 StringStatement(
-                    "INSERT INTO blocks (lessonID, blockType, blockOrder, data) VALUES (%s, %s, %s, %s)"
+                    "INSERT INTO blocks (lessonID, blockType, blockOrder, blockName, data) VALUES (%s, %s, %s, %s, %s) "
                 ),
-                (lesson_id, block_type, order, data_json),
+                (lesson_id, block_type, order, block_name, data_json),
             )
 
     @staticmethod
@@ -154,7 +159,7 @@ class BlocksTable:
         cursor: SwapCursor = conn.get_cursor()
         result: SwapResult = cursor.execute(
             StringStatement(
-                "SELECT blockType, blockOrder, data FROM blocks WHERE lessonID = %s"
+                "SELECT blockType, blockOrder, blockName, data FROM blocks WHERE lessonID = %s"
             ),
             (lesson_id,),
         )

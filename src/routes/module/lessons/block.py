@@ -41,6 +41,14 @@ class Block(Resource):
                     "1",
                 ),
                 SwagParam(
+                    "block_name",
+                    "formData",
+                    "string",
+                    True,
+                    "The name of the block",
+                    "Block Name",
+                ),
+                SwagParam(
                     "data",
                     "formData",
                     "object",
@@ -57,10 +65,11 @@ class Block(Resource):
         # Get block data from request and convert to appropriate types
         block_type = int(request.form.get("block_type", 0))
         order = int(request.form.get("order", 0))
+        block_name = str(request.form.get("block_name", 0))
         data = ast.literal_eval(request.form.get("data"))
 
         # Try to create a block, if successful return a 200 response
-        if BlocksTable.write_block(service, lesson_id, block_type, order, data):
+        if BlocksTable.write_block(service, lesson_id, block_type, order, block_name, data):
             return {"message": "Block created"}, 200
         # If fails, return a 400 response
         else:
@@ -135,8 +144,8 @@ class Block(Resource):
     def get(self, lesson_id: int, service: SwapDB):
         # Get lesson sidebar with basic blocks using lesson_id
         blocks: list[dict[str, int | str]] = []
-        for block_type, block_order, data in BlocksTable.get_blocks(service, lesson_id):
+        for block_type, block_order, block_name, data in BlocksTable.get_blocks(service, lesson_id):
             blocks.append(
-                {"block_type": block_type, "block_order": block_order, "data": data}
+                {"block_type": block_type, "block_order": block_order, "block_name": block_name, "data": data}
             )
         return {"blocks": blocks}, 200

@@ -21,7 +21,7 @@ def user_test(conn: SwapDB) -> None:
             "WVTBSKRNKORNCBMI",
         ),
         (
-            "admin",
+            "teacher",
             "Bob",
             "Johnson",
             "bob.johnson",
@@ -37,7 +37,7 @@ def user_test(conn: SwapDB) -> None:
             "HARAUJMIXYGDSRLA",
         ),
         (
-            "admin",
+            "teacher",
             "David",
             "Brown",
             "david.brown",
@@ -183,30 +183,30 @@ def bundle_modules_test(conn: SwapDB) -> None:
 
 def block_test(conn: SwapDB) -> None:
     # Expected blocks
-    expected_blocks: list[tuple[int, int, int, dict[str, str]]] = [
-        (1,1,1,
+    expected_blocks: list[tuple[int, int, int, str, dict[str, str]]] = [
+        (1, 1, 1, "Sky Question",
             {
                 "question_content": "what is the colour of the sky?",
                 "question_answer": "blue",
             },
         ),
-        (1, 2, 2, {"text": "The sky is blue"}),
-        (1, 3, 3, {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-        (1, 4, 4, {"image_url": "https://www.example.com/image.jpg"})
+        (1, 2, 2, "Sky Text", {"text": "The sky is blue"}),
+        (1, 3, 3, "Sky Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+        (1, 4, 4, "Sky Image", {"image_url": "https://www.example.com/image.jpg"})
     ]
 
     # Read blocks from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(StringStatement(
-            "SELECT blockType, blockOrder, data FROM blocks WHERE lessonID = 1"
+            "SELECT blockType, blockOrder, blockName, data FROM blocks WHERE lessonID = 1"
         )
     )
-    block_results: list[tuple[int, int, dict[str, str]]] | None = result.fetch_all()
+    block_results: list[tuple[int, int, str, dict[str, str]]] | None = result.fetch_all()
 
     # Recreate blocks list for comparison
-    blocks: list[tuple[int, int, int, dict[str, str]]] = []
-    for block_type, order, data_dict in block_results:
-        blocks.append((1, block_type, order, data_dict))
+    blocks: list[tuple[int, int, int, str, dict[str, str]]] = []
+    for block_type, order, block_name, data_dict in block_results:
+        blocks.append((1, block_type, order, block_name, data_dict))
 
     # Compare expected and retrieved blocks
     assert blocks == expected_blocks, f"Original blocks: {expected_blocks},\n Retrieved blocks: {blocks}"
@@ -505,6 +505,7 @@ def create_block_endpoint_test() -> None:
     request_data: dict[str, str] = {
         "block_type": "1",
         "order": "1",
+        "block_name": "Sky Question",
         "data": "{}"
     }
 
@@ -524,11 +525,13 @@ def get_blocks_endpoint_test() -> None:
             {
                 "block_type": 1,
                 "block_order": 1,
+                "block_name": "Sky Question",
                 "data": {}
             },
             {
                 "block_type": 2,
                 "block_order": 2,
+                "block_name": "Sky Text",
                 "data": {
                     "text": "The sky is blue"
                 }
@@ -536,6 +539,7 @@ def get_blocks_endpoint_test() -> None:
             {
                 "block_type": 3,
                 "block_order": 3,
+                "block_name": "Sky Video",
                 "data": {
                     "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                 }
@@ -543,6 +547,7 @@ def get_blocks_endpoint_test() -> None:
             {
                 "block_type": 4,
                 "block_order": 4,
+                "block_name": "Sky Image",
                 "data": {
                     "image_url": "https://www.example.com/image.jpg"
                 }
@@ -712,7 +717,8 @@ def register_endpoint_test() -> None:
     request_data: dict[str, str] = {
         "email": "new_user@example.com",
         "username": "new_username",
-        "password": "new_password"
+        "password": "new_password",
+        "accountType": "user"
     }
 
     # Expected response
