@@ -1,6 +1,5 @@
 from flask import request
 from flask_restful import Resource
-from typing import Union
 from backend.database.module_codes import ModuleCodesTable
 from backend.database.subscriptions import SubscriptionsTable
 from lib.dataswap.database import SwapDB
@@ -41,7 +40,7 @@ class ModuleCode(Resource):
         )
     )
     @Instil("db")
-    def put(self, user_id: int, service: SwapDB) -> tuple[dict[str, Union[str, list[int]]], int]:
+    def put(self, user_id: int, service: SwapDB) -> tuple[dict[str, str | list[int]], int]:
         code: str = request.form.get("code")
 
         if not user_id:

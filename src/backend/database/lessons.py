@@ -74,8 +74,8 @@ class LessonsTable:
             (4, "Lesson 3", '{"content": "This is lesson 3"}'),
         ]
 
-        cursor: SwapCursor = conn.get_cursor()
         # Write sample lessons to the database
+        cursor: SwapCursor = conn.get_cursor()
         for module_id, title, sections in lessons:
             cursor.execute(
                 StringStatement(

@@ -56,9 +56,8 @@ class DashboardTable:
             (4, "calendar", 10, 40),
         ]
 
-        cursor: SwapCursor = conn.get_cursor()
         # Write sample dashboard data to the dashboard table
-
+        cursor: SwapCursor = conn.get_cursor()
         for user_id, widget_type, x, y in dashboard:
             cursor.execute(
                 StringStatement(

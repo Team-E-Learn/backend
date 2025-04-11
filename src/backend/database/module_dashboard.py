@@ -57,8 +57,8 @@ class ModuleDashboardTable:
             (4, 1, "calendar_widget", "calendar", 10, 40),
         ]
 
-        cursor: SwapCursor = conn.get_cursor()
         # Write sample module dashboard data to the database
+        cursor: SwapCursor = conn.get_cursor()
         for user_id, module_id, widget_id, widget_type, x, y in module_dashboard:
             cursor.execute(
                 StringStatement(

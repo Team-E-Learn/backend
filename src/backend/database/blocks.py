@@ -66,6 +66,7 @@ class BlocksTable:
     # For http://127.0.0.1:5000/v1/module/lesson/
     @staticmethod
     def write_blocks(conn: SwapDB) -> None:
+        # format: lesson_id, block_type, order, block_name, data
         blocks: list[tuple[int, int, int, str, dict]] = [
             (
                 1,
@@ -121,6 +122,7 @@ class BlocksTable:
             (4, 4, 4, "Sun Image", {"image_url": "https://www.example.com/image.jpg"}),
         ]
 
+        # Write sample block data to the blocks table
         cursor: SwapCursor = conn.get_cursor()
         for lesson_id, block_type, order, block_name, data in blocks:
             data_json: str = json_dumps(data)

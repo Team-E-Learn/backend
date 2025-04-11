@@ -4,6 +4,7 @@ from typing import Any
 from flask import request
 from flask_restful import Resource
 from werkzeug.security import generate_password_hash
+from backend.database.user import UserTable
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
@@ -80,24 +81,11 @@ class Register(Resource):
             return {"message": "Invalid account type"}, 400
 
         # Check for existing user
-        cursor: SwapCursor = service.get_cursor()
-        user_result: SwapResult = cursor.execute(
-            StringStatement(
-                "SELECT userID FROM users WHERE email = %s OR username = %s"
-            ),
-            (email, username),
-        )
-
-        if user_result.fetch_one():
+        if UserTable.get_by_username(service, username) or UserTable.get_by_email(service, email):
             return {"message": "Email or username already exists"}, 409
 
         # Check if email is verified
-        email_result: SwapResult = cursor.execute(
-            StringStatement("""SELECT verified FROM email_codes WHERE email = %s"""),
-            (email,),
-        )
-        email_tup: tuple[bool] | None = email_result.fetch_one()
-        if email_tup is None or not email_tup[0]:
+        if not UserTable.check_email_verified(service, email):
             return {"message": "Email not verified"}, 409
 
         # Hash the password
@@ -107,18 +95,9 @@ class Register(Resource):
         secret = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=16))
 
         # Insert user into the database
-        insert_result: SwapResult = cursor.execute(
-            StringStatement(
-                """
-                        INSERT INTO users (accountType, email, firstname, lastname, username, password, totpSecret)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                        RETURNING userID, email, username
-                """
-            ),
-            (account_type, email, "firstname", "lastname", username, hashed_password, secret),
+        user: tuple[Any, ...] | None = UserTable.write_user(
+            service, account_type, email, "firstname", "lastname", username, hashed_password, secret
         )
-        user: tuple[Any, ...] | None = insert_result.fetch_one()
-        service.commit()
 
         if not user:
             return {"message": "Error finding user"}, 404
