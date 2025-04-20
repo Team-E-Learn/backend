@@ -1,4 +1,3 @@
-import ast
 from flask import request
 from flask_restful import Resource
 from backend.database.lessons import LessonsTable

@@ -2,7 +2,7 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
-from typing import Optional, Any
+from typing import Any
 
 # This testing system is designed to work with the provided sample data
 # therefore for tests to succeed "populate_dummy_data(conn)" in main.py must be run first
@@ -318,9 +318,9 @@ def dashboard_test(conn: SwapDB) -> None:
 # API endpoint tests to check if the API is working correctly
 
 def test_endpoint(endpoint: str, expected_data: Any,
-                  method: str = "GET",
-                  data: Optional[dict[str, Any]] = None,
-                  headers: Optional[dict[str, str]] = None) -> None:
+              method: str = "GET",
+              data: dict[str, Any] | None = None,
+              headers: dict[str, str] | None = None) -> None:
     from main import front  # Imported here to avoid circular import issues
 
     # Use Flask's test client
