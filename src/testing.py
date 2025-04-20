@@ -104,31 +104,31 @@ def modules_test(conn: SwapDB) -> None:
 
 def lessons_test(conn: SwapDB) -> None:
     # Expected lessons
-    expected_lessons: list[tuple[int, str, dict[str, Any]]] = [
-        (1, "Introduction", {"content": "Welcome to the introduction"}),
-        (1, "Lesson 1", {"content": "This is lesson 1"}),
-        (1, "Lesson 2", {"content": "This is lesson 2"}),
-        (1, "Lesson 3", {"content": "This is lesson 3"}),
-        (2, "Introduction", {"content": "Welcome to the introduction"}),
-        (2, "Lesson 1", {"content": "This is lesson 1"}),
-        (2, "Lesson 2", {"content": "This is lesson 2"}),
-        (2, "Lesson 3", {"content": "This is lesson 3"}),
-        (3, "Introduction", {"content": "Welcome to the introduction"}),
-        (3, "Lesson 1", {"content": "This is lesson 1"}),
-        (3, "Lesson 2", {"content": "This is lesson 2"}),
-        (3, "Lesson 3", {"content": "This is lesson 3"}),
-        (4, "Introduction", {"content": "Welcome to the introduction"}),
-        (4, "Lesson 1", {"content": "This is lesson 1"}),
-        (4, "Lesson 2", {"content": "This is lesson 2"}),
-        (4, "Lesson 3", {"content": "This is lesson 3"}),
-    ]
+    expected_lessons: list[tuple[int, str]] = [
+            (1, "Introduction"),
+            (1, "Lesson 1"),
+            (1, "Lesson 2"),
+            (1, "Lesson 3"),
+            (2, "Introduction"),
+            (2, "Lesson 1",),
+            (2, "Lesson 2"),
+            (2, "Lesson 3"),
+            (3, "Introduction"),
+            (3, "Lesson 1"),
+            (3, "Lesson 2"),
+            (3, "Lesson 3"),
+            (4, "Introduction"),
+            (4, "Lesson 1"),
+            (4, "Lesson 2"),
+            (4, "Lesson 3"),
+        ]
 
     # Read lessons from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(
-        StringStatement("SELECT moduleID, title, sections FROM lessons")
+        StringStatement("SELECT moduleID, title FROM lessons")
     )
-    lessons: list[tuple[int, str, dict[str, Any]]] | None = result.fetch_all()
+    lessons: list[tuple[int, str]] | None = result.fetch_all()
 
     # Compare expected and retrieved lessons
     assert lessons == expected_lessons, f"Original lessons: {expected_lessons},\n Retrieved lessons: {lessons}"
@@ -582,30 +582,18 @@ def get_module_lessons_endpoint_test() -> None:
             {
                 "id": 1,
                 "title": "Introduction",
-                "sections": {
-                    "content": "Welcome to the introduction"
-                }
             },
             {
                 "id": 2,
                 "title": "Lesson 1",
-                "sections": {
-                    "content": "This is lesson 1"
-                }
             },
             {
                 "id": 3,
                 "title": "Lesson 2",
-                "sections": {
-                    "content": "This is lesson 2"
-                }
             },
             {
                 "id": 4,
                 "title": "Lesson 3",
-                "sections": {
-                    "content": "This is lesson 3"
-                }
             }
         ]
     }
@@ -620,7 +608,6 @@ def create_lesson_endpoint_test() -> None:
         "lesson_id": "1",
         "module_id": "1",
         "title": "example_title",
-        "sections": "{'section1': ['content1', 'content2'], 'section2': ['content3', 'content4']}"
     }
 
     # Expected response

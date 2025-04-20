@@ -30,12 +30,12 @@ class Lessons(Resource):
     # Get list of lessons for a specific module using module_id
     @Instil("db")
     def get(self, module_id: int, service: SwapDB):
-        lessons: list[tuple[int, int, str, str]] = LessonsTable.get_lessons(
+        lessons: list[tuple[int, int, str]] = LessonsTable.get_lessons(
             service, module_id
         )
         return {
             "lessons": [
-                {"id": row[0], "title": row[2], "sections": row[3]}
+                {"id": row[0], "title": row[2]}
                 for row in lessons
             ]
         }, 200
