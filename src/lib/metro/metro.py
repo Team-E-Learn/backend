@@ -55,3 +55,23 @@ class MetroBus:
         ):  # check if event has been registered before
             self.__subscriptions[obj] = []  # initialise empty list of callbacks
         self.__subscriptions[obj].append(callback)  # add callback to registry
+
+
+class TestEvent(Event):
+    def __init__(self) -> None:
+        self.found_event: bool = False
+
+    def set_found(self) -> None:
+        self.found_event = True
+
+def test_metro() -> None:
+    MetroBus().subscribe(TestEvent, lambda e: e.set_found())
+
+    event: TestEvent = TestEvent()
+    _ = MetroBus().publish(event)
+    assert event.found_event, "Event successfully modified"
+    
+    print(f">> Test passed for Metro library")
+
+if __name__ == "__main__":
+    test_metro()

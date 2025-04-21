@@ -49,7 +49,7 @@ class Front:
         """
         self.__swag.add_tag(swag_tag)
 
-    def add_middleware(self, middleware: IMiddleware) -> None:
+    def add_after_middleware(self, middleware: IMiddleware) -> None:
         """
         Adds a middleware object to the registry
         """
@@ -63,7 +63,7 @@ class Front:
             self.__swag.start_swag()
 
         if len(self.__middleware) > 0:
-            self.__apply_middleware()  # Applies all available middleware
+            self.__apply_after_middleware()  # Applies all available middleware
 
         self.__app.run("0.0.0.0")
 
@@ -71,7 +71,7 @@ class Front:
         """Returns the Flask test client for testing purposes"""
         return self.__app.test_client()
 
-    def __apply_middleware(self) -> None:
+    def __apply_after_middleware(self) -> None:
         """
         Allows for the middleware to be ran.
         """
