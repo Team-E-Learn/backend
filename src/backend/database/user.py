@@ -1,3 +1,4 @@
+from typing import Any
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
@@ -14,7 +15,7 @@ class UserTable:
     """Manages database operations for the users table.
 
     This class provides methods to create the users table and manage user account data.
-    Each user has an account type (user/admin), personal information, authentication
+    Each user has an account type (user/teacher), personal information, authentication
     credentials, and a TOTP secret for two-factor authentication. Users represent the
     primary actors in the system who interact with educational content.
     """
@@ -53,8 +54,25 @@ class UserTable:
         )
         return result.fetch_one()
 
+    @staticmethod
+    def write_user(conn: SwapDB, account_type: str, email: str, firstname: str, lastname: str, username: str,
+                   hashed_password: str, secret: str):
+        cursor: SwapCursor = conn.get_cursor()
+        insert_result: SwapResult = cursor.execute(
+            StringStatement(
+                """
+                INSERT INTO users (accountType, email, firstname, lastname, username, password, totpSecret)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING userID, email, username
+                """
+            ),
+            (account_type, email, firstname, lastname, username, hashed_password, secret),
+        )
+        user: tuple[Any, ...] | None = insert_result.fetch_one()
+        conn.commit()
+        return user
+
     # This populates user_ids 1-4 with dummy data
-    # No alternative API call to add users, so this is the only way to add them
     @staticmethod
     def write_users(conn: SwapDB) -> None:
         # Format is (accountType, firstName, lastName, username, email)
@@ -69,7 +87,7 @@ class UserTable:
                 "WVTBSKRNKORNCBMI",
             ),
             (
-                "admin",
+                "teacher",
                 "Bob",
                 "Johnson",
                 "bob.johnson",
@@ -87,7 +105,7 @@ class UserTable:
                 "HARAUJMIXYGDSRLA",
             ),
             (
-                "admin",
+                "teacher",
                 "David",
                 "Brown",
                 "david.brown",
@@ -165,3 +183,14 @@ class UserTable:
         )
         result_tup: tuple[str] | None = result.fetch_one()
         return None if result_tup is None else result_tup[0]
+
+    @staticmethod
+    def check_email_verified(conn: SwapDB, email: str) -> bool:
+        # Check if email is verified
+        cursor: SwapCursor = conn.get_cursor()
+        email_result: SwapResult = cursor.execute(
+            StringStatement("""SELECT verified FROM email_codes WHERE email = %s"""),
+            (email,),
+        )
+        email_tup: tuple[bool] | None = email_result.fetch_one()
+        return email_tup is not None and email_tup[0]

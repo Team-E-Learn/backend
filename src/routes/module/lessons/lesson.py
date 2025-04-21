@@ -1,4 +1,3 @@
-import ast
 from flask import request
 from flask_restful import Resource
 from backend.database.lessons import LessonsTable
@@ -40,14 +39,6 @@ class Lesson(Resource):
                     "The title of the lesson",
                     "example_title",
                 ),
-                SwagParam(
-                    "sections",
-                    "formData",
-                    "string",
-                    True,
-                    "The sections of the lesson",
-                    "{'section1': ['content1', 'content2'], 'section2': ['content3', 'content4']}",
-                ),
             ],
             [SwagResp(200, "Lesson created"), SwagResp(404, "Lesson not found")],
         )
@@ -58,11 +49,10 @@ class Lesson(Resource):
         lesson_id = int(request.form.get("lesson_id", 0))
         module_id = int(request.form.get("module_id", 0))
         title = request.form.get("title", "")
-        sections = ast.literal_eval(request.form.get("sections", "{}"))
 
 
-        # Create new lesson using module_id, title, and sections
-        LessonsTable.create_lesson(service, lesson_id, module_id, title, sections)
+        # Create new lesson using module_id, title
+        LessonsTable.create_lesson(service, lesson_id, module_id, title)
         return {"message": "Lesson created"}, 200
 
     @SwagGen(

@@ -1,4 +1,3 @@
-import json
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
@@ -14,8 +13,7 @@ class LessonsTable:
     """Manages database operations for the lessons table.
 
     This class provides methods to create the lessons table and manage lesson data
-    for modules. Each lesson has a title and JSON-structured content
-    organized into sections.
+    for modules.
     """
 
     @staticmethod
@@ -26,8 +24,7 @@ class LessonsTable:
     CREATE TABLE IF NOT EXISTS lessons (
         lessonID SERIAL PRIMARY KEY UNIQUE NOT NULL,
         moduleID INT REFERENCES modules(moduleID) NOT NULL,
-        title VARCHAR(48) NOT NULL,
-        sections JSON NOT NULL
+        title VARCHAR(48) NOT NULL
     );"""
             )
         )
@@ -38,50 +35,48 @@ class LessonsTable:
         lesson_id: int,
         module_id: int,
         title: str,
-        sections: dict[str, str],
     ) -> None:
-        sections_json: str = json.dumps(sections)
 
         cursor: SwapCursor = conn.get_cursor()
         cursor.execute(
             StringStatement(
-                "INSERT INTO lessons (lessonID, moduleID, title, sections) VALUES (%s, %s, %s, %s) "
-                + "ON CONFLICT (lessonID) DO UPDATE SET title = EXCLUDED.title, sections = EXCLUDED.sections"
+                "INSERT INTO lessons (lessonID, moduleID, title) VALUES (%s, %s, %s) "
+                + "ON CONFLICT (lessonID) DO UPDATE SET title = EXCLUDED.title"
             ),
-            (lesson_id, module_id, title, sections_json),
+            (lesson_id, module_id, title),
         )
 
     # For http://127.0.0.1:5000/v1/module/5/lessons
     @staticmethod
     def write_lessons(conn: SwapDB) -> None:
-        # Format is (module_id, title, sections)
-        lessons: list[tuple[int, str, str]] = [
-            (1, "Introduction", '{"content": "Welcome to the introduction"}'),
-            (1, "Lesson 1", '{"content": "This is lesson 1"}'),
-            (1, "Lesson 2", '{"content": "This is lesson 2"}'),
-            (1, "Lesson 3", '{"content": "This is lesson 3"}'),
-            (2, "Introduction", '{"content": "Welcome to the introduction"}'),
-            (2, "Lesson 1", '{"content": "This is lesson 1"}'),
-            (2, "Lesson 2", '{"content": "This is lesson 2"}'),
-            (2, "Lesson 3", '{"content": "This is lesson 3"}'),
-            (3, "Introduction", '{"content": "Welcome to the introduction"}'),
-            (3, "Lesson 1", '{"content": "This is lesson 1"}'),
-            (3, "Lesson 2", '{"content": "This is lesson 2"}'),
-            (3, "Lesson 3", '{"content": "This is lesson 3"}'),
-            (4, "Introduction", '{"content": "Welcome to the introduction"}'),
-            (4, "Lesson 1", '{"content": "This is lesson 1"}'),
-            (4, "Lesson 2", '{"content": "This is lesson 2"}'),
-            (4, "Lesson 3", '{"content": "This is lesson 3"}'),
+        # Format is (module_id, title)
+        lessons: list[tuple[int, str]] = [
+            (1, "Introduction"),
+            (1, "Lesson 1"),
+            (1, "Lesson 2"),
+            (1, "Lesson 3"),
+            (2, "Introduction"),
+            (2, "Lesson 1",),
+            (2, "Lesson 2"),
+            (2, "Lesson 3"),
+            (3, "Introduction"),
+            (3, "Lesson 1"),
+            (3, "Lesson 2"),
+            (3, "Lesson 3"),
+            (4, "Introduction"),
+            (4, "Lesson 1"),
+            (4, "Lesson 2"),
+            (4, "Lesson 3"),
         ]
 
-        cursor: SwapCursor = conn.get_cursor()
         # Write sample lessons to the database
-        for module_id, title, sections in lessons:
+        cursor: SwapCursor = conn.get_cursor()
+        for module_id, title in lessons:
             cursor.execute(
                 StringStatement(
-                    "INSERT INTO lessons (moduleID, title, sections) VALUES (%s, %s, %s)",
+                    "INSERT INTO lessons (moduleID, title) VALUES (%s, %s)",
                 ),
-                (module_id, title, sections),
+                (module_id, title),
             )
 
     @staticmethod
@@ -108,12 +103,12 @@ class LessonsTable:
         return True
 
     @staticmethod
-    def get_lessons(conn: SwapDB, module_id: int) -> list[tuple[int, int, str, str]]:
+    def get_lessons(conn: SwapDB, module_id: int) -> list[tuple[int, int, str]]:
         cursor: SwapCursor = conn.get_cursor()
         result: SwapResult = cursor.execute(
             StringStatement("SELECT * FROM lessons WHERE moduleID = %s"), (module_id,)
         )
-        tuple_res: list[tuple[int, int, str, str]] | None = result.fetch_all()
+        tuple_res: list[tuple[int, int, str]] | None = result.fetch_all()
 
         if tuple_res is None:
             return []

@@ -1,7 +1,7 @@
 import ast
 from flask import request
 from flask_restful import Resource
-from typing import Any, Optional
+from typing import Any
 from backend.database.organisations import OrganisationsTable
 from backend.database.modules import ModulesTable
 from lib.dataswap.database import SwapDB
@@ -65,7 +65,7 @@ class Organisation(Resource):
 
         # Parse modules list
         try:
-            modules_str: Optional[str] = request.form.get("modules", "[]")
+            modules_str: str | None = request.form.get("modules", "[]")
             modules: list[dict[str, Any]] = ast.literal_eval(modules_str)
         except (SyntaxError, ValueError):
             return {"message": "Invalid modules format"}, 400
@@ -79,7 +79,7 @@ class Organisation(Resource):
             return {"message": "Modules must be a list"}, 400
 
         # Create/Update Organisation
-        org_id: Optional[int] = OrganisationsTable.write_org(service, name, description, owner_id)
+        org_id: int | None = OrganisationsTable.write_org(service, name, description, owner_id)
 
         # Create modules for the Organisation
         created_modules: list[dict[str, Any]] = []
@@ -91,7 +91,7 @@ class Organisation(Resource):
             module_description: str = module.get("description", "")
 
             # Overwriting happens automatically in the database
-            module_id: Optional[int] = ModulesTable.write_module(
+            module_id: int | None = ModulesTable.write_module(
                 service,
                 org_id,
                 module_name,

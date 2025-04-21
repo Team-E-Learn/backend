@@ -45,8 +45,8 @@ class SubscriptionsTable:
             (4, 8),
         ]
 
-        cursor: SwapCursor = conn.get_cursor()
         # Write sample subscriptions to the database
+        cursor: SwapCursor = conn.get_cursor()
         for user_id, module_id in subscriptions:
             cursor.execute(
                 StringStatement(

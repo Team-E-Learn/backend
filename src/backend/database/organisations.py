@@ -74,8 +74,8 @@ class OrganisationsTable:
             ("Amazon", "An online retailer", 2),
         ]
 
-        cursor: SwapCursor = conn.get_cursor()
         # Write sample organisations to the database
+        cursor: SwapCursor = conn.get_cursor()
         for name, description, ownerID in orgs:
             result: SwapResult = cursor.execute(
                 StringStatement("SELECT 1 FROM organisations WHERE name = %s"), (name,)
