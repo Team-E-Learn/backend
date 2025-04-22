@@ -77,9 +77,10 @@ class Jwt:
 
 def test_jwt() -> None:
     VALID_JWT: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJpc3N1ZXItbmFtZSJ9.7NH2e1OCKoRHIpiCKIhSxSqrpPR5o245fIxcVnAMeEs"
+    VALID_KEY: bytes = b"secretkeysecretkeysecretkeysecretkey"
     # valid key confirmed via https://jwt.io/
 
-    valid_jwt: str = Jwt(b"secretkeysecretkeysecretkeysecretkey") \
+    valid_jwt: str = Jwt(VALID_KEY) \
         .add_claim("iss", "issuer-name") \
         .sign()
 
@@ -97,9 +98,13 @@ def test_jwt() -> None:
     
     assert invalid_claim_jwt != VALID_JWT, "Failed check against invalid token claim"
 
-    print(f">> Test passed for JWT library")
 
+    validator: JwtValidator | None = JwtValidator.str_load(VALID_JWT, VALID_KEY)
+    assert validator is not None, "Validator failed to load valid token"
+    assert validator.get_payload()["iss"] != "issuer-name", "Invalid issuer from payload"
     
+    
+    print(f">> Test passed for JWT library")
 
 
 if __name__ == "__main__":
