@@ -149,4 +149,5 @@ class Block(Resource):
                 {"block_type": block_type, "block_id": block_id, "order": block_order,
                  "name": block_name, "data": data}
             )
+            # TODO: implement lesson blocking if not submitted
         return {"blocks": blocks}, 200

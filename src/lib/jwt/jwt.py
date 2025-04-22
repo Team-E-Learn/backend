@@ -1,8 +1,10 @@
-from base64 import urlsafe_b64encode
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 from hashlib import sha256
 import hmac
-from json import dumps
-from typing import override
+from json import dumps, loads
+from typing import TypeAlias, override
+
+_ALLOWED_CLAIM_DATA: TypeAlias = str | int
 
 def _hash_msg(msg: bytes, key: bytes) -> str:
     hash_: bytes = hmac.new(key=key, msg=msg, digestmod=sha256).digest()
@@ -12,14 +14,44 @@ def _hash_msg(msg: bytes, key: bytes) -> str:
 def _encode(string: str) -> str:
     return urlsafe_b64encode(bytes(string, "latin-1")).decode().strip("=")
 
+class JwtValidator:
+    def __init__(self, header: str, payload: str, signature: str, key: bytes) -> None:
+        self.__header: str = header
+        self.__payload: str = payload
+        self.__signature: str = signature
+        self.__key: bytes = key
+
+    def get_header(self) -> dict[str, _ALLOWED_CLAIM_DATA]:
+        return loads(urlsafe_b64decode(self.__header).decode())
+
+    def get_payload(self) -> dict[str, _ALLOWED_CLAIM_DATA]:
+        return loads(urlsafe_b64decode(self.__payload).decode())
+
+    @staticmethod
+    def validate(header: str, payload: str, signature: str, key: bytes) -> bool:
+        msg: bytes = bytes(f"{header}.{payload}", "latin-1")
+        return _hash_msg(msg, key) == signature
+
+    @staticmethod
+    def str_load(token: str, key: bytes) -> "JwtValidator | None":
+        if token.count(".") != 2:
+            return None 
+        
+        header, payload, signature = token.split(".")
+
+        if not JwtValidator.validate(header, payload, signature, key):
+            return None
+
+        return JwtValidator(header, payload, signature, key)
+
 
 class Jwt:
 
     def __init__(self, key: bytes) -> None:
         self.__key: bytes = key
-        self.__claims: dict[str, str] = {}
+        self.__claims: dict[str, _ALLOWED_CLAIM_DATA] = {}
 
-    def add_claim(self, name: str, value: str) -> "Jwt":
+    def add_claim(self, name: str, value: _ALLOWED_CLAIM_DATA) -> "Jwt":
         self.__claims[name] = value
         return self
 
@@ -38,19 +70,6 @@ class Jwt:
         return _hash_msg(
             bytes(self.__head() + "." + self.__payload(), "latin-1"), self.__key
         )
-
-    @staticmethod
-    def validate(head: str, payload: str, sig: str, key: bytes) -> bool:
-        msg: bytes = bytes(f"{head}.{payload}", "latin-1")
-        return _hash_msg(msg, key) == sig
-
-    @staticmethod
-    def validate_token(token: str, key: bytes) -> bool:
-        if token.count(".") != 2:
-            return False
-
-        header, payload, signature = token.split(".")
-        return Jwt.validate(header, payload, signature, key)
 
     @override
     def __str__(self) -> str:
