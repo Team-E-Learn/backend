@@ -72,3 +72,21 @@ class ModuleCode(Resource):
             "message": f"Successfully subscribed user {user_id} to {len(subscribed_modules)} modules",
             "modules": subscribed_modules
         }, 200
+
+    @SwagGen(
+        SwagDoc(
+            SwagMethod.OPTIONS,
+            ["Module"],
+            "Handle OPTIONS requests for CORS preflight",
+            [],
+            [SwagResp(200, "Options response")]
+        )
+    )
+    def options(self, user_id=None):
+        """Handle OPTIONS requests to support CORS preflight requests."""
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        }
+        return {'message': 'OK'}, 200, headers
