@@ -78,7 +78,16 @@ class ModuleCode(Resource):
             SwagMethod.OPTIONS,
             ["Module"],
             "Handle OPTIONS requests for CORS preflight",
-            [],
+            [
+                SwagParam(
+                    "user_id",
+                    "path",
+                    "integer",
+                    False,
+                    "The ID of the user",
+                    "1",
+                ),
+            ],
             [SwagResp(200, "Options response")]
         )
     )
