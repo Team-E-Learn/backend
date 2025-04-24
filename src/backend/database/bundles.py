@@ -64,7 +64,6 @@ class BundlesTable:
     CREATE TABLE IF NOT EXISTS bundles (
         bundleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
         name VARCHAR(48) NOT NULL,
-        description VARCHAR(100) NOT NULL,
         orgID INT REFERENCES organisations(orgID) NOT NULL
     );"""
             )
@@ -74,16 +73,14 @@ class BundlesTable:
     # No alternative API call to add bundles, so this is the only way to add them
     @staticmethod
     def write_bundles(conn: SwapDB) -> None:
-        # format is (name, description, orgID)
-        bundles: list[tuple[str, str, int]] = [
+        # format is (name, orgID)
+        bundles: list[tuple[str, int]] = [
             (
                 "Computer Science BSc",
-                "A bundle of modules for a Computer Science degree",
                 1,
             ),
             (
                 "Excel Certification",
-                "A bundle of modules for an Excel certification",
                 2,
             ),
         ]
@@ -91,7 +88,7 @@ class BundlesTable:
         cursor: SwapCursor = conn.get_cursor()
 
         # Add each bundle to the bundles table
-        for name, description, orgID in bundles:
+        for name, orgID in bundles:
             result = cursor.execute(
                 StringStatement("SELECT 1 FROM bundles WHERE name = %s"), (name,)
             )
@@ -102,9 +99,9 @@ class BundlesTable:
             # Add the bundle to the bundles table
             cursor.execute(
                 StringStatement(
-                    "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)"
+                    "INSERT INTO bundles (name, orgID) VALUES (%s, %s)"
                 ),
-                (name, description, orgID),
+                (name, orgID),
             )
 
         # List of modules to add to the CS bundle from modules.py

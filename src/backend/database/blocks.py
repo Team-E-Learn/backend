@@ -70,62 +70,32 @@ class BlocksTable:
     def write_blocks(conn: SwapDB) -> None:
         # format: lesson_id, block_id, block_type, order, block_name, data
         blocks: list[tuple[int, int, int, int, str, dict]] = [
-            (
-                1,
-                1,
-                1,
-                1,
-                "Sky Question",
-                {
-                    "question_content": "what is the colour of the sky?",
-                    "question_answer": "blue",
-                },
-            ),
-            (1, 2, 2, 2, "Sky Text", {"text": "The sky is blue"}),
-            (1, 3, 3, 3, "Sky Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (1, 4, 4, 4, "Sky Image", {"image_url": "https://www.example.com/image.jpg"}),
-            (
-                2,
-                1,
-                1,
-                1,
-                "Grass Question",
-                {
-                    "question_content": "what is the colour of the grass?",
-                    "question_answer": "green",
-                },
-            ),
-            (2, 2, 2, 2, "Grass Text", {"text": "The grass is green"}),
-            (2, 3, 3, 3, "Grass Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (2, 4, 4, 4, "Grass Image", {"image_url": "https://www.example.com/image.jpg"}),
-            (
-                3,
-                1,
-                1,
-                1,
-                "Sea Question",
-                {
-                    "question_content": "what is the colour of the sea?",
-                    "question_answer": "blue",
-                },
-            ),
-            (3, 2, 2, 2, "Sea Text", {"text": "The sea is blue"}),
-            (3, 3, 3, 3, "Sea Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (3, 4, 4, 4, "Sea Image", {"image_url": "https://www.example.com/image.jpg"}),
-            (
-                4,
-                1,
-                1,
-                1,
-                "Sun Question",
-                {
-                    "question_content": "what is the colour of the sun?",
-                    "question_answer": "yellow",
-                },
-            ),
-            (4, 2, 2, 2, "Sun Text", {"text": "The sun is yellow"}),
-            (4, 3, 3, 3, "Sun Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-            (4, 4, 4, 4, "Sun Image", {"image_url": "https://www.example.com/image.jpg"}),
+            (1, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (1, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+            (1, 3, 3, 3, "text and image block",
+                {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet",
+                 "image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+            (1, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (1, 5, 5, 5, "quiz block", {"question": "press option A",
+                                        "options": {
+                                        "A": {"text": "Option A", "isCorrect": True},
+                                        "B": {"text": "Option B", "isCorrect": False},
+                                        "C": {"text": "Option C", "isCorrect": False},
+                                        "D": {"text": "Option D", "isCorrect": False}}}),
+
+            (2, 2, 2, 2, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (2, 3, 3, 3, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+            (2, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+
+            (3, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (3, 2, 2, 2, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (3, 3, 3, 3, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (3, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+
+            (4, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (4, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+            (4, 3, 3, 3, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (4, 4, 4, 4, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
         ]
 
         # Write sample block data to the blocks table

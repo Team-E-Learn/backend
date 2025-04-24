@@ -2,6 +2,7 @@ from flask import request
 from flask_restful import Resource
 from backend.database.module_codes import ModuleCodesTable
 from backend.database.subscriptions import SubscriptionsTable
+from backend.database.user import UserTable
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -34,7 +35,7 @@ class ModuleCode(Resource):
             ],
             [
                 SwagResp(200, "Successfully subscribed to modules"),
-                SwagResp(404, "Code not found"),
+                SwagResp(404, "Code or user not found"),
                 SwagResp(400, "Invalid request data"),
             ],
         )
@@ -49,6 +50,10 @@ class ModuleCode(Resource):
             return {"message": "Code is required"}, 400
         if len(code) != 6:
             return {"message": "Code must be 6 characters long"}, 404
+
+        # Check user_id exists in the user's table
+        if not UserTable.user_exists(service, user_id):
+            return {"success": False, "error": "User not found"}, 404
 
         # Get module IDs for this code
         module_ids: list[int] = ModuleCodesTable.get_code_modules(service, code)

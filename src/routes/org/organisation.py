@@ -31,7 +31,7 @@ class Organisation(Resource):
                     "string",
                     True,
                     "list of modules to create for this Organisation",
-                    "[{'name': 'Module 1', 'description': 'Description for module 1'}]",
+                    "[{'name': 'Module 1'}, {'name': 'Module 2'}]",
                 ),
                 SwagParam(
                     "owner_id",
@@ -79,14 +79,12 @@ class Organisation(Resource):
                 continue
 
             module_name: str = module.get("name")
-            module_description: str = module.get("description", "")
 
             # Overwriting happens automatically in the database
             module_id: int | None = ModulesTable.write_module(
                 service,
                 org_id,
                 module_name,
-                module_description
             )
 
             if module_id:
