@@ -27,7 +27,7 @@ class Lessons(Resource):
         )
     )
 
-    # Get list of lessons for a specific module using module_id
+    # Get a list of lessons for a specific module using module_id
     @Instil("db")
     def get(self, module_id: int, service: SwapDB):
         lessons: list[tuple[int, int, str]] = LessonsTable.get_lessons(

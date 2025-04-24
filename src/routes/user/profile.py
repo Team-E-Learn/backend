@@ -33,7 +33,7 @@ class Profile(Resource):
         # Get user profile information using user_id
         user = UserTable.get_user_profile(service, user_id)
 
-        # Guard clause for user not found
+        # Guard clause for if user not found
         if user is None:
             return {"error": "User not found"}
         return {

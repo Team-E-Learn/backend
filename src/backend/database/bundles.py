@@ -45,6 +45,8 @@ def add_modules_to_bundle(
             (bundle_id, module_id),
         )
 
+    return None
+
 
 class BundlesTable:
     """Manages database operations for the bundles table.

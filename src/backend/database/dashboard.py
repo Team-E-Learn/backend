@@ -14,7 +14,7 @@ class DashboardTable:
 
     This class provides methods to create the dashboard table and manage
     widget positions for user dashboards. Each record represents a widget
-    positioned on a user's personalized dashboard interface.
+    positioned on a user's personalised dashboard interface.
     """
 
     @staticmethod

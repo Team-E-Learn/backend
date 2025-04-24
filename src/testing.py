@@ -59,16 +59,16 @@ def user_test(conn: SwapDB) -> None:
 
 def organisations_test(conn: SwapDB) -> None:
     # Expected organisations
-    expected_orgs: list[tuple[str, str, int]] = [
-        ("University of Lincoln", "A university in Lincoln", 4),
-        ("Microsoft", "A tech company", 2),
-        ("Amazon", "An online retailer", 2),
+    expected_orgs: list[tuple[str, int]] = [
+        ("University of Lincoln", 4),
+        ("Microsoft", 2),
+        ("Amazon", 2),
     ]
 
     # read organisations from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(
-        StringStatement("SELECT name, description, ownerID FROM organisations")
+        StringStatement("SELECT name, ownerID FROM organisations")
     )
     orgs: list[tuple[str, str, int]] | None = result.fetch_all()
 
@@ -476,7 +476,6 @@ def create_organisation_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "name": "Example Organisation",
-        "description": "An example Organisation description",
         "modules": "[{'name': 'Module 1', 'description': 'Description for module 1'}]",
         "owner_id": "1"
     }

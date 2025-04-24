@@ -83,14 +83,14 @@ class LessonsTable:
     def delete_lesson(conn: SwapDB, lesson_id: int) -> bool:
         cursor: SwapCursor = conn.get_cursor()
 
-        # Check if lesson exists
+        # Check if a lesson exists
         if not cursor.execute(
             StringStatement("SELECT * FROM lessons WHERE lessonID = %s"), (lesson_id,)
         ).fetch_one():
-            # If lesson does not exist, return False
+            # If a lesson does not exist, return False
             return False
 
-        # If lesson exists, delete blocks associated with lesson
+        # If a lesson exists, delete blocks associated with the lesson
         cursor.execute(
             StringStatement("DELETE FROM blocks WHERE lessonID = %s"), (lesson_id,)
         )

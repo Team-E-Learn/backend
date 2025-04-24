@@ -26,7 +26,7 @@ def initialise_tables(conn: SwapDB) -> None:
 
     Creates all tables if they don't exist, ensuring proper sequencing
     to maintain foreign key integrity. Tables are created in an order
-    that respects their dependencies (e.g., users table before tables
+    that respects their dependencies (e.g. users' table before tables
     that reference user IDs).
     """
     UserTable.create(conn)

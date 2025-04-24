@@ -26,14 +26,6 @@ class Organisation(Resource):
                     "Example Organisation",
                 ),
                 SwagParam(
-                    "description",
-                    "formData",
-                    "string",
-                    False,
-                    "The description of the Organisation",
-                    "An example Organisation description",
-                ),
-                SwagParam(
                     "modules",
                     "formData",
                     "string",
@@ -60,7 +52,6 @@ class Organisation(Resource):
     def post(self, service: SwapDB) -> tuple[dict[str, Any], int]:
         # Get Organisation data from request
         name: str | None = request.form.get("name")
-        description: str | None = request.form.get("description", "")
         owner_id: int | None = int(request.form.get("owner_id"))
 
         # Parse modules list
@@ -79,7 +70,7 @@ class Organisation(Resource):
             return {"message": "Modules must be a list"}, 400
 
         # Create/Update Organisation
-        org_id: int | None = OrganisationsTable.write_org(service, name, description, owner_id)
+        org_id: int | None = OrganisationsTable.write_org(service, name, owner_id)
 
         # Create modules for the Organisation
         created_modules: list[dict[str, Any]] = []
