@@ -12,7 +12,6 @@ class SwagMethod(Enum):
     POST = "post"
     PUT = "put"
     DELETE = "delete"
-    OPTIONS = "options"
 
 
 class SwagParam:
