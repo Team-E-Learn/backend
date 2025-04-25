@@ -4,7 +4,6 @@ import hmac
 from json import dumps
 from typing import override
 
-
 def _hash_msg(msg: bytes, key: bytes) -> str:
     hash_: bytes = hmac.new(key=key, msg=msg, digestmod=sha256).digest()
     return urlsafe_b64encode(hash_).decode().strip("=")
@@ -56,3 +55,33 @@ class Jwt:
     @override
     def __str__(self) -> str:
         return self.sign()
+
+def test_jwt() -> None:
+    VALID_JWT: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJpc3N1ZXItbmFtZSJ9.7NH2e1OCKoRHIpiCKIhSxSqrpPR5o245fIxcVnAMeEs"
+    # valid key confirmed via https://jwt.io/
+
+    valid_jwt: str = Jwt(b"secretkeysecretkeysecretkeysecretkey") \
+        .add_claim("iss", "issuer-name") \
+        .sign()
+
+    assert valid_jwt == VALID_JWT, "Failed check against valid token"
+    
+    invalid_key_jwt: str = Jwt(b"wrongkey") \
+        .add_claim("iss", "issuer-name") \
+        .sign()
+    
+    assert invalid_key_jwt != VALID_JWT, "Failed check against invalid token key"
+    
+    invalid_claim_jwt: str = Jwt(b"secretkeysecretkeysecretkeysecretkey") \
+        .add_claim("iss", "wrong-name") \
+        .sign()
+    
+    assert invalid_claim_jwt != VALID_JWT, "Failed check against invalid token claim"
+
+    print(f">> Test passed for JWT library")
+
+    
+
+
+if __name__ == "__main__":
+    test_jwt()

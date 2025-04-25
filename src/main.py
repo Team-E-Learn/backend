@@ -42,7 +42,7 @@ front: Front = Front(
     + " developed for the Team Software Engineering module at the University of Lincoln.",
     "0.0.0",
 )
-front.add_middleware(CORSMiddleware())  # apply middleware for CORS
+front.add_after_middleware(CORSMiddleware())  # apply middleware for CORS
 
 
 def log_event(event: LogEvent) -> None:

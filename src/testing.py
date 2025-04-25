@@ -4,6 +4,9 @@ from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
 from typing import Any
 
+from lib.jwt.jwt import test_jwt
+from lib.metro.metro import test_metro
+
 # This testing system is designed to work with the provided sample data
 # therefore for tests to succeed "populate_dummy_data(conn)" in main.py must be run first
 
@@ -202,6 +205,8 @@ def block_test(conn: SwapDB) -> None:
         )
     )
     block_results: list[tuple[int, int, int, str, dict[str, str]]] | None = result.fetch_all()
+
+    assert block_results is not None, ">> Failed to get blocks"
 
     # Recreate blocks list for comparison
     blocks: list[tuple[int, int, int, int, str, dict[str, str]]] = []
@@ -786,6 +791,9 @@ def run_tests(conn: SwapDB) -> None:
         username_check_endpoint_test()
         register_endpoint_test()
         login_endpoint_test()
+        test_jwt()
+        test_metro()
         print("All tests passed!\n")
     except AssertionError as e:
-        input(f"Test failed: {e}")
+        print(f"Test failed: {e}")
+        _ = input("Press enter to exit")
