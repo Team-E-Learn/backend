@@ -44,10 +44,27 @@ class OrganisationsTable:
 
         # If it does, delete its modules
         if orgID is not None:
+            # First, get all modules for this org
+            modules_result = cursor.execute(
+                StringStatement("SELECT moduleID FROM modules WHERE orgID = %s"),
+                (orgID[0],)
+            )
+
+            module_ids = [row[0] for row in modules_result.fetch_all()]
+
+            # Delete module associations from bundle_modules first
+            if module_ids:
+                cursor.execute(
+                    StringStatement("DELETE FROM bundle_modules WHERE moduleID = ANY(%s)"),
+                    (module_ids,)
+                )
+
+            # Now safe to delete modules
             cursor.execute(
                 StringStatement("DELETE FROM modules WHERE orgID = %s"),
                 (orgID[0],)
             )
+
             conn.commit()
             # Return the orgID of the organisation
             return orgID[0]

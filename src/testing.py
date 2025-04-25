@@ -476,6 +476,7 @@ def create_organisation_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "name": "Example Organisation",
+        "bundles": "[{'bundle_name': 'Bundle 1', 'modules': [{'name': 'Module 1'}, {'name': 'Module 2'}]}]",
         "modules": "[{'name': 'Module 1'}, {'name': 'Module 2'}]",
         "owner_id": "1"
     }
@@ -484,16 +485,32 @@ def create_organisation_endpoint_test() -> None:
     expected_response: dict[str, Any] = {
         "message": "Organisation created successfully",
         "Organisation": {
+            "name": "Example Organisation",
             "id": 4,
-            "name": "Example Organisation"
+            "bundles": [
+                {
+                    "bundle_id": 3,
+                    "bundle_name": "Bundle 1",
+                    "modules": [
+                        {
+                            "name": "Module 1",
+                            "module_id": 9
+                        },
+                        {
+                            "name": "Module 2",
+                            "module_id": 10
+                        }
+                    ]
+                }
+            ]
         },
         "modules": [
             {
-                "id": 9,
+                "id": 11,
                 "name": "Module 1"
             },
             {
-                "id": 10,
+                "id": 12,
                 "name": "Module 2"
             }
         ]

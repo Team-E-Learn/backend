@@ -69,8 +69,55 @@ class BundlesTable:
             )
         )
 
+    @staticmethod
+    def write_bundle(conn: SwapDB, org_id: int, bundle_name: str) -> int | None:
+        cursor: SwapCursor = conn.get_cursor()
+
+        # Check if the bundle already exists for this org
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT bundleID FROM bundles WHERE name = %s AND orgID = %s"),
+            (bundle_name, org_id)
+        )
+        existing_bundle = result.fetch_one()
+
+        if existing_bundle is not None:
+            # Bundle already exists, return its ID
+            return existing_bundle[0]
+
+        # Create the new bundle
+        insert_result: SwapResult = cursor.execute(
+            StringStatement("INSERT INTO bundles (name, orgID) VALUES (%s, %s) RETURNING bundleID"),
+            (bundle_name, org_id)
+        )
+
+        # Get the ID of the newly created bundle
+        new_bundle_id = insert_result.fetch_one()
+
+        return new_bundle_id[0] if new_bundle_id else None
+
+
+    @staticmethod
+    def associate_module(conn: SwapDB, bundle_id: int, module_id: int) -> None:
+        cursor: SwapCursor = conn.get_cursor()
+
+        # Check if the association already exists
+        check_result: SwapResult = cursor.execute(
+            StringStatement("SELECT 1 FROM bundle_modules WHERE bundleID = %s AND moduleID = %s"),
+            (bundle_id, module_id)
+        )
+
+        # IO association already exists return True
+        if check_result.fetch_one() is not None:
+            return
+
+        # Create a new association
+        cursor.execute(
+            StringStatement("INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)"),
+            (bundle_id, module_id)
+        )
+        return
+
     # Adds 2 bundles to the DB, each bundle contains a different set of modules
-    # No alternative API call to add bundles, so this is the only way to add them
     @staticmethod
     def write_bundles(conn: SwapDB) -> None:
         # format is (name, orgID)
