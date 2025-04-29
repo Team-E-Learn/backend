@@ -2,6 +2,7 @@
 
 from sys import stderr
 
+from backend.middleware import AuthMiddleware
 from routes.module.module import Module
 from testing import run_tests
 from flask.helpers import redirect
@@ -11,7 +12,7 @@ from backend.database.setup import initialise_tables, populate_dummy_data
 from backend.events.logevent import LogEvent, LogLevel
 from lib.dataswap.database import PsqlDatabase, SwapDB
 from lib.front.front import Front
-from lib.front.middleware import CORSMiddleware
+from lib.front.middleware import CORSResponseMiddleware
 from lib.instilled.instiled import Instil
 from lib.metro.metro import MetroBus
 from lib.swagdoc.swagtag import SwagTag
@@ -42,7 +43,17 @@ front: Front = Front(
     + " developed for the Team Software Engineering module at the University of Lincoln.",
     "0.0.0",
 )
-front.add_after_middleware(CORSMiddleware())  # apply middleware for CORS
+
+front.add_request_middleware(
+    AuthMiddleware(
+        "/v1/auth/username", 
+        "/v1/auth/register", 
+        "/v1/auth/login", 
+        "/v1/auth/2fa", 
+        "/v1/auth/verify-email"
+    )
+)  # apply middleware for CORS
+front.add_response_middleware(CORSResponseMiddleware())  # apply middleware for CORS
 
 
 def log_event(event: LogEvent) -> None:

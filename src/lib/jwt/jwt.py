@@ -32,6 +32,7 @@ class JwtValidator:
         msg: bytes = bytes(f"{header}.{payload}", "latin-1")
         return _hash_msg(msg, key) == signature
 
+
     @staticmethod
     def str_load(token: str, key: bytes) -> "JwtValidator | None":
         if token.count(".") != 2:
@@ -101,7 +102,7 @@ def test_jwt() -> None:
 
     validator: JwtValidator | None = JwtValidator.str_load(VALID_JWT, VALID_KEY)
     assert validator is not None, "Validator failed to load valid token"
-    assert validator.get_payload()["iss"] != "issuer-name", "Invalid issuer from payload"
+    assert validator.get_payload()["iss"] == "issuer-name", "Invalid issuer from payload"
     
     
     print(f">> Test passed for JWT library")

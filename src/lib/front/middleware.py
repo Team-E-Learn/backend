@@ -3,23 +3,42 @@ from typing import override
 
 from werkzeug.wrappers import Response
 
-
-class IMiddleware(ABC):
+class IRequestMiddleware(ABC):
     """
-    Interface for Middleware to extend.
+    Interface for request Middleware to extend.
+    """
+
+    @abstractmethod
+    def abort_code(self) -> int:
+        pass
+
+    @abstractmethod
+    def process(self) -> bool:
+        """
+        Called when processing is required to happen on the middleware,
+        all middleware instances will override this method to handle the Response
+        object.
+        It returns a boolean represent if the request should be handled (True)
+        or dropped (False).
+        """
+        pass
+
+class IResponseMiddleware(ABC):
+    """
+    Interface for response Middleware to extend.
     """
 
     @abstractmethod
     def process(self, response: Response) -> Response:
         """
         Called when processing is required to happen on the middleware,
-        all middleware instances will extend this method to handle the Response
+        all middleware instances will override this method to handle the Response
         object.
         """
         pass
 
 
-class CORSMiddleware(IMiddleware):
+class CORSResponseMiddleware(IResponseMiddleware):
     """
     The CORSMiddleware object has been created to solve issues relating
     to CORS parameters not existing inside of the response to incoming
