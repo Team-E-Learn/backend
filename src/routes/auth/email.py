@@ -70,5 +70,5 @@ class CheckEmail(Resource):
         # Store verification code in DB
         EmailCodesTable.add_code(service, email, verification_code)
 
-        # Return success message
+        # Return a success message
         return {"message": "Verification code sent"}, 200

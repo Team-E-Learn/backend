@@ -32,7 +32,7 @@ class Module(Resource):
     )
     @Instil("db")
     def get(self, module_id: int, service: SwapDB):
-        module: tuple[int, str, str, int] | None = ModulesTable.get_info(
+        module: tuple[int, str, int] | None = ModulesTable.get_info(
             service, module_id
         )
 
@@ -42,6 +42,5 @@ class Module(Resource):
         return {
             "module_id": module[0],
             "name": module[1],
-            "description": module[2],
-            "org_id": module[3],
+            "org_id": module[2],
         }, 200

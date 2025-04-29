@@ -62,16 +62,16 @@ def user_test(conn: SwapDB) -> None:
 
 def organisations_test(conn: SwapDB) -> None:
     # Expected organisations
-    expected_orgs: list[tuple[str, str, int]] = [
-        ("University of Lincoln", "A university in Lincoln", 4),
-        ("Microsoft", "A tech company", 2),
-        ("Amazon", "An online retailer", 2),
+    expected_orgs: list[tuple[str, int]] = [
+        ("University of Lincoln", 4),
+        ("Microsoft", 2),
+        ("Amazon", 2),
     ]
 
     # read organisations from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(
-        StringStatement("SELECT name, description, ownerID FROM organisations")
+        StringStatement("SELECT name, ownerID FROM organisations")
     )
     orgs: list[tuple[str, str, int]] | None = result.fetch_all()
 
@@ -82,23 +82,23 @@ def organisations_test(conn: SwapDB) -> None:
 
 def modules_test(conn: SwapDB) -> None:
     # Expected modules
-    expected_modules: list[tuple[str, str, int]] = [
-        ("Personal Development", "Learn how to develop yourself", 1),
-        ("Team Software Engineering", "Team-based software engineering project", 1),
-        ("Networking Fundamentals", "Basics of networking", 1),
-        ("Applied Programming Paradigms", "Different programming paradigms", 1),
-        ("Excel Certification", "Get certified in Excel", 2),
-        ("Advanced Excel", "Advanced techniques in Excel", 2),
-        ("Data Analysis", "Learn data analysis techniques", 3),
-        ("Machine Learning", "Introduction to machine learning", 3),
+    expected_modules: list[tuple[str, int]] = [
+        ("Personal Development", 1),
+        ("Team Software Engineering", 1),
+        ("Networking Fundamentals", 1),
+        ("Applied Programming Paradigms", 1),
+        ("Excel Certification", 2),
+        ("Advanced Excel", 2),
+        ("Data Analysis", 3),
+        ("Machine Learning", 3),
     ]
 
     # Read modules from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(
-        StringStatement("SELECT name, description, orgID FROM modules")
+        StringStatement("SELECT name, orgID FROM modules")
     )
-    modules: list[tuple[str, str, int]] | None = result.fetch_all()
+    modules: list[tuple[str, int]] | None = result.fetch_all()
 
     # Compare expected and retrieved modules
     assert modules == expected_modules, f"Original modules: {expected_modules},\n Retrieved modules: {modules}"
@@ -140,17 +140,14 @@ def lessons_test(conn: SwapDB) -> None:
 
 def bundle_test(conn: SwapDB) -> None:
     # Expected bundles
-    expected_bundles: list[tuple[str, str]] = [
-        ('Computer Science BSc', 'A bundle of modules for a Computer Science degree'),
-        ('Excel Certification', 'A bundle of modules for an Excel certification')
-    ]
+    expected_bundles: list[str] = [('Computer Science BSc',), ('Excel Certification',)]
 
     # Read bundles from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(
-        StringStatement("SELECT name, description FROM bundles")
+        StringStatement("SELECT name FROM bundles")
     )
-    bundles: list[tuple[str, str]] | None = result.fetch_all()
+    bundles: list[tuple[str]] | None = result.fetch_all()
 
     # Compare expected and retrieved bundles
     assert bundles == expected_bundles, f"Original bundles: {expected_bundles},\n Retrieved bundles: {bundles}"
@@ -187,15 +184,18 @@ def bundle_modules_test(conn: SwapDB) -> None:
 def block_test(conn: SwapDB) -> None:
     # Expected blocks
     expected_blocks: list[tuple[int, int, int, int, str, dict[str, str]]] = [
-        (1, 1, 1, 1, "Sky Question",
-            {
-                "question_content": "what is the colour of the sky?",
-                "question_answer": "blue",
-            },
-        ),
-        (1, 2, 2, 2, "Sky Text", {"text": "The sky is blue"}),
-        (1, 3, 3, 3, "Sky Video", {"video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
-        (1, 4, 4, 4, "Sky Image", {"image_url": "https://www.example.com/image.jpg"})
+        (1, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+        (1, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+        (1, 3, 3, 3, "text and image block",
+         {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet",
+          "image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+        (1, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+        (1, 5, 5, 5, "quiz block", {"question": "press option A",
+                                    "options": {
+                                        "A": {"text": "Option A", "isCorrect": True},
+                                        "B": {"text": "Option B", "isCorrect": False},
+                                        "C": {"text": "Option C", "isCorrect": False},
+                                        "D": {"text": "Option D", "isCorrect": False}}}),
     ]
 
     # Read blocks from the database
@@ -481,8 +481,8 @@ def create_organisation_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "name": "Example Organisation",
-        "description": "An example Organisation description",
-        "modules": "[{'name': 'Module 1', 'description': 'Description for module 1'}]",
+        "bundles": "[{'bundle_name': 'Bundle 1', 'modules': [{'name': 'Module 1'}, {'name': 'Module 2'}]}]",
+        "modules": "[{'name': 'Module 1'}, {'name': 'Module 2'}]",
         "owner_id": "1"
     }
 
@@ -490,13 +490,33 @@ def create_organisation_endpoint_test() -> None:
     expected_response: dict[str, Any] = {
         "message": "Organisation created successfully",
         "Organisation": {
+            "name": "Example Organisation",
             "id": 4,
-            "name": "Example Organisation"
+            "bundles": [
+                {
+                    "bundle_id": 3,
+                    "bundle_name": "Bundle 1",
+                    "modules": [
+                        {
+                            "name": "Module 1",
+                            "module_id": 9
+                        },
+                        {
+                            "name": "Module 2",
+                            "module_id": 10
+                        }
+                    ]
+                }
+            ]
         },
         "modules": [
             {
-                "id": 9,
+                "id": 11,
                 "name": "Module 1"
+            },
+            {
+                "id": 12,
+                "name": "Module 2"
             }
         ]
     }
@@ -509,8 +529,8 @@ def create_block_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "lesson_id": "1",
-        "block_id": "1",
-        "block_type": "1",
+        "block_id": "100",
+        "block_type": "100",
         "order": "1",
         "name": "Sky Question",
         "data": "{}"
@@ -525,56 +545,11 @@ def create_block_endpoint_test() -> None:
     test_endpoint("/v1/module/lesson/1/block", expected_response, method="POST", data=request_data)
 
 
-def get_blocks_endpoint_test() -> None:
-    # Expected response
-    expected_response: dict[str, Any] = {
-        "blocks": [
-            {
-                "block_type": 1,
-                "block_id": 1,
-                "order": 1,
-                "name": "Sky Question",
-                "data": {}
-            },
-            {
-                "block_type": 2,
-                "block_id": 2,
-                "order": 2,
-                "name": "Sky Text",
-                "data": {
-                    "text": "The sky is blue"
-                }
-            },
-            {
-                "block_type": 3,
-                "block_id": 3,
-                "order": 3,
-                "name": "Sky Video",
-                "data": {
-                    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                }
-            },
-            {
-                "block_type": 4,
-                "block_id": 4,
-                "order": 4,
-                "name": "Sky Image",
-                "data": {
-                    "image_url": "https://www.example.com/image.jpg"
-                }
-            }
-        ]
-    }
-
-    # Call the API endpoint
-    test_endpoint("/v1/module/lesson/1/block", expected_response)
-
-
 def delete_block_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "lesson_id": "1",
-        "block_id": "1"
+        "block_id": "100"
     }
 
     # Expected response
@@ -584,6 +559,58 @@ def delete_block_endpoint_test() -> None:
 
     # Call the API endpoint with form data
     test_endpoint("/v1/module/lesson/1/block", expected_response, method="DELETE", data=request_data)
+
+
+def get_blocks_endpoint_test() -> None:
+    # Expected response
+    expected_response: dict[str, Any] = {
+        "blocks": [
+            {
+                "block_type": 1,
+                "block_id": 1,
+                "order": 1,
+                "name": "text block",
+                "data": {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}
+            },
+            {
+                "block_type": 2,
+                "block_id": 2,
+                "order": 2,
+                "name": "image block",
+                "data": {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}
+            },
+            {
+                "block_type": 3,
+                "block_id": 3,
+                "order": 3,
+                "name": "text and image block",
+                "data": {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet",
+                 "image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}
+            },
+            {
+                "block_type": 4,
+                "block_id": 4,
+                "order": 4,
+                "name": "download block",
+                "data": {"downloadLink": "https://www.google.com", "fileName": "document.docx"}
+            },
+            {
+                "block_type": 5,
+                "block_id": 5,
+                "order": 5,
+                "name": "quiz block",
+                "data": {"question": "press option A",
+                                        "options": {
+                                        "A": {"text": "Option A", "isCorrect": True},
+                                        "B": {"text": "Option B", "isCorrect": False},
+                                        "C": {"text": "Option C", "isCorrect": False},
+                                        "D": {"text": "Option D", "isCorrect": False}}}
+            }
+        ]
+    }
+
+    # Call the API endpoint
+    test_endpoint("/v1/module/lesson/1/block", expected_response)
 
 
 def get_module_lessons_endpoint_test() -> None:
@@ -616,7 +643,7 @@ def get_module_lessons_endpoint_test() -> None:
 def create_lesson_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
-        "lesson_id": "1",
+        "lesson_id": "100",
         "module_id": "1",
         "title": "example_title",
     }
@@ -633,7 +660,7 @@ def create_lesson_endpoint_test() -> None:
 def delete_lesson_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
-        "lesson_id": "1"
+        "lesson_id": "100"
     }
 
     # Expected response
@@ -661,7 +688,6 @@ def get_module_info_endpoint_test() -> None:
     expected_response: dict[str, Any] = {
         "module_id": 1,
         "name": "Personal Development",
-        "description": "Learn how to develop yourself",
         "org_id": 1
     }
 
@@ -779,8 +805,8 @@ def run_tests(conn: SwapDB) -> None:
         dashboard_endpoint_test()
         create_organisation_endpoint_test()
         create_block_endpoint_test()
-        get_blocks_endpoint_test()
         delete_block_endpoint_test()
+        get_blocks_endpoint_test()
         get_module_lessons_endpoint_test()
         create_lesson_endpoint_test()
         delete_lesson_endpoint_test()

@@ -48,14 +48,14 @@ class Verify2FA(Resource):
         limited_jwt: str | None = request.form.get("Limited JWT")
         code: int | None = int(request.form.get("code"))
 
-        # Check if limited JWT and 2FA code are present, if not return 400
+        # Check if-limited JWT and 2FA code is present, if not return 400
         if not limited_jwt or not code:
             return {"message": "Bad Request"}, 400
 
         # Decode limited JWT to get user ID and check expiry time
         payload = limited_jwt.split(".")[1]
 
-        # Make sure payload is padded correctly
+        # Make sure the payload is padded correctly
         if len(payload) % 4 != 0:
             payload += "=" * (4 - len(payload) % 4)
         payload = base64.b64decode(payload)
@@ -63,14 +63,14 @@ class Verify2FA(Resource):
         user_id: int = int(payload["sub"])
         expiry_time = payload["exp"]
 
-        # If expiry time is less than current time, return unauthorized
+        # If expiry time is less than current time, return unauthorised
         if int(expiry_time) < int(time()):
             return {"message": "Unauthorized"}, 401
 
-        # Get user secret from database
+        # Get user secret from the database
         user_secret: str | None = UserTable.get_totp_secret(service, user_id)
 
-        # If user secret is not found, return unauthorized
+        # If user secret is not found, return unauthorised
         if not user_secret:
             return {"message": "Unauthorized"}, 401
 

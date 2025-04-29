@@ -45,6 +45,8 @@ def add_modules_to_bundle(
             (bundle_id, module_id),
         )
 
+    return None
+
 
 class BundlesTable:
     """Manages database operations for the bundles table.
@@ -62,26 +64,70 @@ class BundlesTable:
     CREATE TABLE IF NOT EXISTS bundles (
         bundleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
         name VARCHAR(48) NOT NULL,
-        description VARCHAR(100) NOT NULL,
         orgID INT REFERENCES organisations(orgID) NOT NULL
     );"""
             )
         )
 
+    @staticmethod
+    def write_bundle(conn: SwapDB, org_id: int, bundle_name: str) -> int | None:
+        cursor: SwapCursor = conn.get_cursor()
+
+        # Check if the bundle already exists for this org
+        result: SwapResult = cursor.execute(
+            StringStatement("SELECT bundleID FROM bundles WHERE name = %s AND orgID = %s"),
+            (bundle_name, org_id)
+        )
+        existing_bundle = result.fetch_one()
+
+        if existing_bundle is not None:
+            # Bundle already exists, return its ID
+            return existing_bundle[0]
+
+        # Create the new bundle
+        insert_result: SwapResult = cursor.execute(
+            StringStatement("INSERT INTO bundles (name, orgID) VALUES (%s, %s) RETURNING bundleID"),
+            (bundle_name, org_id)
+        )
+
+        # Get the ID of the newly created bundle
+        new_bundle_id = insert_result.fetch_one()
+
+        return new_bundle_id[0] if new_bundle_id else None
+
+
+    @staticmethod
+    def associate_module(conn: SwapDB, bundle_id: int, module_id: int) -> None:
+        cursor: SwapCursor = conn.get_cursor()
+
+        # Check if the association already exists
+        check_result: SwapResult = cursor.execute(
+            StringStatement("SELECT 1 FROM bundle_modules WHERE bundleID = %s AND moduleID = %s"),
+            (bundle_id, module_id)
+        )
+
+        # IO association already exists return True
+        if check_result.fetch_one() is not None:
+            return
+
+        # Create a new association
+        cursor.execute(
+            StringStatement("INSERT INTO bundle_modules (bundleID, moduleID) VALUES (%s, %s)"),
+            (bundle_id, module_id)
+        )
+        return
+
     # Adds 2 bundles to the DB, each bundle contains a different set of modules
-    # No alternative API call to add bundles, so this is the only way to add them
     @staticmethod
     def write_bundles(conn: SwapDB) -> None:
-        # format is (name, description, orgID)
-        bundles: list[tuple[str, str, int]] = [
+        # format is (name, orgID)
+        bundles: list[tuple[str, int]] = [
             (
                 "Computer Science BSc",
-                "A bundle of modules for a Computer Science degree",
                 1,
             ),
             (
                 "Excel Certification",
-                "A bundle of modules for an Excel certification",
                 2,
             ),
         ]
@@ -89,7 +135,7 @@ class BundlesTable:
         cursor: SwapCursor = conn.get_cursor()
 
         # Add each bundle to the bundles table
-        for name, description, orgID in bundles:
+        for name, orgID in bundles:
             result = cursor.execute(
                 StringStatement("SELECT 1 FROM bundles WHERE name = %s"), (name,)
             )
@@ -100,9 +146,9 @@ class BundlesTable:
             # Add the bundle to the bundles table
             cursor.execute(
                 StringStatement(
-                    "INSERT INTO bundles (name, description, orgID) VALUES (%s, %s, %s)"
+                    "INSERT INTO bundles (name, orgID) VALUES (%s, %s)"
                 ),
-                (name, description, orgID),
+                (name, orgID),
             )
 
         # List of modules to add to the CS bundle from modules.py

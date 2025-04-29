@@ -54,7 +54,7 @@ class User(Resource):
     def put(self, org_id: int, module_id: int, user_id: int, service: SwapDB
     ) -> tuple[dict[str, str | bool], int]:
         # Add a module to a user using org_id, module_id and user_id
-        # Check user_id exists in the users table
+        # Check user_id exists in the user's table
         if not UserTable.user_exists(service, user_id):
             return {"success": False, "error": "User not found"}, 404
 
@@ -73,5 +73,5 @@ class User(Resource):
         # Insert into subscriptions user_id and module_id
         SubscriptionsTable.add_subscription(service, user_id, module_id)
 
-        # If subscription is added without error, return success message
+        # If the subscription is added without error, return success message
         return {"success": True, "message": "Successfully added subscription to user"}, 200

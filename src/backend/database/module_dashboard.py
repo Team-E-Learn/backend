@@ -13,7 +13,7 @@ class ModuleDashboardTable:
 
     This class provides methods to create the module_dashboard table and manage
     widget positions for user dashboards within specific modules. Each record
-    represents a widget positioned on a user's personalized interface for a particular
+    represents a widget positioned on a user's personalised interface for a particular
     module.
     """
 

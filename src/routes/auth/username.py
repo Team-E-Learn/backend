@@ -38,7 +38,7 @@ class CheckUsername(Resource):
         if not username:
             return {"message": "Bad Request"}, 400
 
-        # Check if username exists
+        # Check if the username already exists
         if UserTable.get_by_username(service, username):
             return {"message": "Username exists"}, 200
 
