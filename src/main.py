@@ -53,6 +53,7 @@ front.add_request_middleware(
         "/v1/auth/verify-email"
     )
 )  # apply middleware for CORS
+
 front.add_response_middleware(CORSResponseMiddleware())  # apply middleware for CORS
 
 
