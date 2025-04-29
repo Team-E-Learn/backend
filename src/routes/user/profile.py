@@ -36,6 +36,7 @@ class Profile(Resource):
         # Guard clause for user not found
         if user is None:
             return {"error": "User not found"}
+
         return {
             "username": user[0],
             "email": user[1],

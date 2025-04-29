@@ -4,7 +4,7 @@ import hmac
 from json import dumps, loads
 from typing import TypeAlias, override
 
-_ALLOWED_CLAIM_DATA: TypeAlias = str | int
+ALLOWED_CLAIM_DATA: TypeAlias = str | int
 
 def _hash_msg(msg: bytes, key: bytes) -> str:
     hash_: bytes = hmac.new(key=key, msg=msg, digestmod=sha256).digest()
@@ -21,10 +21,10 @@ class JwtValidator:
         self.__signature: str = signature
         self.__key: bytes = key
 
-    def get_header(self) -> dict[str, _ALLOWED_CLAIM_DATA]:
+    def get_header(self) -> dict[str, ALLOWED_CLAIM_DATA]:
         return loads(urlsafe_b64decode(self.__header).decode())
 
-    def get_payload(self) -> dict[str, _ALLOWED_CLAIM_DATA]:
+    def get_payload(self) -> dict[str, ALLOWED_CLAIM_DATA]:
         return loads(urlsafe_b64decode(self.__payload).decode())
 
     @staticmethod
@@ -50,9 +50,9 @@ class Jwt:
 
     def __init__(self, key: bytes) -> None:
         self.__key: bytes = key
-        self.__claims: dict[str, _ALLOWED_CLAIM_DATA] = {}
+        self.__claims: dict[str, ALLOWED_CLAIM_DATA] = {}
 
-    def add_claim(self, name: str, value: _ALLOWED_CLAIM_DATA) -> "Jwt":
+    def add_claim(self, name: str, value: ALLOWED_CLAIM_DATA) -> "Jwt":
         self.__claims[name] = value
         return self
 

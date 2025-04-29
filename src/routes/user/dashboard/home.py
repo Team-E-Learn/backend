@@ -32,6 +32,7 @@ class HomeDashboard(Resource):
         dashboard: list[tuple[int, str, str, int, int]] = DashboardTable.get_dashboard(
             service, user_id
         )
+
         return {
             "elements": [
                 {"id": row[1], "type": row[2], "position": {"x": row[3], "y": row[4]}}

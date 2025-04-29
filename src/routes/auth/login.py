@@ -1,4 +1,5 @@
 from time import time
+from typing import cast
 from flask import request
 from flask_restful import Resource
 from werkzeug.security import check_password_hash
@@ -60,11 +61,11 @@ class Login(Resource):
 
         # Check if password is correct
         # If not, return a 401 Unauthorized
-        if not check_password_hash(user_data[6], password):
+        if not check_password_hash(cast(str, user_data[6]), password):
             return {"message": "Unauthorized"}, 401
 
         # Get user id
-        uid: int = user_data[0]
+        uid: int = cast(int, user_data[0])
 
         # Generate expiry time for JWT
         expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now

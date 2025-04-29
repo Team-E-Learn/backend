@@ -1,13 +1,14 @@
 import base64
 import json
 from time import time
+from backend.auth import get_jwt
 from lib.dataswap.database import SwapDB
 from mintotp import totp
 from flask import request
 from flask_restful import Resource
 from backend.database.user import UserTable
 from lib.instilled.instiled import Instil
-from lib.jwt.jwt import Jwt
+from lib.jwt.jwt import ALLOWED_CLAIM_DATA, Jwt, JwtValidator
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 from projenv import JWT_ACCESS_KEY, JWT_ACCESS_EXP
@@ -21,14 +22,6 @@ class Verify2FA(Resource):
             ["Auth"],
             "Verifies a user with a 6-digit 2FA code",
             [
-                SwagParam(
-                    "Limited JWT",
-                    "formData",
-                    "string",
-                    True,
-                    "The limited JWT",
-                    "Bearer example_limited_jwt",
-                ),
                 SwagParam(
                     "code",
                     "formData",
@@ -45,13 +38,13 @@ class Verify2FA(Resource):
     @Instil("db")
     def post(self, service: SwapDB):
         # Get limited JWT and 2FA code from request
-        limited_jwt: str | None = request.form.get("Limited JWT")
         code: int | None = int(request.form.get("code"))
 
         # Check if limited JWT and 2FA code are present, if not return 400
-        if not limited_jwt or not code:
+        if not code:
             return {"message": "Bad Request"}, 400
 
+        """
         # Decode limited JWT to get user ID and check expiry time
         payload = limited_jwt.split(".")[1]
 
@@ -62,9 +55,24 @@ class Verify2FA(Resource):
         payload = json.loads(payload)
         user_id: int = int(payload["sub"])
         expiry_time = payload["exp"]
+        """
+
+        # NOTE: Validate that this works and remove above section
+        jwt: JwtValidator | None = get_jwt()
+
+        if jwt is None:
+            return {"message": "Unauthorized"}, 401
+
+        payload: dict[str, ALLOWED_CLAIM_DATA] = jwt.get_payload()
+
+        try:
+            user_id: int = int(payload["sub"])
+            expiry: int = int(payload["exp"])
+        except KeyError:
+            return {"message": "Unauthorized"}, 401
 
         # If expiry time is less than current time, return unauthorized
-        if int(expiry_time) < int(time()):
+        if int(expiry) < int(time()):
             return {"message": "Unauthorized"}, 401
 
         # Get user secret from database
