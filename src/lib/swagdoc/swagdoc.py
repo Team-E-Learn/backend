@@ -15,7 +15,7 @@ class SwagMethod(Enum):
 
 
 class SwagParam:
-    SwagParamType: TypeAlias = dict[str, str | bool]
+    SwagParamType: TypeAlias = dict[str, str | int | float | bool]
     """
     A class that stores a Swagger parameter
 
@@ -31,7 +31,7 @@ class SwagParam:
         if the data is required or not.
     desc : str
         a description about the data.
-    default : str
+    default : str | int | float
         the default value of the data.
 
     Methods
@@ -47,14 +47,14 @@ class SwagParam:
         type_: str,
         required: bool,
         desc: str,
-        default: str,
+        default: str | int | float,
     ) -> None:
         self.__name: str = name
         self.__location: str = location
         self.__type: str = type_
         self.__required: bool = required
         self.__desc: str = desc
-        self.__default: str = default
+        self.__default: str | int | float = default
 
     @property
     def name(self) -> str:
@@ -77,7 +77,7 @@ class SwagParam:
         return self.__desc
 
     @property
-    def default(self) -> str:
+    def default(self) -> str | int | float:
         return self.__default
 
     def to_doc(self) -> SwagParamType:
@@ -129,8 +129,13 @@ class SwagResp:
 
 
 class SwagDoc:
+    SecurityType: TypeAlias = list[dict[str, list[str]]]
     SwagDocTypes: TypeAlias = (
-        list[str] | str | list[SwagParam.SwagParamType] | list[SwagResp.SwagRespType]
+        list[str]
+        | str
+        | list[SwagParam.SwagParamType]
+        | list[SwagResp.SwagRespType]
+        | SecurityType
     )
     SwagDocType: TypeAlias = dict[
         str, SwagDocTypes
@@ -150,6 +155,8 @@ class SwagDoc:
         a list of SwagParams that the end-point takes.
     resp : list[SwagResp]
         a list of SwagResps that the end-point has.
+    protected : bool 
+        a boolean representing if JWT protection should be applied to the endpoint.
 
     Methods
     -------
@@ -164,12 +171,14 @@ class SwagDoc:
         summary: str,
         params: list[SwagParam],
         resp: list[SwagResp],
+        protected: bool = False,
     ) -> None:
         self.__method: SwagMethod = method
         self.__tags: list[str] = tags
         self.__summary: str = summary
         self.__params: list[SwagParam] = params
         self.__resp: list[SwagResp] = resp
+        self.__protected: bool = protected
 
     @property
     def method(self) -> SwagMethod:
@@ -191,10 +200,19 @@ class SwagDoc:
     def resp(self) -> list[SwagResp]:
         return self.__resp
 
+    @property
+    def protected(self) -> bool:
+        return self.__protected
+
     def to_doc(self) -> SwagDocType:
-        return {
+        doc: SwagDoc.SwagDocType = {
             "tags": self.tags,
             "summary": self.summary,
             "parameters": [param.to_doc() for param in self.params],
             "responses": [res.to_doc() for res in self.resp],
         }
+
+        if self.protected:
+            doc["security"] = [{"Bearer": []}]
+
+        return doc

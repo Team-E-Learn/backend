@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, TypeAlias
 from flask_restful import Resource
+from backend.auth import valid_jwt_sub
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
@@ -72,11 +73,15 @@ class Subscriptions(Resource):
                 )
             ],
             [SwagResp(200, "Returns the subscriptions")],
+            protected=True
         )
     )
     @Instil("db")
     def get(self, user_id: int, service: SwapDB) -> [list[OrgJson], int]:
         # Get the user's subscriptions
+        if not valid_jwt_sub(user_id):
+            return {"message": "You are unauthorised to access this endpoint"}, 401
+
         cur: SwapCursor = service.get_cursor()
         result: SwapResult = cur.execute(
             StringStatement(

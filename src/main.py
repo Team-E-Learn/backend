@@ -46,29 +46,17 @@ front: Front = Front(
 
 front.add_request_middleware(
     AuthMiddleware(
-        "/v1/auth/username", 
-        "/v1/auth/register", 
-        "/v1/auth/login", 
-        "/v1/auth/2fa", 
-        "/v1/auth/verify-email"
+        "/auth/username",
+        "/auth/register",
+        "/auth/login",
+        "/auth/2fa",
+        "/auth/verify-email",
+        "/auth/email",
+        required_path="/v1",
     )
 )  # apply middleware for CORS
 
 front.add_response_middleware(CORSResponseMiddleware())  # apply middleware for CORS
-
-
-def log_event(event: LogEvent) -> None:
-    """
-    An event handler for LogEvents
-    """
-    if (
-        event.level != LogLevel.LOG
-    ):  # We don't need to log low level messages, this is for debug purposes
-        return
-    print(event, file=stderr)
-
-
-MetroBus().subscribe(LogEvent, log_event)  # subscribe log_event to the event bus
 
 # get Postgres connection
 # conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
@@ -85,7 +73,6 @@ print("Registered database service")
 
 
 class Main(Resource):
-
     def get(self) -> Response:
         _ = MetroBus().publish(LogEvent(LogLevel.LOG, "Accessed docs."))
         return redirect("/apidocs")
@@ -119,13 +106,30 @@ front.register(
 front.register(Module, "/v1/module/<int:module_id>/")
 
 
+def log_event(event: LogEvent) -> None:
+    """
+    An event handler for LogEvents
+    """
+    if (
+        event.level != LogLevel.LOG
+    ):  # We don't need to log low level messages, this is for debug purposes
+        return
+    print(event, file=stderr)
+
+
 # Start app
 if __name__ == "__main__":
     debug_mode: bool = projenv.project_mode == projenv.ProjectMode.DEVELOPMENT
     if debug_mode:
         # Write dummy data
         populate_dummy_data(conn)
+
         # Run tests
         run_tests(conn)  # Only works if dummy data is populated
+
+        # Enable EventBus logging
+        MetroBus().subscribe(
+            LogEvent, log_event
+        )  # subscribe log_event to the event bus
 
     front.start(debug=debug_mode)

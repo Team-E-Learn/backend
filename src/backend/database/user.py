@@ -4,6 +4,7 @@ from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
 from werkzeug.security import generate_password_hash
+
 """
 Module for managing user accounts in the database.
 Provides operations for creating, authenticating, retrieving and validating user accounts
@@ -55,8 +56,16 @@ class UserTable:
         return result.fetch_one()
 
     @staticmethod
-    def write_user(conn: SwapDB, account_type: str, email: str, firstname: str, lastname: str, username: str,
-                   hashed_password: str, secret: str):
+    def write_user(
+        conn: SwapDB,
+        account_type: str,
+        email: str,
+        firstname: str,
+        lastname: str,
+        username: str,
+        hashed_password: str,
+        secret: str,
+    ):
         cursor: SwapCursor = conn.get_cursor()
         insert_result: SwapResult = cursor.execute(
             StringStatement(
@@ -66,7 +75,15 @@ class UserTable:
                 RETURNING userID, email, username
                 """
             ),
-            (account_type, email, firstname, lastname, username, hashed_password, secret),
+            (
+                account_type,
+                email,
+                firstname,
+                lastname,
+                username,
+                hashed_password,
+                secret,
+            ),
         )
         user: tuple[Any, ...] | None = insert_result.fetch_one()
         conn.commit()
@@ -175,14 +192,15 @@ class UserTable:
         return result.fetch_one() is not None
 
     @staticmethod
-    def get_totp_secret(conn: SwapDB, user_id: int) -> str | None:
+    def get_totp_secret(conn: SwapDB, user_id: int) -> tuple[str, int, str] | None:
         cursor: SwapCursor = conn.get_cursor()
         result: SwapResult = cursor.execute(
-            StringStatement("SELECT totpSecret FROM users WHERE userID = %s"),
+            StringStatement(
+                "SELECT totpSecret, userID, accountType FROM users WHERE userID = %s"
+            ),
             (user_id,),
         )
-        result_tup: tuple[str] | None = result.fetch_one()
-        return None if result_tup is None else result_tup[0]
+        return result.fetch_one()
 
     @staticmethod
     def check_email_verified(conn: SwapDB, email: str) -> bool:
