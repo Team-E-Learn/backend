@@ -60,11 +60,18 @@ class Verify2FA(Resource):
             return {"message": "Unauthorised"}, 401
 
         # Get user secret from database
-        user_secret: str | None = UserTable.get_totp_secret(service, user_id)
+        user_data: tuple[str, int, str] | None = UserTable.get_totp_secret(
+            service, user_id
+        )
 
         # If user secret is not found, return unauthorized
-        if not user_secret:
+        if not user_data:
             return {"message": "Unauthorized"}, 401
+
+        user_secret, uid, account_type = user_data
+
+        if user_id != uid:
+            return {"message": "Unauthorised"}, 401
 
         # Logic to verify 2FA code and generate full access JWT
         if int(totp(user_secret)) != code:
@@ -87,4 +94,6 @@ class Verify2FA(Resource):
         return {
             "message": "Verification successful",
             "full_access_jwt": full_access_jwt,
+            "user_id": uid,
+            "account_type": account_type,
         }, 200
