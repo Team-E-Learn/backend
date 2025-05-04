@@ -2,6 +2,7 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+
 """
 Module for managing modules in the database.
 Provides operations for creating, populating, and validating modules
@@ -95,6 +96,20 @@ class ModulesTable:
         result: SwapResult = cursor.execute(
             StringStatement("SELECT 1 FROM modules WHERE moduleID = %s AND orgID = %s"),
             (module_id, org_id),
+        )
+        return result.fetch_one() is not None
+
+    @staticmethod
+    def module_owned_by_user(conn: SwapDB, module_id: int, user_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("""
+                    SELECT 1
+                    FROM modules
+                    JOIN organisations as org ON org.ownerid = %s
+                    WHERE moduleid = %s
+            """),
+            (user_id, module_id),
         )
         return result.fetch_one() is not None
 

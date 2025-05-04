@@ -1,9 +1,11 @@
 from flask import request
 from flask_restful import Resource
+from backend.auth import valid_jwt_sub
 from backend.database.module_codes import ModuleCodesTable
 from backend.database.subscriptions import SubscriptionsTable
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
+from lib.jwt.jwt import ALLOWED_CLAIM_DATA, Jwt, JwtValidator
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
 
@@ -37,16 +39,21 @@ class ModuleCode(Resource):
                 SwagResp(404, "Code not found"),
                 SwagResp(400, "Invalid request data"),
             ],
+            protected=True,
         )
     )
     @Instil("db")
-    def put(self, user_id: int, service: SwapDB) -> tuple[dict[str, str | list[int]], int]:
-        code: str = request.form.get("code")
+    def put(
+        self, user_id: int, service: SwapDB
+    ) -> tuple[dict[str, str | list[int]], int]:
+        code: str | None = request.form.get("code")
 
-        if not user_id:
-            return {"message": "User ID is required"}, 400
+        if not valid_jwt_sub(user_id):
+            return {"message": "You are unauthorised to access this endpoint"}, 401
+
         if not code:
             return {"message": "Code is required"}, 400
+
         if len(code) != 6:
             return {"message": "Code must be 6 characters long"}, 404
 
@@ -65,5 +72,5 @@ class ModuleCode(Resource):
         # Return the list of subscribed modules
         return {
             "message": f"Successfully subscribed user {user_id} to {len(subscribed_modules)} modules",
-            "modules": subscribed_modules
+            "modules": subscribed_modules,
         }, 200

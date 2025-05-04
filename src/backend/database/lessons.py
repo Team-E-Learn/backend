@@ -2,6 +2,7 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+
 """
 Module for managing educational lessons in the database.
 Provides operations for creating, populating, retrieving, and deleting lessons
@@ -18,7 +19,7 @@ class LessonsTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        conn.get_cursor().execute(
+        _ = conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS lessons (
@@ -36,7 +37,6 @@ class LessonsTable:
         module_id: int,
         title: str,
     ) -> None:
-
         cursor: SwapCursor = conn.get_cursor()
         cursor.execute(
             StringStatement(
@@ -56,7 +56,10 @@ class LessonsTable:
             (1, "Lesson 2"),
             (1, "Lesson 3"),
             (2, "Introduction"),
-            (2, "Lesson 1",),
+            (
+                2,
+                "Lesson 1",
+            ),
             (2, "Lesson 2"),
             (2, "Lesson 3"),
             (3, "Introduction"),
@@ -114,3 +117,18 @@ class LessonsTable:
             return []
 
         return tuple_res
+
+    @staticmethod
+    def user_can_delete(conn: SwapDB, lesson_id: int, user_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("""
+                    SELECT 1
+                    FROM lessons
+                    JOIN modules ON modules.moduleid = lessons.moduleid
+                    JOIN organisations ON organisations.orgid = modules.orgid
+                    WHERE lessons.lessonid = %s AND ownerid = %s
+            """),
+            (lesson_id, user_id),
+        )
+        return result.fetch_one() is not None

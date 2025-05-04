@@ -1,7 +1,7 @@
 import base64
 import json
 from time import time
-from backend.auth import get_jwt
+from backend.auth import get_jwt, get_jwt_sub
 from lib.dataswap.database import SwapDB
 from mintotp import totp
 from flask import request
@@ -15,7 +15,6 @@ from projenv import JWT_ACCESS_KEY, JWT_ACCESS_EXP
 
 
 class Verify2FA(Resource):
-
     @SwagGen(
         SwagDoc(
             SwagMethod.POST,
@@ -31,8 +30,12 @@ class Verify2FA(Resource):
                     "123456",
                 ),
             ],
-            [SwagResp(200, "Verification successful"), SwagResp(400, "Bad Request"),
-             SwagResp(401, "Unauthorized")],
+            [
+                SwagResp(200, "Verification successful"),
+                SwagResp(400, "Bad Request"),
+                SwagResp(401, "Unauthorized"),
+            ],
+            protected=True,
         )
     )
     @Instil("db")
@@ -44,36 +47,17 @@ class Verify2FA(Resource):
         if not code:
             return {"message": "Bad Request"}, 400
 
-        """
-        # Decode limited JWT to get user ID and check expiry time
-        payload = limited_jwt.split(".")[1]
+        validator: JwtValidator | None = get_jwt(
+            disable_checks=False, required_aud="elearn-login"
+        )
 
-        # Make sure payload is padded correctly
-        if len(payload) % 4 != 0:
-            payload += "=" * (4 - len(payload) % 4)
-        payload = base64.b64decode(payload)
-        payload = json.loads(payload)
-        user_id: int = int(payload["sub"])
-        expiry_time = payload["exp"]
-        """
+        if validator is None:
+            return {"message": "Unauthorised"}, 401
 
-        # NOTE: Validate that this works and remove above section
-        jwt: JwtValidator | None = get_jwt()
+        user_id: int | None = get_jwt_sub(validator)
 
-        if jwt is None:
-            return {"message": "Unauthorized"}, 401
-
-        payload: dict[str, ALLOWED_CLAIM_DATA] = jwt.get_payload()
-
-        try:
-            user_id: int = int(payload["sub"])
-            expiry: int = int(payload["exp"])
-        except KeyError:
-            return {"message": "Unauthorized"}, 401
-
-        # If expiry time is less than current time, return unauthorized
-        if int(expiry) < int(time()):
-            return {"message": "Unauthorized"}, 401
+        if user_id is None:
+            return {"message": "Unauthorised"}, 401
 
         # Get user secret from database
         user_secret: str | None = UserTable.get_totp_secret(service, user_id)
@@ -93,9 +77,9 @@ class Verify2FA(Resource):
         full_access_jwt: str = (
             Jwt(JWT_ACCESS_KEY)
             .add_claim("iss", "elearn-backend")
-            .add_claim("aud", "elearn-access")
-            .add_claim("sub", f"{user_id}")
-            .add_claim("exp", f"{expiry_time}")
+            .add_claim("aud", "elearn-full")
+            .add_claim("sub", user_id)
+            .add_claim("exp", expiry_time)
             .sign()
         )
 

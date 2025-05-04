@@ -4,7 +4,7 @@ from enum import Enum
 
 
 class ProjectMode(Enum):
-    DEVELOPMENT= 0
+    DEVELOPMENT = 0
     PRODUCTION = 1
 
 
@@ -18,7 +18,8 @@ Database Access
 """
 DB_UNAME: str = "postgres"
 DB_PWD: str = "cisco"
-DB_HOSTNAME: str = "postgres"
+# DB_HOSTNAME: str = "postgres"
+DB_HOSTNAME: str = "127.0.0.1"
 DB_PORT: str = "5432"
 DB_NAME: str = "dev"
 
@@ -30,8 +31,8 @@ JWT Signing Keys
 """
 
 # token for limited usage until 2fa used
-JWT_LOGIN_KEY: bytes = b"secretkeysecretkeysecretkeysecretkey"
-JWT_LOGIN_EXP: int = 1_800  # seconds
+JWT_LIMITED_KEY: bytes = b"secretkeysecretkeysecretkeysecretkey"
+JWT_LIMITED_EXP: int = 1_800  # seconds
 
 # token for full access
 JWT_ACCESS_KEY: bytes = b"secretkeysecretkeysecretkeysecretkey"

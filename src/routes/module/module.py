@@ -8,7 +8,6 @@ from lib.swagdoc.swagmanager import SwagGen
 
 
 class Module(Resource):
-
     @SwagGen(
         SwagDoc(
             SwagMethod.GET,
