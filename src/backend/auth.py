@@ -26,7 +26,7 @@ def get_jwt_exp(validator: JwtValidator | None = None) -> int | None:
 
 
 def valid_jwt_sub(found_id: int) -> bool:
-    if sub_id := get_jwt_sub() is None:
+    if (sub_id := get_jwt_sub()) is None:
         return False
     return sub_id == found_id
 
