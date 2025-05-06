@@ -91,12 +91,10 @@ class SubscriptionsTable:
     def can_read_lesson(conn: SwapDB, user_id: int, lesson_id: int) -> bool:
         cursor: SwapCursor = conn.get_cursor()
         result: SwapResult = cursor.execute(
-            StringStatement("""
-                    SELECT 1
-                    FROM lessons
-                    JOIN subscriptions ON subscriptions.moduleid = lessons.moduleid
-                    WHERE subscriptions.userID = %s AND lessons.lessonid = %s
-            """),
+            StringStatement("""SELECT 1 FROM lessons
+                            JOIN subscriptions ON subscriptions.moduleID = lessons.moduleID
+                            WHERE subscriptions.userID = %s AND lessons.lessonID = %s
+                            """),
             (user_id, lesson_id),
         )
         return result.fetch_one() is not None
