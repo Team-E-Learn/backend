@@ -48,7 +48,7 @@ class Organisation(Resource):
                     "number",
                     True,
                     "The ID of the owner of the Organisation",
-                    1,
+                    2,
                 ),
             ],
             [

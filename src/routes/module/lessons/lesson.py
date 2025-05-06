@@ -17,19 +17,19 @@ class Lesson(Resource):
             "Creates a new lesson",
             [
                 SwagParam(
-                    "lesson_id",
-                    "formData",
-                    "number",
-                    True,
-                    "The lesson id for the lesson",
-                    "1",
-                ),
-                SwagParam(
                     "module_id",
                     "formData",
                     "number",
                     True,
                     "The module id of the lesson",
+                    "1",
+                ),
+                SwagParam(
+                    "lesson_id",
+                    "formData",
+                    "number",
+                    True,
+                    "The lesson id for the lesson",
                     "1",
                 ),
                 SwagParam(
@@ -39,7 +39,7 @@ class Lesson(Resource):
                     True,
                     "The title of the lesson",
                     "example_title",
-                ),
+                )
             ],
             [SwagResp(200, "Lesson created"), SwagResp(404, "Lesson not found")],
             protected=True
@@ -76,6 +76,14 @@ class Lesson(Resource):
             "Deletes a lesson",
             [
                 SwagParam(
+                    "module_id",
+                    "formData",
+                    "integer",
+                    True,
+                    "The module id of the lesson",
+                    "1",
+                ),
+                SwagParam(
                     "lesson_id",
                     "formData",
                     "integer",
@@ -90,7 +98,8 @@ class Lesson(Resource):
     )
     @Instil("db")
     def delete(self, service: SwapDB):
-        # Get lesson_id from request
+        # Get module_id and lesson_id from request
+        module_id = int(request.form.get("module_id", 0))
         lesson_id = int(request.form.get("lesson_id", 0))
 
         if (sub := get_jwt_sub()) is None:
@@ -99,8 +108,8 @@ class Lesson(Resource):
         if not LessonsTable.user_can_delete(service, lesson_id, sub):
             return {"message": "Unauthorized"}, 401
 
-        # Delete lesson using lesson_id, if successful return a 200 response
-        if LessonsTable.delete_lesson(service, lesson_id):
+        # Delete lesson using module_id and lesson_id, if successful return a 200 response
+        if LessonsTable.delete_lesson(service, module_id, lesson_id):
             return {"message": "Lesson deleted"}, 200
         # If fails, return a 404 response
         else:

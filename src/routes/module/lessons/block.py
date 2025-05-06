@@ -19,6 +19,14 @@ class Block(Resource):
             "Creates a new block",
             [
                 SwagParam(
+                    "module_id",
+                    "formData",
+                    "number",
+                    True,
+                    "The module id of the block",
+                    "2",
+                ),
+                SwagParam(
                     "lesson_id",
                     "path",
                     "number",
@@ -74,6 +82,7 @@ class Block(Resource):
     @Instil("db")
     def post(self, lesson_id: int, service: SwapDB):
         # Get block data from request and convert to appropriate types
+        module_id = int(request.form.get("module_id", 0))
         block_id = int(request.form.get("block_id", 0))
         block_type = int(request.form.get("block_type", 0))
         order = int(request.form.get("order", 0))
@@ -91,7 +100,7 @@ class Block(Resource):
 
         # Try to create a block, if successful return a 200 response
         if BlocksTable.write_block(
-            service, block_id, lesson_id, block_type, order, name, data
+            service, block_id, module_id, lesson_id, block_type, order, name, data
         ):
             return {"message": "Block created"}, 200
         # If fails, return a 400 response
@@ -104,6 +113,14 @@ class Block(Resource):
             ["Block"],
             "Deletes a block",
             [
+                SwagParam(
+                    "module_id",
+                    "formData",
+                    "number",
+                    True,
+                    "The module id of the block",
+                    "1",
+                ),
                 SwagParam(
                     "lesson_id",
                     "path",
@@ -128,6 +145,7 @@ class Block(Resource):
     @Instil("db")
     def delete(self, lesson_id: int, service: SwapDB):
         # Get block data from request and convert to integers
+        module_id = int(request.form.get("module_id", 0))
         block_id = int(request.form.get("block_id", 0))
 
         if (sub := get_jwt_sub()) is None:
@@ -137,7 +155,7 @@ class Block(Resource):
             return {"message": "Unauthorized"}, 401
 
         # Try to delete a block, if successful return a 200 response
-        if BlocksTable.delete_block(service, lesson_id, block_id):
+        if BlocksTable.delete_block(service, module_id, lesson_id, block_id):
             return {"message": "Block deleted"}, 200
         # If fails, return a 404 response
         else:
@@ -149,6 +167,14 @@ class Block(Resource):
             ["Block"],
             "Returns the lesson sidebar with basic blocks",
             [
+                SwagParam(
+                    "module_id",
+                    "query",
+                    "integer",
+                    True,
+                    "The module id to retrieve",
+                    "9",
+                ),
                 SwagParam(
                     "lesson_id",
                     "path",
@@ -164,7 +190,8 @@ class Block(Resource):
     )
     @Instil("db")
     def get(self, lesson_id: int, service: SwapDB):
-        # Get lesson sidebar with basic blocks using lesson_id
+        # Get lesson sidebar with basic blocks using module_id and lesson_id
+        module_id = int(request.args.get("module_id", 0))
         blocks: list[dict[str, int | str | dict]] = []
 
         if (sub := get_jwt_sub()) is None:
@@ -179,7 +206,7 @@ class Block(Resource):
             block_order,
             block_name,
             data,
-        ) in BlocksTable.get_blocks(service, lesson_id):
+        ) in BlocksTable.get_blocks(service, module_id, lesson_id):
             blocks.append(
                 {
                     "block_type": block_type,

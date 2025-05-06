@@ -125,7 +125,7 @@ if __name__ == "__main__":
         populate_dummy_data(conn)
 
         # Run tests
-        run_tests(conn)  # Only works if dummy data is populated
+        #run_tests(conn)  # Only works if dummy data is populated
 
         # Enable EventBus logging
         MetroBus().subscribe(
