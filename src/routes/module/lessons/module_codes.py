@@ -48,7 +48,7 @@ class ModuleCode(Resource):
     ) -> tuple[dict[str, str | list[int]], int]:
         code: str | None = request.form.get("code")
 
-        if not valid_jwt_sub(user_id):
+        if valid_jwt_sub(user_id):
             return {"message": "You are unauthorised to access this endpoint"}, 401
 
         if not code:

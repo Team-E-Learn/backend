@@ -20,6 +20,9 @@ class AuthMiddleware(IRequestMiddleware):
     def process(self) -> bool:
         path: str = request.path
 
+        if request.method == "OPTIONS":
+            return True
+
         if not path.startswith(self.__required_path):  # enforce only on required_path
             return True
 

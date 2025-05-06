@@ -54,4 +54,5 @@ class CORSResponseMiddleware(IResponseMiddleware):
         response.headers.add(
             "Access-Control-Allow-Headers", "Content-Type,Authorization"
         )
+        response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
         return response
