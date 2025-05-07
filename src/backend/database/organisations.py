@@ -42,49 +42,19 @@ class OrganisationsTable:
         )
         orgID = result.fetch_one()
 
-        # If it does, delete its modules
-        if orgID is not None:
-            # First, get all modules for this org
-            modules_result = cursor.execute(
-                StringStatement("SELECT moduleID FROM modules WHERE orgID = %s"),
-                (orgID[0],)
-            )
-
-            module_ids = [row[0] for row in modules_result.fetch_all()]
-
-            # Delete subscription records first
-            if module_ids:
-                cursor.execute(
-                    StringStatement("DELETE FROM subscriptions WHERE moduleID = ANY(%s)"),
-                    (module_ids,)
-                )
-
-            # Delete module associations from bundle_modules
-            if module_ids:
-                cursor.execute(
-                    StringStatement("DELETE FROM bundle_modules WHERE moduleID = ANY(%s)"),
-                    (module_ids,)
-                )
-
-            # Now safe to delete modules
-            cursor.execute(
-                StringStatement("DELETE FROM modules WHERE orgID = %s"),
-                (orgID[0],)
-            )
-
-            conn.commit()
-            # Return the orgID of the organisation
+        # If it doesn't exist, create it
+        if orgID:
+            # Return existing orgID
             return orgID[0]
-
-        # Insert the organisation
-        result = cursor.execute(
-            StringStatement(
-                "INSERT INTO organisations (name, ownerID) VALUES (%s, %s) RETURNING orgID"
-            ),
-            (name, owner_id),
-        )
-        # Return the orgID of the organisation
-        return result.fetch_one()[0]
+        else:
+            result = cursor.execute(
+                StringStatement(
+                    "INSERT INTO organisations (name, ownerID) VALUES (%s, %s) RETURNING orgID"
+                ),
+                (name, owner_id),
+            )
+            # Return the orgID of the organisation
+            return result.fetch_one()[0]
 
     # Adds 3 orgs to the DB, user_id 3 is the owner of the first org, user_id 2 is the owner of the other two
     # No alternative API call to add organisations, so this is the only way to add them
