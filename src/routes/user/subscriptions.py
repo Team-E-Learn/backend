@@ -48,8 +48,8 @@ class Org:
 
     def to_dict(self) -> OrgJson:
         return {
-            "org_name": self.org_name,
-            "org_id": self.org_id,
+            "name": self.org_name,
+            "id": self.org_id,
             "bundles": [bund.to_dict() for bund in self.bundles],
             "modules": [mod.to_dict() for mod in self.modules],
         }
