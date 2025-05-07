@@ -94,10 +94,10 @@ class Subscriptions(Resource):
             LEFT JOIN bundle_modules ON modules.moduleID = bundle_modules.moduleID
             LEFT JOIN bundles ON bundle_modules.bundleID = bundles.bundleID
             JOIN organisations ON modules.orgID = organisations.orgID
-            WHERE subscriptions.userID = %s
+            WHERE subscriptions.userID = %s OR organisations.ownerID = %s
         """
             ),
-            (user_id,),
+            (user_id, user_id),
         )
         subscriptions: list[tuple[Any, ...]] | None = result.fetch_all()
 
