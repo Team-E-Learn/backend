@@ -84,23 +84,39 @@ class Subscriptions(Resource):
 
         cur: SwapCursor = service.get_cursor()
         result: SwapResult = cur.execute(
-        #TODO: make this work for all modules and bundles in an Organisation that the teacher owns
             StringStatement(
                 """
-            SELECT 
-                organisations.orgID, 
-                organisations.name AS orgName,
-                bundles.bundleID, 
-                bundles.name AS bundleName,
-                modules.moduleID, 
-                modules.name AS moduleName
-            FROM modules
-            JOIN organisations ON modules.orgID = organisations.orgID
-            LEFT JOIN bundle_modules ON modules.moduleID = bundle_modules.moduleID
-            LEFT JOIN bundles ON bundle_modules.bundleID = bundles.bundleID
-            LEFT JOIN subscriptions ON subscriptions.moduleID = modules.moduleID
-            WHERE subscriptions.userID = %s OR organisations.ownerID = %s
-        """
+                -- Get all modules the user is subscribed to
+                SELECT 
+                    orgs.orgID, 
+                    orgs.name AS orgName,
+                    bundles.bundleID, 
+                    bundles.name AS bundleName,
+                    mods.moduleID, 
+                    mods.name AS moduleName
+                FROM subscriptions subs
+                JOIN modules mods ON subs.moduleID = mods.moduleID
+                JOIN organisations orgs ON mods.orgID = orgs.orgID
+                LEFT JOIN bundle_modules bm ON mods.moduleID = bm.moduleID
+                LEFT JOIN bundles ON bm.bundleID = bundles.bundleID
+                WHERE subs.userID = %s
+
+                UNION
+
+                -- Get all modules and bundles from orgs the user owns
+                SELECT 
+                    orgs.orgID, 
+                    orgs.name AS orgName,
+                    bundles.bundleID, 
+                    bundles.name AS bundleName,
+                    mods.moduleID, 
+                    mods.name AS moduleName
+                FROM organisations orgs
+                LEFT JOIN modules mods ON mods.orgID = orgs.orgID
+                LEFT JOIN bundle_modules bm ON mods.moduleID = bm.moduleID
+                LEFT JOIN bundles ON bm.bundleID = bundles.bundleID
+                WHERE orgs.ownerID = %s
+                """
             ),
             (user_id, user_id),
         )
