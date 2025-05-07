@@ -122,10 +122,10 @@ if __name__ == "__main__":
     debug_mode: bool = projenv.project_mode == projenv.ProjectMode.DEVELOPMENT
     if debug_mode:
         # Write dummy data
-        populate_dummy_data(conn)
+        #populate_dummy_data(conn)
 
         # Run tests
-        run_tests(conn)  # Only works if dummy data is populated
+        #run_tests(conn)  # Only works if dummy data is populated
 
         # Enable EventBus logging
         MetroBus().subscribe(

@@ -18,8 +18,8 @@ Database Access
 """
 DB_UNAME: str = "postgres"
 DB_PWD: str = "cisco"
-DB_HOSTNAME: str = "postgres"
-#DB_HOSTNAME: str = "127.0.0.1"
+#DB_HOSTNAME: str = "postgres"
+DB_HOSTNAME: str = "127.0.0.1"
 DB_PORT: str = "5432"
 DB_NAME: str = "dev"
 
