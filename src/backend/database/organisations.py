@@ -52,7 +52,14 @@ class OrganisationsTable:
 
             module_ids = [row[0] for row in modules_result.fetch_all()]
 
-            # Delete module associations from bundle_modules first
+            # Delete subscription records first
+            if module_ids:
+                cursor.execute(
+                    StringStatement("DELETE FROM subscriptions WHERE moduleID = ANY(%s)"),
+                    (module_ids,)
+                )
+
+            # Delete module associations from bundle_modules
             if module_ids:
                 cursor.execute(
                     StringStatement("DELETE FROM bundle_modules WHERE moduleID = ANY(%s)"),
