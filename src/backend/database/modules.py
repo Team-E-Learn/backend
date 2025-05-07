@@ -14,7 +14,7 @@ class ModulesTable:
     """Manages database operations for the modules table.
 
     This class provides methods to create the modules table and manage modules
-    within the system. Each module has a name, description, and belongs to an organisation.
+    within the system. Each module has a name, and belongs to an organisation.
     Modules serve as containers for lessons and other content.
     """
 
@@ -26,22 +26,21 @@ class ModulesTable:
     CREATE TABLE IF NOT EXISTS modules (
         moduleID SERIAL PRIMARY KEY UNIQUE NOT NULL,
         name VARCHAR(48) NOT NULL,
-        description VARCHAR(100) NOT NULL,
         orgID INT REFERENCES organisations(orgID) NOT NULL
     );"""
             )
         )
 
     @staticmethod
-    def write_module(conn: SwapDB, org_id: int, name: str, description: str) -> int:
+    def write_module(conn: SwapDB, org_id: int, name: str) -> int:
         cursor: SwapCursor = conn.get_cursor()
 
         # Insert new module
         result = cursor.execute(
             StringStatement(
-                "INSERT INTO modules (name, description, orgID) VALUES (%s, %s, %s) RETURNING moduleID"
+                "INSERT INTO modules (name, orgID) VALUES (%s, %s) RETURNING moduleID"
             ),
-            (name, description, org_id),
+            (name, org_id),
         )
 
         # Return the moduleID of the newly created module
@@ -51,21 +50,21 @@ class ModulesTable:
     # No alternative API call to add modules, so this is the only way to add them
     @staticmethod
     def write_modules(conn: SwapDB) -> None:
-        # format is (name, description, orgID)
-        modules: list[tuple[str, str, int]] = [
-            ("Personal Development", "Learn how to develop yourself", 1),
-            ("Team Software Engineering", "Team-based software engineering project", 1),
-            ("Networking Fundamentals", "Basics of networking", 1),
-            ("Applied Programming Paradigms", "Different programming paradigms", 1),
-            ("Excel Certification", "Get certified in Excel", 2),
-            ("Advanced Excel", "Advanced techniques in Excel", 2),
-            ("Data Analysis", "Learn data analysis techniques", 3),
-            ("Machine Learning", "Introduction to machine learning", 3),
+        # format is (name, orgID)
+        modules: list[tuple[str, int]] = [
+            ("Personal Development", 1),
+            ("Team Software Engineering", 1),
+            ("Networking Fundamentals", 1),
+            ("Applied Programming Paradigms", 1),
+            ("Excel Certification", 2),
+            ("Advanced Excel", 2),
+            ("Data Analysis", 3),
+            ("Machine Learning", 3),
         ]
 
         cursor: SwapCursor = conn.get_cursor()
         # Write sample modules to the database
-        for name, description, orgID in modules:
+        for name, orgID in modules:
             result: SwapResult = cursor.execute(
                 StringStatement("SELECT 1 FROM modules WHERE name = %s"), (name,)
             )
@@ -77,9 +76,9 @@ class ModulesTable:
             # Otherwise, add the module to the database
             _ = cursor.execute(
                 StringStatement(
-                    "INSERT INTO modules (name, description, orgID) VALUES (%s, %s, %s)"
+                    "INSERT INTO modules (name, orgID) VALUES (%s, %s)"
                 ),
-                (name, description, orgID),
+                (name, orgID),
             )
 
     @staticmethod
@@ -114,14 +113,14 @@ class ModulesTable:
         return result.fetch_one() is not None
 
     @staticmethod
-    def get_info(conn: SwapDB, module_id: int) -> tuple[int, str, str, int] | None:
+    def get_info(conn: SwapDB, module_id: int) -> tuple[int, str, int] | None:
         cursor: SwapCursor = conn.get_cursor()
         result: SwapResult = cursor.execute(
             StringStatement(
-                "SELECT moduleID, name, description, orgID FROM modules WHERE moduleID = %s"
+                "SELECT moduleID, name, orgID FROM modules WHERE moduleID = %s"
             ),
             (module_id,),
         )
 
-        tuple_result: tuple[int, str, str, int] | None = result.fetch_one()
+        tuple_result: tuple[int, str, int] | None = result.fetch_one()
         return tuple_result

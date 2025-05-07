@@ -3,6 +3,7 @@ from flask_restful import Resource
 from backend.auth import valid_jwt_sub
 from backend.database.module_codes import ModuleCodesTable
 from backend.database.subscriptions import SubscriptionsTable
+from backend.database.user import UserTable
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.jwt.jwt import ALLOWED_CLAIM_DATA, Jwt, JwtValidator
@@ -36,7 +37,7 @@ class ModuleCode(Resource):
             ],
             [
                 SwagResp(200, "Successfully subscribed to modules"),
-                SwagResp(404, "Code not found"),
+                SwagResp(404, "Code or user not found"),
                 SwagResp(400, "Invalid request data"),
             ],
             protected=True,
@@ -56,6 +57,10 @@ class ModuleCode(Resource):
 
         if len(code) != 6:
             return {"message": "Code must be 6 characters long"}, 404
+
+        # Check user_id exists in the user's table
+        if not UserTable.user_exists(service, user_id):
+            return {"success": False, "error": "User not found"}, 404
 
         # Get module IDs for this code
         module_ids: list[int] = ModuleCodesTable.get_code_modules(service, code)

@@ -63,7 +63,7 @@ class Login(Resource):
         if not user_data:
             return {"message": "Bad request"}, 400
 
-        # Check if password is correct
+        # Check if the password is correct
         # If not, return a 401 Unauthorized
         if not check_password_hash(cast(str, user_data[6]), password):
             return {"message": "Unauthorized"}, 401
@@ -84,5 +84,5 @@ class Login(Resource):
             .sign()
         )
 
-        # Return limited JWT (for 2fa) and success message
+        # Return limited JWT (for 2FA) and success message
         return {"message": "Login successful", "limited_jwt": token}, 200

@@ -5,6 +5,7 @@ from typing import Any
 from backend.auth import valid_jwt_sub
 from backend.database.organisations import OrganisationsTable
 from backend.database.modules import ModulesTable
+from backend.database.bundles import BundlesTable
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
@@ -27,20 +28,20 @@ class Organisation(Resource):
                     "Example Organisation",
                 ),
                 SwagParam(
-                    "description",
+                    "bundles",
                     "formData",
                     "string",
                     False,
-                    "The description of the Organisation",
-                    "An example Organisation description",
+                    "List of bundles with modules to create for this Organisation",
+                    "[{'bundle_name': 'Bundle 1', 'modules': [{'name': 'Module 1'}, {'name': 'Module 2'}]}]",
                 ),
                 SwagParam(
                     "modules",
                     "formData",
                     "string",
                     True,
-                    "list of modules to create for this Organisation",
-                    "[{'name': 'Module 1', 'description': 'Description for module 1'}]",
+                    "list of standalone modules to create for this Organisation",
+                    "[{'name': 'Module 1'}, {'name': 'Module 2'}]",
                 ),
                 SwagParam(
                     "owner_id",
@@ -62,9 +63,8 @@ class Organisation(Resource):
     def post(self, service: SwapDB) -> tuple[dict[str, Any], int]:
         # Get Organisation data from request
         name: str | None = request.form.get("name")
-        description: str | None = request.form.get("description", "")
-
         owner_id_str: str | None = request.form.get("owner_id")
+
         if owner_id_str is None:
             return {"message": "Owner ID is required"}, 400
 
@@ -76,7 +76,12 @@ class Organisation(Resource):
         if not valid_jwt_sub(owner_id):
             return {"message": "You are unauthorised to access this endpoint"}, 401
 
-        # Parse modules list
+        # Parse bundles and modules lists
+        try:
+            bundles_str: str | None = request.form.get("bundles", "[]")
+            bundles: list[dict[str, Any]] = ast.literal_eval(bundles_str)
+        except (SyntaxError, ValueError):
+            return {"message": "Invalid bundles format"}, 400
         try:
             modules_str: str | None = request.form.get("modules", "[]")
             modules: list[dict[str, Any]] = ast.literal_eval(modules_str)
@@ -91,26 +96,74 @@ class Organisation(Resource):
 
         # Create/Update Organisation
         org_id: int | None = OrganisationsTable.write_org(
-            service, name, description, owner_id
+            service, name, owner_id
         )
 
-        # Create modules for the Organisation
-        created_modules: list[dict[str, Any]] = []
+        if org_id is None:
+            return {"message": "Failed to create org"}, 400
+
+        # Process bundles and their modules
+        created_bundles: list[dict[str, Any]] = []
+        for bundle in bundles:
+            if not isinstance(bundle, dict) or "bundle_name" not in bundle:
+               return {"message": "Invalid bundle format"}, 400
+
+            bundle_name: str = bundle["bundle_name"]
+
+            # Create a bundle
+            bundle_id: int | None = BundlesTable.write_bundle(service, org_id, bundle_name)
+
+            # Process modules in this bundle
+            bundle_modules: list[dict[str, Any]] = bundle.get("modules", [])
+            created_modules: list[dict[str, Any]] = []
+
+            for module in bundle_modules:
+                if not isinstance(module, dict) or "name" not in module:
+                    continue
+
+                module_name: str = module["name"]
+
+                # Create module
+                module_id: int | None = ModulesTable.write_module(service, org_id, module_name)
+
+                if module_id:
+                    # Associate module with a bundle
+                    BundlesTable.associate_module(service, bundle_id, module_id)
+                    created_modules.append({
+                        "name": module_name,
+                        "module_id": module_id
+                    })
+
+            created_bundles.append({
+                "bundle_id": bundle_id,
+                "bundle_name": bundle_name,
+                "modules": created_modules
+            })
+
+        # Process direct modules (not in bundles)
+        created_direct_modules: list[dict[str, Any]] = []
         for module in modules:
-            module_name: str | None = module.get("name")
-            module_description: str = module.get("description", "")
+            if not isinstance(module, dict) or "name" not in module:
+                return {"message": "Invalid module format"}, 400
+
+            module_name: str = module.get("name", "Blank Name")
 
             # Overwriting happens automatically in the database
-            module_id: int | None = ModulesTable.write_module(
-                service, org_id, module_name, module_description
-            )
+            module_id: int | None = ModulesTable.write_module(service, org_id, module_name)
 
             if module_id:
-                created_modules.append({"id": module_id, "name": module_name})
+                created_direct_modules.append({
+                    "id": module_id,
+                    "name": module_name
+                })
 
         # Return success response with org_id and created modules
         return {
             "message": "Organisation created successfully",
-            "Organisation": {"id": org_id, "name": name},
-            "modules": created_modules,
+            "Organisation": {
+                "name": name,
+                "id": org_id,
+                "bundles": created_bundles
+            },
+            "modules": created_direct_modules
         }, 200

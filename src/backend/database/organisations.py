@@ -14,7 +14,7 @@ class OrganisationsTable:
 
     This class provides methods to create the organisations table and manage
     organisation data. Each organisation has a unique name, description, and
-    an owner who is referenced by their user ID. organisations serve as containers
+    an owner is referenced by their user ID. organisations serve as containers
     for modules and other content.
     """
 
@@ -27,17 +27,16 @@ class OrganisationsTable:
     CREATE TABLE IF NOT EXISTS organisations (
         orgID SERIAL PRIMARY KEY UNIQUE NOT NULL,
         name VARCHAR(48) UNIQUE NOT NULL,
-        description VARCHAR(100) NOT NULL,
         ownerID INT REFERENCES users(userID) NOT NULL
     );"""
             )
         )
 
     @staticmethod
-    def write_org(conn: SwapDB, name: str, description: str, owner_id: int) -> int | None:
+    def write_org(conn: SwapDB, name: str, owner_id: int) -> int | None:
         cursor: SwapCursor = conn.get_cursor()
 
-        # Check if the organization already exists
+        # Check if the organisation already exists
         result: SwapResult = cursor.execute(
             StringStatement("SELECT orgID FROM organisations WHERE name = %s"), (name,)
         )
@@ -45,20 +44,37 @@ class OrganisationsTable:
 
         # If it does, delete its modules
         if orgID is not None:
+            # First, get all modules for this org
+            modules_result = cursor.execute(
+                StringStatement("SELECT moduleID FROM modules WHERE orgID = %s"),
+                (orgID[0],)
+            )
+
+            module_ids = [row[0] for row in modules_result.fetch_all()]
+
+            # Delete module associations from bundle_modules first
+            if module_ids:
+                cursor.execute(
+                    StringStatement("DELETE FROM bundle_modules WHERE moduleID = ANY(%s)"),
+                    (module_ids,)
+                )
+
+            # Now safe to delete modules
             cursor.execute(
                 StringStatement("DELETE FROM modules WHERE orgID = %s"),
                 (orgID[0],)
             )
+
             conn.commit()
             # Return the orgID of the organisation
             return orgID[0]
 
-        # Insert the organization
+        # Insert the organisation
         result = cursor.execute(
             StringStatement(
-                "INSERT INTO organisations (name, description, ownerID) VALUES (%s, %s, %s) RETURNING orgID"
+                "INSERT INTO organisations (name, ownerID) VALUES (%s, %s) RETURNING orgID"
             ),
-            (name, description, owner_id),
+            (name, owner_id),
         )
         # Return the orgID of the organisation
         return result.fetch_one()[0]
@@ -67,16 +83,16 @@ class OrganisationsTable:
     # No alternative API call to add organisations, so this is the only way to add them
     @staticmethod
     def write_orgs(conn: SwapDB) -> None:
-        # Format is (name, description, ownerID (userID who owns the org))
-        orgs: list[tuple[str, str, int]] = [
-            ("University of Lincoln", "A university in Lincoln", 4),
-            ("Microsoft", "A tech company", 2),
-            ("Amazon", "An online retailer", 2),
+        # Format is (name, ownerID (userID who owns the org))
+        orgs: list[tuple[str, int]] = [
+            ("University of Lincoln", 4),
+            ("Microsoft", 2),
+            ("Amazon", 2),
         ]
 
         # Write sample organisations to the database
         cursor: SwapCursor = conn.get_cursor()
-        for name, description, ownerID in orgs:
+        for name, ownerID in orgs:
             result: SwapResult = cursor.execute(
                 StringStatement("SELECT 1 FROM organisations WHERE name = %s"), (name,)
             )
@@ -88,9 +104,9 @@ class OrganisationsTable:
             # Insert organisation into organisations table
             cursor.execute(
                 StringStatement(
-                    "INSERT INTO organisations (name, description, ownerID) VALUES (%s, %s, %s)"
+                    "INSERT INTO organisations (name, ownerID) VALUES (%s, %s)"
                 ),
-                (name, description, ownerID),
+                (name, ownerID),
             )
 
     @staticmethod

@@ -65,7 +65,7 @@ class Lesson(Resource):
 
         title = request.form.get("title", "")
 
-        # Create new lesson using module_id, title
+        # Create a new lesson using module_id, title
         LessonsTable.create_lesson(service, lesson_id, module_id, title)
         return {"message": "Lesson created"}, 200
 
