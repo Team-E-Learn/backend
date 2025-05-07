@@ -53,6 +53,10 @@ class OrganisationsTable:
                 ),
                 (name, owner_id),
             )
+
+            # Commit to database
+            conn.commit()
+
             # Return the orgID of the organisation
             return result.fetch_one()[0]
 

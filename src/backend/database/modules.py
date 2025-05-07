@@ -56,6 +56,9 @@ class ModulesTable:
             (name, org_id),
         )
 
+        # Commit to database
+        conn.commit()
+
         # Return the moduleID of the newly created module
         return result.fetch_one()[0]
 

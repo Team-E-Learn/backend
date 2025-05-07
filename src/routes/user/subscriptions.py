@@ -84,16 +84,21 @@ class Subscriptions(Resource):
 
         cur: SwapCursor = service.get_cursor()
         result: SwapResult = cur.execute(
+        #TODO: make this work for all modules and bundles in an Organisation that the teacher owns
             StringStatement(
                 """
-            SELECT organisations.orgID, organisations.name AS orgName,
-                   bundles.bundleID, bundles.name AS bundleName,
-                   modules.moduleID, modules.name AS moduleName
-            FROM subscriptions
-            JOIN modules ON subscriptions.moduleID = modules.moduleID
+            SELECT 
+                organisations.orgID, 
+                organisations.name AS orgName,
+                bundles.bundleID, 
+                bundles.name AS bundleName,
+                modules.moduleID, 
+                modules.name AS moduleName
+            FROM modules
+            JOIN organisations ON modules.orgID = organisations.orgID
             LEFT JOIN bundle_modules ON modules.moduleID = bundle_modules.moduleID
             LEFT JOIN bundles ON bundle_modules.bundleID = bundles.bundleID
-            JOIN organisations ON modules.orgID = organisations.orgID
+            LEFT JOIN subscriptions ON subscriptions.moduleID = modules.moduleID
             WHERE subscriptions.userID = %s OR organisations.ownerID = %s
         """
             ),
