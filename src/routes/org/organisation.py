@@ -160,7 +160,7 @@ class Organisation(Resource):
             "Organisation": {
                 "name": name,
                 "id": org_id,
-                "bundles": created_bundles
+                "bundles": created_bundles,
+                "modules": created_direct_modules
             },
-            "modules": created_direct_modules
         }, 200
