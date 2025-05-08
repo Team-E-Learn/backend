@@ -28,7 +28,7 @@ class Instil[T]:
     def __call__(self, func: Callable[..., T]) -> Callable[..., T]:
         def instil_wrapper(*args, **kwargs) -> T:
             if self.__service_name not in Instil.__services.keys():
-                raise InstilException
+                raise InstilException  # service does not exist
             return func(*args, **kwargs, service=Instil.__services[self.__service_name])
 
         return instil_wrapper
