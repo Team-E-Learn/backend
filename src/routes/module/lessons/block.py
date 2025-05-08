@@ -4,6 +4,7 @@ from flask_restful import Resource
 from backend.auth import get_jwt_sub
 from backend.database.blocks import BlocksTable
 from backend.database.lessons import LessonsTable
+from backend.database.modules import ModulesTable
 from backend.database.subscriptions import SubscriptionsTable
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
@@ -76,7 +77,7 @@ class Block(Resource):
                 ),
             ],
             [SwagResp(200, "Block created"), SwagResp(400, "Block not created")],
-            protected=True
+            protected=True,
         )
     )
     @Instil("db")
@@ -139,7 +140,7 @@ class Block(Resource):
                 ),
             ],
             [SwagResp(200, "Block deleted"), SwagResp(404, "Block not found")],
-            protected=True
+            protected=True,
         )
     )
     @Instil("db")
@@ -182,10 +183,10 @@ class Block(Resource):
                     True,
                     "The lesson id to retrieve",
                     "1",
-                )
+                ),
             ],
             [SwagResp(200, "Returns the lesson sidebar")],
-            protected=True
+            protected=True,
         )
     )
     @Instil("db")
@@ -197,7 +198,9 @@ class Block(Resource):
         if (sub := get_jwt_sub()) is None:
             return {"message": "Unauthorized"}, 401
 
-        if not SubscriptionsTable.can_read_lesson(service, sub, lesson_id):
+        if not SubscriptionsTable.can_read_lesson(
+            service, sub, lesson_id
+        ) and not ModulesTable.module_owned_by_user(service, module_id, sub):
             return {"message": "Unauthorized"}, 401
 
         for (
