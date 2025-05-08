@@ -86,10 +86,13 @@ class BlocksTable:
             (1, 2, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
             (1, 2, 5, 5, 5, "quiz block", {"question": "press option A",
                                         "options": {
-                                        "A": {"text": "Option A", "isCorrect": True},
-                                        "B": {"text": "Option B", "isCorrect": False},
-                                        "C": {"text": "Option C", "isCorrect": False},
-                                        "D": {"text": "Option D", "isCorrect": False}}}),
+                                            "A": {"text": "Option A", "isCorrect": True},
+                                            "B": {"text": "Option B", "isCorrect": False},
+                                            "C": {"text": "Option C", "isCorrect": False},
+                                            "D": {"text": "Option D", "isCorrect": False}
+                                        },
+                                        "answer": "A"
+                                        }),
 
             (2, 2, 2, 1, 2, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
             (2, 2, 3, 2, 3, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
