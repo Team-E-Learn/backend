@@ -56,10 +56,10 @@ class LessonsTable:
     def write_lessons(conn: SwapDB) -> None:
         # Format is (lesson_id, module_id, title)
         lessons: list[tuple[int, int, str]] = [
-            (1, 1, "Introduction"),
-            (2, 1, "Lesson 1"),
-            (3, 1, "Lesson 2"),
-            (4, 1, "Lesson 3"),
+            (1, 6, "Introduction"),
+            (2, 6, "Lesson 1"),
+            (3, 6, "Lesson 2"),
+            (4, 6, "Lesson 3"),
             (1, 2, "Introduction"),
             (2, 2, "Lesson 1"),
             (3, 2, "Lesson 2"),

@@ -78,35 +78,35 @@ class BlocksTable:
     def write_blocks(conn: SwapDB) -> None:
         # format: lesson_id, block_id, block_type, order, block_name, data
         blocks: list[tuple[int, int, int, int, int, str, dict]] = [
-            (1, 2, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
-            (1, 2, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
-            (1, 2, 3, 3, 3, "text and image block",
+            (1, 6, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (1, 6, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+            (1, 6, 3, 3, 3, "text and image block",
                 {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet",
                  "image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
-            (1, 2, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
-            (1, 2, 5, 5, 5, "quiz block", {"question": "press option A",
-                                        "options": {
-                                            "A": {"text": "Option A", "isCorrect": True},
-                                            "B": {"text": "Option B", "isCorrect": False},
-                                            "C": {"text": "Option C", "isCorrect": False},
-                                            "D": {"text": "Option D", "isCorrect": False}
-                                        },
+            (1, 6, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (1, 6, 5, 5, 5, "quiz block", {"question": "press option A",
+                                        "options": [
+                                            {"text": "Option A", "isCorrect": True},
+                                            {"text": "Option B", "isCorrect": False},
+                                            {"text": "Option C", "isCorrect": False},
+                                            {"text": "Option D", "isCorrect": False}
+                                        ],
                                         "answer": "A"
                                         }),
 
-            (2, 2, 2, 1, 2, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
-            (2, 2, 3, 2, 3, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
-            (2, 2, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (2, 6, 2, 1, 2, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (2, 6, 3, 2, 3, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+            (2, 6, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
 
-            (3, 2, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
-            (3, 2, 2, 4, 2, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
-            (3, 2, 3, 1, 3, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
-            (3, 2, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (3, 6, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (3, 6, 2, 4, 2, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (3, 6, 3, 1, 3, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (3, 6, 4, 4, 4, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
 
-            (4, 2, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
-            (4, 2, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
-            (4, 2, 3, 4, 3, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
-            (4, 2, 4, 1, 4, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (4, 6, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
+            (4, 6, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
+            (4, 6, 3, 4, 3, "download block", {"downloadLink": "https://www.google.com", "fileName": "document.docx"}),
+            (4, 6, 4, 1, 4, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
         ]
 
         # Write sample block data to the blocks table
