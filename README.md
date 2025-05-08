@@ -16,9 +16,8 @@ same configuration.
 OR 
 
 ```bash
-docker-compose build
-docker-compuse up -d 
-docker-compose down
+docker-compose up --build
+docker-compose down --volumes
 ```
 
 
