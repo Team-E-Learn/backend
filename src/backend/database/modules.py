@@ -35,6 +35,19 @@ class ModulesTable:
     def write_module(conn: SwapDB, org_id: int, name: str) -> int:
         cursor: SwapCursor = conn.get_cursor()
 
+        # Check if the module already exists
+        result = cursor.execute(
+            StringStatement(
+                "SELECT moduleID FROM modules WHERE name = %s AND orgID = %s"
+            ),
+            (name, org_id),
+        )
+        existing_module = result.fetch_one()
+
+        # If it exists, return the existing moduleID
+        if existing_module is not None:
+            return existing_module[0]
+
         # Insert new module
         result = cursor.execute(
             StringStatement(
@@ -42,6 +55,9 @@ class ModulesTable:
             ),
             (name, org_id),
         )
+
+        # Commit to database
+        conn.commit()
 
         # Return the moduleID of the newly created module
         return result.fetch_one()[0]

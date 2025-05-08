@@ -99,9 +99,6 @@ class Organisation(Resource):
             service, name, owner_id
         )
 
-        if org_id is None:
-            return {"message": "Failed to create org"}, 400
-
         # Process bundles and their modules
         created_bundles: list[dict[str, Any]] = []
         for bundle in bundles:
@@ -163,7 +160,7 @@ class Organisation(Resource):
             "Organisation": {
                 "name": name,
                 "id": org_id,
-                "bundles": created_bundles
+                "bundles": created_bundles,
+                "modules": created_direct_modules
             },
-            "modules": created_direct_modules
         }, 200
