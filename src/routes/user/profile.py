@@ -7,7 +7,6 @@ from lib.swagdoc.swagmanager import SwagGen
 
 
 class Profile(Resource):
-
     @SwagGen(
         SwagDoc(
             SwagMethod.GET,
@@ -19,14 +18,14 @@ class Profile(Resource):
                     "path",
                     "integer",
                     True,
-                    "The user id to add to the module",
+                    "The user id to get information about",
                     "1",
                 )
             ],
             [SwagResp(200, "Returns the profile information")],
+            protected=True
         )
     )
-
     # get user profile information using user_id
     @Instil("db")
     def get(self, user_id: int, service: SwapDB):
@@ -36,6 +35,7 @@ class Profile(Resource):
         # Guard clause for if user not found
         if user is None:
             return {"error": "User not found"}
+
         return {
             "username": user[0],
             "email": user[1],

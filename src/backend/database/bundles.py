@@ -93,6 +93,9 @@ class BundlesTable:
         # Get the ID of the newly created bundle
         new_bundle_id = insert_result.fetch_one()
 
+        # Commit to database
+        conn.commit()
+
         return new_bundle_id[0] if new_bundle_id else None
 
 

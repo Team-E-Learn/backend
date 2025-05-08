@@ -1,18 +1,19 @@
 from time import time
+from typing import cast
 from flask import request
 from flask_restful import Resource
 from werkzeug.security import check_password_hash
+from backend.auth import get_jwt, get_jwt_sub
 from backend.database.user import UserTable
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
-from lib.jwt.jwt import Jwt
-from projenv import JWT_LOGIN_KEY, JWT_LOGIN_EXP
+from lib.jwt.jwt import Jwt, JwtValidator
+from projenv import JWT_LIMITED_KEY, JWT_LIMITED_EXP
 
 
 class Login(Resource):
-
     @SwagGen(
         SwagDoc(
             SwagMethod.POST,
@@ -36,8 +37,12 @@ class Login(Resource):
                     "example_password",
                 ),
             ],
-            [SwagResp(200, "Login successful"), SwagResp(400, "Bad request"),
-             SwagResp(401, "Unauthorized")],
+            [
+                SwagResp(200, "Login successful"),
+                SwagResp(400, "Bad request"),
+                SwagResp(401, "Unauthorized"),
+            ],
+            protected=True,
         )
     )
     @Instil("db")
@@ -60,24 +65,24 @@ class Login(Resource):
 
         # Check if the password is correct
         # If not, return a 401 Unauthorized
-        if not check_password_hash(user_data[6], password):
+        if not check_password_hash(cast(str, user_data[6]), password):
             return {"message": "Unauthorized"}, 401
 
         # Get user id
-        uid: int = user_data[0]
+        uid: int = cast(int, user_data[0])
 
         # Generate expiry time for JWT
-        expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now
+        expiry_time: int = int(time()) + JWT_LIMITED_EXP  # 30m from now
 
         # Logic to authenticate user and generate limited JWT
-        limited_jwt: str = (
-            Jwt(JWT_LOGIN_KEY)
+        token: str = (
+            Jwt(JWT_LIMITED_KEY)
             .add_claim("iss", "elearn-backend")
             .add_claim("aud", "elearn-login")
-            .add_claim("sub", f"{uid}")
-            .add_claim("exp", f"{expiry_time}")
+            .add_claim("sub", uid)
+            .add_claim("exp", expiry_time)
             .sign()
         )
 
         # Return limited JWT (for 2FA) and success message
-        return {"message": "Login successful", "limited_jwt": limited_jwt}, 200
+        return {"message": "Login successful", "limited_jwt": token}, 200

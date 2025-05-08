@@ -2,6 +2,7 @@ from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+
 """
 Module for managing modules in the database.
 Provides operations for creating, populating, and validating modules
@@ -34,6 +35,19 @@ class ModulesTable:
     def write_module(conn: SwapDB, org_id: int, name: str) -> int:
         cursor: SwapCursor = conn.get_cursor()
 
+        # Check if the module already exists
+        result = cursor.execute(
+            StringStatement(
+                "SELECT moduleID FROM modules WHERE name = %s AND orgID = %s"
+            ),
+            (name, org_id),
+        )
+        existing_module = result.fetch_one()
+
+        # If it exists, return the existing moduleID
+        if existing_module is not None:
+            return existing_module[0]
+
         # Insert new module
         result = cursor.execute(
             StringStatement(
@@ -41,6 +55,9 @@ class ModulesTable:
             ),
             (name, org_id),
         )
+
+        # Commit to database
+        conn.commit()
 
         # Return the moduleID of the newly created module
         return result.fetch_one()[0]
@@ -94,6 +111,20 @@ class ModulesTable:
         result: SwapResult = cursor.execute(
             StringStatement("SELECT 1 FROM modules WHERE moduleID = %s AND orgID = %s"),
             (module_id, org_id),
+        )
+        return result.fetch_one() is not None
+
+    @staticmethod
+    def module_owned_by_user(conn: SwapDB, module_id: int, user_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("""
+                    SELECT 1
+                    FROM modules
+                    JOIN organisations as org ON org.ownerid = %s
+                    WHERE moduleid = %s
+            """),
+            (user_id, module_id),
         )
         return result.fetch_one() is not None
 

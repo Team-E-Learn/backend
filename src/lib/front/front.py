@@ -1,8 +1,9 @@
+from flask import abort
 from flask.app import Flask
 from flask_restful import Api, Resource
 from werkzeug.wrappers import Response
 
-from lib.front.middleware import IMiddleware
+from lib.front.middleware import IRequestMiddleware, IResponseMiddleware
 from lib.swagdoc.swagmanager import SwagManager
 from lib.swagdoc.swagtag import SwagTag
 
@@ -29,9 +30,12 @@ class Front:
         self.__app: Flask = Flask(app_name)
         self.__api: Api = Api(self.__app)
         self.__swag: SwagManager = SwagManager(self.__app, doc_title, doc_desc, version)
-        self.__middleware: set[IMiddleware] = (
-            set()
-        )  # Create a set of after request 'middleware' objects
+        
+        # Create a set of 'response middleware' objects
+        self.__resp_middleware: set[IResponseMiddleware] = set()  
+        
+        # Create a set of 'request middleware' objects
+        self.__req_middleware: set[IRequestMiddleware] = set()
 
     def register(self, res: type[Resource], route: str, docs: bool = True) -> None:
         """
@@ -49,11 +53,17 @@ class Front:
         """
         self.__swag.add_tag(swag_tag)
 
-    def add_after_middleware(self, middleware: IMiddleware) -> None:
+    def add_response_middleware(self, middleware: IResponseMiddleware) -> None:
         """
-        Adds a middleware object to the registry
+        Adds a response middleware object to the registry
         """
-        self.__middleware.add(middleware)
+        self.__resp_middleware.add(middleware)
+    
+    def add_request_middleware(self, middleware: IRequestMiddleware) -> None:
+        """
+        Adds a request middleware object to the registry
+        """
+        self.__req_middleware.add(middleware)
 
     def start(self, debug: bool = False) -> None:
         """
@@ -62,8 +72,11 @@ class Front:
         if debug:  # Don't want documentation in production!
             self.__swag.start_swag()
 
-        if len(self.__middleware) > 0:
-            self.__apply_after_middleware()  # Applies all available middleware
+        if len(self.__resp_middleware) > 0:
+            self.__apply_resp_middleware()  # Applies all available middleware
+        
+        if len(self.__req_middleware) > 0:
+            self.__apply_req_middleware()  # Applies all available middleware
 
         self.__app.run("0.0.0.0")
 
@@ -71,9 +84,9 @@ class Front:
         """Returns the Flask test client for testing purposes"""
         return self.__app.test_client()
 
-    def __apply_after_middleware(self) -> None:
+    def __apply_resp_middleware(self) -> None:
         """
-        Allows for the middleware to be ran.
+        Allows for the middleware to be ran after a request is processed.
         """
 
         def __run_middleware(resp: Response) -> Response:
@@ -82,10 +95,24 @@ class Front:
             App.after_request was originally intended for.
             Ensures that each middleware object is used.
             """
-            for middle in self.__middleware:
+            for middle in self.__resp_middleware:
                 resp = middle.process(resp)
             return resp
 
         _ = self.__app.after_request(
             __run_middleware
         )  # Applies all middleware using after_request
+
+    def __apply_req_middleware(self) -> None:
+        """
+        Allows for middleware to be ran before a request is processed.
+        """
+
+        def __run_middleware() -> None:
+            for middle in self.__req_middleware:
+                if not middle.process():
+                    abort(middle.abort_code())
+
+        _ = self.__app.before_request(
+            __run_middleware
+        )  # Applies all middleware using before_request

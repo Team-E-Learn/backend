@@ -1,6 +1,8 @@
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
+from lib.dataswap.result import SwapResult
 from lib.dataswap.statement import StringStatement
+
 """
 Module for managing user subscriptions to modules in the database.
 Provides operations for creating, populating, and managing the many-to-many
@@ -19,7 +21,7 @@ class SubscriptionsTable:
 
     @staticmethod
     def create(conn: SwapDB) -> None:
-        conn.get_cursor().execute(
+        _ = conn.get_cursor().execute(
             StringStatement(
                 """
     CREATE TABLE IF NOT EXISTS subscriptions (
@@ -48,7 +50,7 @@ class SubscriptionsTable:
         # Write sample subscriptions to the database
         cursor: SwapCursor = conn.get_cursor()
         for user_id, module_id in subscriptions:
-            cursor.execute(
+            _ = cursor.execute(
                 StringStatement(
                     "INSERT INTO subscriptions (userID, moduleID) VALUES (%s, %s)"
                 ),
@@ -58,7 +60,7 @@ class SubscriptionsTable:
     @staticmethod
     def add_subscription(conn: SwapDB, user_id: int, module_id: int) -> None:
         cursor: SwapCursor = conn.get_cursor()
-        cursor.execute(
+        _ = cursor.execute(
             StringStatement(
                 """
                 INSERT INTO subscriptions (userID, moduleID) 
@@ -69,3 +71,30 @@ class SubscriptionsTable:
             (user_id, module_id),
         )
         conn.commit()
+
+    @staticmethod
+    def is_member(conn: SwapDB, user_id: int, module_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement(
+                """
+                SELECT 1
+                FROM subscriptions
+                WHERE userID = %s AND moduleID = %s
+                """
+            ),
+            (user_id, module_id),
+        )
+        return result.fetch_one() is not None
+
+    @staticmethod
+    def can_read_lesson(conn: SwapDB, user_id: int, lesson_id: int) -> bool:
+        cursor: SwapCursor = conn.get_cursor()
+        result: SwapResult = cursor.execute(
+            StringStatement("""SELECT 1 FROM lessons
+                            JOIN subscriptions ON subscriptions.moduleID = lessons.moduleID
+                            WHERE subscriptions.userID = %s AND lessons.lessonID = %s
+                            """),
+            (user_id, lesson_id),
+        )
+        return result.fetch_one() is not None

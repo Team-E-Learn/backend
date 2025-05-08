@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, TypeAlias
 from flask_restful import Resource
+from backend.auth import valid_jwt_sub
 from lib.dataswap.cursor import SwapCursor
 from lib.dataswap.database import SwapDB
 from lib.dataswap.result import SwapResult
@@ -47,8 +48,8 @@ class Org:
 
     def to_dict(self) -> OrgJson:
         return {
-            "org_name": self.org_name,
-            "org_id": self.org_id,
+            "name": self.org_name,
+            "id": self.org_id,
             "bundles": [bund.to_dict() for bund in self.bundles],
             "modules": [mod.to_dict() for mod in self.modules],
         }
@@ -72,27 +73,52 @@ class Subscriptions(Resource):
                 )
             ],
             [SwagResp(200, "Returns the subscriptions")],
+            protected=True
         )
     )
     @Instil("db")
     def get(self, user_id: int, service: SwapDB) -> [list[OrgJson], int]:
         # Get the user's subscriptions
+        if not valid_jwt_sub(user_id):
+            return {"message": "You are unauthorised to access this endpoint"}, 401
+
         cur: SwapCursor = service.get_cursor()
         result: SwapResult = cur.execute(
             StringStatement(
                 """
-            SELECT organisations.orgID, organisations.name AS orgName,
-                   bundles.bundleID, bundles.name AS bundleName,
-                   modules.moduleID, modules.name AS moduleName
-            FROM subscriptions
-            JOIN modules ON subscriptions.moduleID = modules.moduleID
-            LEFT JOIN bundle_modules ON modules.moduleID = bundle_modules.moduleID
-            LEFT JOIN bundles ON bundle_modules.bundleID = bundles.bundleID
-            JOIN organisations ON modules.orgID = organisations.orgID
-            WHERE subscriptions.userID = %s
-        """
+                -- Get all modules the user is subscribed to
+                SELECT 
+                    orgs.orgID, 
+                    orgs.name AS orgName,
+                    bundles.bundleID, 
+                    bundles.name AS bundleName,
+                    mods.moduleID, 
+                    mods.name AS moduleName
+                FROM subscriptions subs
+                JOIN modules mods ON subs.moduleID = mods.moduleID
+                JOIN organisations orgs ON mods.orgID = orgs.orgID
+                LEFT JOIN bundle_modules bm ON mods.moduleID = bm.moduleID
+                LEFT JOIN bundles ON bm.bundleID = bundles.bundleID
+                WHERE subs.userID = %s
+
+                UNION
+
+                -- Get all modules and bundles from orgs the user owns
+                SELECT 
+                    orgs.orgID, 
+                    orgs.name AS orgName,
+                    bundles.bundleID, 
+                    bundles.name AS bundleName,
+                    mods.moduleID, 
+                    mods.name AS moduleName
+                FROM organisations orgs
+                LEFT JOIN modules mods ON mods.orgID = orgs.orgID
+                LEFT JOIN bundle_modules bm ON mods.moduleID = bm.moduleID
+                LEFT JOIN bundles ON bm.bundleID = bundles.bundleID
+                WHERE orgs.ownerID = %s
+                """
             ),
-            (user_id,),
+            (user_id, user_id),
         )
         subscriptions: list[tuple[Any, ...]] | None = result.fetch_all()
 

@@ -1,6 +1,6 @@
 import random
 from time import time
-from typing import Any
+from typing import Any, cast
 from flask import request
 from flask_restful import Resource
 from werkzeug.security import generate_password_hash
@@ -13,11 +13,10 @@ from lib.instilled.instiled import Instil
 from lib.jwt.jwt import Jwt
 from lib.swagdoc.swagdoc import SwagDoc, SwagMethod, SwagParam, SwagResp
 from lib.swagdoc.swagmanager import SwagGen
-from projenv import JWT_LOGIN_EXP, JWT_LOGIN_KEY
+from projenv import JWT_LIMITED_EXP, JWT_LIMITED_KEY
 
 
 class Register(Resource):
-
     @SwagGen(
         SwagDoc(
             SwagMethod.POST,
@@ -81,7 +80,9 @@ class Register(Resource):
             return {"message": "Invalid account type"}, 400
 
         # Check for existing user
-        if UserTable.get_by_username(service, username) or UserTable.get_by_email(service, email):
+        if UserTable.get_by_username(service, username) or UserTable.get_by_email(
+            service, email
+        ):
             return {"message": "Email or username already exists"}, 409
 
         # Check if email is verified
@@ -96,22 +97,29 @@ class Register(Resource):
 
         # Insert user into the database
         user: tuple[Any, ...] | None = UserTable.write_user(
-            service, account_type, email, "firstname", "lastname", username, hashed_password, secret
+            service,
+            account_type,
+            email,
+            "firstname",
+            "lastname",
+            username,
+            hashed_password,
+            secret,
         )
 
         if not user:
             return {"message": "Error finding user"}, 404
 
         # Generate expiry time for JWT
-        expiry_time: int = int(time()) + JWT_LOGIN_EXP  # 30m from now
+        expiry_time: int = int(time()) + JWT_LIMITED_EXP  # 30m from now
 
         # Logic to authenticate user and generate limited JWT
         token: str = (
-            Jwt(JWT_LOGIN_KEY)
+            Jwt(JWT_LIMITED_KEY)
             .add_claim("iss", "elearn-backend")
             .add_claim("aud", "elearn-login")
-            .add_claim("sub", f"{user[0]}")
-            .add_claim("exp", f"{expiry_time}")
+            .add_claim("sub", cast(int, user[0]))
+            .add_claim("exp", expiry_time)
             .sign()
         )
 

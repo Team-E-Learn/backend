@@ -1,4 +1,5 @@
 from flask_restful import Resource
+from backend.auth import valid_jwt_sub
 from backend.database.module_dashboard import ModuleDashboardTable
 from lib.dataswap.database import SwapDB
 from lib.instilled.instiled import Instil
@@ -32,11 +33,16 @@ class ModuleDashboard(Resource):
                 ),
             ],
             [SwagResp(200, "Returns the module dashboard")],
+            protected=True
         )
     )
     @Instil("db")
     def get(self, user_id: int, module_id: int, service: SwapDB):
         # Get module dashboard for a specific user and module using user_id and module_id
+
+        if not valid_jwt_sub(user_id):
+            return {"message": "You are unauthorised to access this endpoint"}, 401
+
         dashboard: list[tuple[int, int, str, str, int, int]] = (
             ModuleDashboardTable.get_dashboard(service, user_id, module_id)
         )

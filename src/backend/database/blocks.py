@@ -146,3 +146,4 @@ class BlocksTable:
         if tup is None:
             return []
         return tup
+

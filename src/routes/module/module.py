@@ -8,7 +8,6 @@ from lib.swagdoc.swagmanager import SwagGen
 
 
 class Module(Resource):
-
     @SwagGen(
         SwagDoc(
             SwagMethod.GET,
@@ -28,6 +27,7 @@ class Module(Resource):
                 SwagResp(200, "Returns the lessons"),
                 SwagResp(404, "Could not find the lesson"),
             ],
+            protected=True
         )
     )
     @Instil("db")

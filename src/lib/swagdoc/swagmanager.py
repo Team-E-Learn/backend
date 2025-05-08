@@ -75,6 +75,7 @@ class SwagManager:
         self.__swagger = Swagger(
             self.__app,
             template={
+                "swagger": "2.0",
                 "info": {
                     "title": self.__title,
                     "description": self.__desc,
@@ -85,6 +86,14 @@ class SwagManager:
                     path: {doc.method.value: doc.to_doc() for doc in docs}
                     for path, docs in self.__docs.items()
                 },
+                "securityDefinitions": {
+                    "Bearer": {
+                        "type": "apiKey",
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Apply a JWT authentication token."
+                    }
+                }
             },
         )
 

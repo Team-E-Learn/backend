@@ -12,6 +12,7 @@ from lib.metro.metro import test_metro
 
 # Tests to check sample data is stored and retrieved correctly from the database
 
+
 def user_test(conn: SwapDB) -> None:
     # Expected users in the database
     expected_users: list[tuple[str, str, str, str, str, str]] = [
@@ -52,13 +53,16 @@ def user_test(conn: SwapDB) -> None:
     # Read users from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(
-        StringStatement("SELECT accountType, firstName, lastName, username, email, totpSecret FROM users")
+        StringStatement(
+            "SELECT accountType, firstName, lastName, username, email, totpSecret FROM users"
+        )
     )
     users: list[tuple[str, str, str, str, str, str]] | None = result.fetch_all()
 
     # Compare expected and retrieved users
     assert users == expected_users, f"Expected: {expected_users}, Got: {users}"
     print("\n>> User data write and read test passed!")
+
 
 def organisations_test(conn: SwapDB) -> None:
     # Expected organisations
@@ -76,7 +80,9 @@ def organisations_test(conn: SwapDB) -> None:
     orgs: list[tuple[str, str, int]] | None = result.fetch_all()
 
     # compare expected and retrieved organisations
-    assert orgs == expected_orgs, f"Original organisations: {expected_orgs},\n Retrieved organisations: {orgs}"
+    assert orgs == expected_orgs, (
+        f"Original organisations: {expected_orgs},\n Retrieved organisations: {orgs}"
+    )
     print(">> Organisation write and read test passed!")
 
 
@@ -101,30 +107,35 @@ def modules_test(conn: SwapDB) -> None:
     modules: list[tuple[str, int]] | None = result.fetch_all()
 
     # Compare expected and retrieved modules
-    assert modules == expected_modules, f"Original modules: {expected_modules},\n Retrieved modules: {modules}"
+    assert modules == expected_modules, (
+        f"Original modules: {expected_modules},\n Retrieved modules: {modules}"
+    )
     print(">> Module write and read test passed!")
 
 
 def lessons_test(conn: SwapDB) -> None:
     # Expected lessons
     expected_lessons: list[tuple[int, str]] = [
-            (1, "Introduction"),
-            (1, "Lesson 1"),
-            (1, "Lesson 2"),
-            (1, "Lesson 3"),
-            (2, "Introduction"),
-            (2, "Lesson 1",),
-            (2, "Lesson 2"),
-            (2, "Lesson 3"),
-            (3, "Introduction"),
-            (3, "Lesson 1"),
-            (3, "Lesson 2"),
-            (3, "Lesson 3"),
-            (4, "Introduction"),
-            (4, "Lesson 1"),
-            (4, "Lesson 2"),
-            (4, "Lesson 3"),
-        ]
+        (1, "Introduction"),
+        (1, "Lesson 1"),
+        (1, "Lesson 2"),
+        (1, "Lesson 3"),
+        (2, "Introduction"),
+        (
+            2,
+            "Lesson 1",
+        ),
+        (2, "Lesson 2"),
+        (2, "Lesson 3"),
+        (3, "Introduction"),
+        (3, "Lesson 1"),
+        (3, "Lesson 2"),
+        (3, "Lesson 3"),
+        (4, "Introduction"),
+        (4, "Lesson 1"),
+        (4, "Lesson 2"),
+        (4, "Lesson 3"),
+    ]
 
     # Read lessons from the database
     cursor: SwapCursor = conn.get_cursor()
@@ -134,13 +145,15 @@ def lessons_test(conn: SwapDB) -> None:
     lessons: list[tuple[int, str]] | None = result.fetch_all()
 
     # Compare expected and retrieved lessons
-    assert lessons == expected_lessons, f"Original lessons: {expected_lessons},\n Retrieved lessons: {lessons}"
+    assert lessons == expected_lessons, (
+        f"Original lessons: {expected_lessons},\n Retrieved lessons: {lessons}"
+    )
     print(">> Lesson write and read test passed!")
 
 
 def bundle_test(conn: SwapDB) -> None:
     # Expected bundles
-    expected_bundles: list[str] = [('Computer Science BSc',), ('Excel Certification',)]
+    expected_bundles: list[tuple[str]] = [('Computer Science BSc',), ('Excel Certification',)]
 
     # Read bundles from the database
     cursor: SwapCursor = conn.get_cursor()
@@ -150,7 +163,9 @@ def bundle_test(conn: SwapDB) -> None:
     bundles: list[tuple[str]] | None = result.fetch_all()
 
     # Compare expected and retrieved bundles
-    assert bundles == expected_bundles, f"Original bundles: {expected_bundles},\n Retrieved bundles: {bundles}"
+    assert bundles == expected_bundles, (
+        f"Original bundles: {expected_bundles},\n Retrieved bundles: {bundles}"
+    )
     print(">> Bundle write and read test passed!")
 
 
@@ -160,7 +175,7 @@ def bundle_modules_test(conn: SwapDB) -> None:
         ("Applied Programming Paradigms",),
         ("Networking Fundamentals",),
         ("Personal Development",),
-        ("Team Software Engineering",)
+        ("Team Software Engineering",),
     ]
 
     # Get modules in Computer Science BSc bundle
@@ -183,7 +198,7 @@ def bundle_modules_test(conn: SwapDB) -> None:
 
 def block_test(conn: SwapDB) -> None:
     # Expected blocks
-    expected_blocks: list[tuple[int, int, int, int, str, dict[str, str]]] = [
+    expected_blocks: list[tuple[int, int, int, int, str, dict[str, Any]]] = [
         (1, 1, 1, 1, "text block", {"title": "Lorem Ipsum", "text": "Lorem ipsum dolor sit amet"}),
         (1, 2, 2, 2, "image block", {"image": "image", "altText": "Bliss location, Sonoma Valley in 2006"}),
         (1, 3, 3, 3, "text and image block",
@@ -200,11 +215,14 @@ def block_test(conn: SwapDB) -> None:
 
     # Read blocks from the database
     cursor: SwapCursor = conn.get_cursor()
-    result: SwapResult = cursor.execute(StringStatement(
+    result: SwapResult = cursor.execute(
+        StringStatement(
             "SELECT blockID, blockType, blockOrder, blockName, data FROM blocks WHERE lessonID = 1"
         )
     )
-    block_results: list[tuple[int, int, int, str, dict[str, str]]] | None = result.fetch_all()
+    block_results: list[tuple[int, int, int, str, dict[str, str]]] | None = (
+        result.fetch_all()
+    )
 
     assert block_results is not None, ">> Failed to get blocks"
 
@@ -214,7 +232,9 @@ def block_test(conn: SwapDB) -> None:
         blocks.append((1, block_type, block_id, order, block_name, data_dict))
 
     # Compare expected and retrieved blocks
-    assert blocks == expected_blocks, f"Original blocks: {expected_blocks},\n Retrieved blocks: {blocks}"
+    assert blocks == expected_blocks, (
+        f"Original blocks: {expected_blocks},\n Retrieved blocks: {blocks}"
+    )
     print(">> Block write and read test passed!")
 
 
@@ -237,42 +257,46 @@ def subscriptions_table_test(conn: SwapDB) -> None:
 def module_dashboard_test(conn: SwapDB) -> None:
     # Expected dashboard settings
     expected_module_dashboard: list[tuple[int, int, str, str, int, int]] = [
-            (1, 1, "announcements_widget", "announcements", 10, 20),
-            (1, 1, "info_widget", "info", 30, 20),
-            (1, 1, "about_widget", "about", 10, 40),
-            (1, 1, "grade_centre_widget", "grade_centre", 30, 40),
-            (1, 1, "calendar_widget", "calendar", 10, 60),
-            (2, 1, "announcements_widget", "announcements", 10, 20),
-            (2, 1, "grade_centre_widget", "grade_centre", 30, 20),
-            (2, 1, "calendar_widget", "calendar", 10, 40),
-            (3, 1, "announcements_widget", "announcements", 10, 20),
-            (3, 1, "info_widget", "info", 30, 20),
-            (3, 1, "about_widget", "about", 10, 40),
-            (3, 1, "grade_centre_widget", "grade_centre", 30, 40),
-            (3, 1, "calendar_widget", "calendar", 10, 60),
-            (4, 1, "announcements_widget", "announcements", 10, 20),
-            (4, 1, "grade_centre_widget", "grade_centre", 30, 20),
-            (4, 1, "calendar_widget", "calendar", 10, 40),
-        ]
+        (1, 1, "announcements_widget", "announcements", 10, 20),
+        (1, 1, "info_widget", "info", 30, 20),
+        (1, 1, "about_widget", "about", 10, 40),
+        (1, 1, "grade_centre_widget", "grade_centre", 30, 40),
+        (1, 1, "calendar_widget", "calendar", 10, 60),
+        (2, 1, "announcements_widget", "announcements", 10, 20),
+        (2, 1, "grade_centre_widget", "grade_centre", 30, 20),
+        (2, 1, "calendar_widget", "calendar", 10, 40),
+        (3, 1, "announcements_widget", "announcements", 10, 20),
+        (3, 1, "info_widget", "info", 30, 20),
+        (3, 1, "about_widget", "about", 10, 40),
+        (3, 1, "grade_centre_widget", "grade_centre", 30, 40),
+        (3, 1, "calendar_widget", "calendar", 10, 60),
+        (4, 1, "announcements_widget", "announcements", 10, 20),
+        (4, 1, "grade_centre_widget", "grade_centre", 30, 20),
+        (4, 1, "calendar_widget", "calendar", 10, 40),
+    ]
 
     # Read dashboard settings from the database
     cursor: SwapCursor = conn.get_cursor()
     result: SwapResult = cursor.execute(
-        StringStatement("SELECT userID, moduleID, widgetID, widgetType, x, y FROM module_dashboard")
+        StringStatement(
+            "SELECT userID, moduleID, widgetID, widgetType, x, y FROM module_dashboard"
+        )
     )
     dashboard: list[tuple[int, int, str, str, int, int]] | None = result.fetch_all()
 
     # Recreate module dashboard settings list for comparison
-    assert dashboard == expected_module_dashboard, f"Expected: {expected_module_dashboard}, Got: {dashboard}"
+    assert dashboard == expected_module_dashboard, (
+        f"Expected: {expected_module_dashboard}, Got: {dashboard}"
+    )
     print(">> Dashboard settings write and read test passed!")
 
 
 def module_codes_test(conn: SwapDB) -> None:
     # Expected module codes
     expected_codes: list[tuple[int, str, list[int]]] = [
-        (1, 'INTRO1', [1, 2, 3]),
-        (2, 'ADVMOD', [4, 5, 6]),
-        (3, 'ALLMOD', [1, 2, 3, 4, 5, 6, 7, 8])
+        (1, "INTRO1", [1, 2, 3]),
+        (2, "ADVMOD", [4, 5, 6]),
+        (3, "ALLMOD", [1, 2, 3, 4, 5, 6, 7, 8]),
     ]
 
     # Read module codes from the database
@@ -290,23 +314,23 @@ def module_codes_test(conn: SwapDB) -> None:
 def dashboard_test(conn: SwapDB) -> None:
     # Expected module dashboard data
     expected_dashboard: list[tuple[int, str, int, int]] = [
-            (1, "announcements", 10, 20),
-            (1, "info", 30, 20),
-            (1, "about", 10, 40),
-            (1, "grade_centre", 30, 40),
-            (1, "calendar", 10, 60),
-            (2, "announcements", 10, 20),
-            (2, "grade_centre", 30, 20),
-            (2, "calendar", 10, 40),
-            (3, "announcements", 10, 20),
-            (3, "info", 30, 20),
-            (3, "about", 10, 40),
-            (3, "grade_centre", 30, 40),
-            (3, "calendar", 10, 60),
-            (4, "announcements", 10, 20),
-            (4, "grade_centre", 30, 20),
-            (4, "calendar", 10, 40),
-        ]
+        (1, "announcements", 10, 20),
+        (1, "info", 30, 20),
+        (1, "about", 10, 40),
+        (1, "grade_centre", 30, 40),
+        (1, "calendar", 10, 60),
+        (2, "announcements", 10, 20),
+        (2, "grade_centre", 30, 20),
+        (2, "calendar", 10, 40),
+        (3, "announcements", 10, 20),
+        (3, "info", 30, 20),
+        (3, "about", 10, 40),
+        (3, "grade_centre", 30, 40),
+        (3, "calendar", 10, 60),
+        (4, "announcements", 10, 20),
+        (4, "grade_centre", 30, 20),
+        (4, "calendar", 10, 40),
+    ]
 
     # Read dashboards from the database
     cursor: SwapCursor = conn.get_cursor()
@@ -316,16 +340,22 @@ def dashboard_test(conn: SwapDB) -> None:
     dashboard: list[tuple[int, str, int, int]] | None = result.fetch_all()
 
     # Compare expected and retrieved dashboards
-    assert dashboard == expected_dashboard, f"Expected: {expected_dashboard}, Got: {dashboard}"
+    assert dashboard == expected_dashboard, (
+        f"Expected: {expected_dashboard}, Got: {dashboard}"
+    )
     print(">> Module dashboard write and read test passed!")
 
 
 # API endpoint tests to check if the API is working correctly
 
-def test_endpoint(endpoint: str, expected_data: Any,
-              method: str = "GET",
-              data: dict[str, Any] | None = None,
-              headers: dict[str, str] | None = None) -> None:
+
+def test_endpoint(
+    endpoint: str,
+    expected_data: Any,
+    method: str = "GET",
+    data: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> None:
     from main import front  # Imported here to avoid circular import issues
 
     # Use Flask's test client
@@ -345,8 +375,11 @@ def test_endpoint(endpoint: str, expected_data: Any,
 
     # Check the response is as expected
     response_data: Any = response.get_json()
-    assert response_data == expected_data, f"Expected: {expected_data}, Got: {response_data}"
+    assert response_data == expected_data, (
+        f"Expected: {expected_data}, Got: {response_data}"
+    )
     print(f">> API endpoint test passed for {method.upper()} {endpoint}!")
+
 
 def subscriptions_endpoint_test() -> None:
     # Expected response
@@ -359,34 +392,22 @@ def subscriptions_endpoint_test() -> None:
                     "bundle_id": 1,
                     "bundle_name": "Computer Science BSc",
                     "modules": [
-                        {
-                            "name": "Networking Fundamentals",
-                            "module_id": 3
-                        },
-                        {
-                            "name": "Personal Development",
-                            "module_id": 1
-                        }
-                    ]
+                        {"name": "Networking Fundamentals", "module_id": 3},
+                        {"name": "Personal Development", "module_id": 1},
+                    ],
                 }
             ],
-            "modules": []
+            "modules": [],
         },
         {
             "org_name": "Amazon",
             "org_id": 3,
             "bundles": [],
             "modules": [
-                {
-                    "name": "Machine Learning",
-                    "module_id": 8
-                },
-                {
-                    "name": "Data Analysis",
-                    "module_id": 7
-                }
-            ]
-        }
+                {"name": "Machine Learning", "module_id": 8},
+                {"name": "Data Analysis", "module_id": 7},
+            ],
+        },
     ]
 
     # Call the API endpoint
@@ -400,7 +421,7 @@ def profile_endpoint_test() -> None:
         "email": "alice.smith@example.com",
         "firstName": "Alice",
         "lastName": "Smith",
-        "accountType": "user"
+        "accountType": "user",
     }
 
     # Call the API endpoint
@@ -414,27 +435,18 @@ def module_dashboard_endpoint_test() -> None:
             {
                 "id": "announcements_widget",
                 "type": "announcements",
-                "position": {
-                    "x": 10,
-                    "y": 20
-                }
+                "position": {"x": 10, "y": 20},
             },
             {
                 "id": "grade_centre_widget",
                 "type": "grade_centre",
-                "position": {
-                    "x": 30,
-                    "y": 20
-                }
+                "position": {"x": 30, "y": 20},
             },
             {
                 "id": "calendar_widget",
                 "type": "calendar",
-                "position": {
-                    "x": 10,
-                    "y": 40
-                }
-            }
+                "position": {"x": 10, "y": 40},
+            },
         ]
     }
 
@@ -446,30 +458,9 @@ def dashboard_endpoint_test() -> None:
     # Expected response
     expected_response: dict[str, Any] = {
         "elements": [
-            {
-                "id": 2,
-                "type": "announcements",
-                "position": {
-                    "x": 10,
-                    "y": 20
-                }
-            },
-            {
-                "id": 2,
-                "type": "grade_centre",
-                "position": {
-                    "x": 30,
-                    "y": 20
-                }
-            },
-            {
-                "id": 2,
-                "type": "calendar",
-                "position": {
-                    "x": 10,
-                    "y": 40
-                }
-            }
+            {"id": 2, "type": "announcements", "position": {"x": 10, "y": 20}},
+            {"id": 2, "type": "grade_centre", "position": {"x": 30, "y": 20}},
+            {"id": 2, "type": "calendar", "position": {"x": 10, "y": 40}},
         ]
     }
 
@@ -533,16 +524,16 @@ def create_block_endpoint_test() -> None:
         "block_type": "100",
         "order": "1",
         "name": "Sky Question",
-        "data": "{}"
+        "data": "{}",
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Block created"
-    }
+    expected_response: dict[str, str] = {"message": "Block created"}
 
     # Call the API endpoint with form data
-    test_endpoint("/v1/module/lesson/1/block", expected_response, method="POST", data=request_data)
+    test_endpoint(
+        "/v1/module/lesson/1/block", expected_response, method="POST", data=request_data
+    )
 
 
 def delete_block_endpoint_test() -> None:
@@ -553,12 +544,15 @@ def delete_block_endpoint_test() -> None:
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Block deleted"
-    }
+    expected_response: dict[str, str] = {"message": "Block deleted"}
 
     # Call the API endpoint with form data
-    test_endpoint("/v1/module/lesson/1/block", expected_response, method="DELETE", data=request_data)
+    test_endpoint(
+        "/v1/module/lesson/1/block",
+        expected_response,
+        method="DELETE",
+        data=request_data,
+    )
 
 
 def get_blocks_endpoint_test() -> None:
@@ -632,7 +626,7 @@ def get_module_lessons_endpoint_test() -> None:
             {
                 "id": 4,
                 "title": "Lesson 3",
-            }
+            },
         ]
     }
 
@@ -649,12 +643,12 @@ def create_lesson_endpoint_test() -> None:
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Lesson created"
-    }
+    expected_response: dict[str, str] = {"message": "Lesson created"}
 
     # Call the API endpoint with form data
-    test_endpoint("/v1/module/lesson/", expected_response, method="POST", data=request_data)
+    test_endpoint(
+        "/v1/module/lesson/", expected_response, method="POST", data=request_data
+    )
 
 
 def delete_lesson_endpoint_test() -> None:
@@ -664,19 +658,19 @@ def delete_lesson_endpoint_test() -> None:
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Lesson deleted"
-    }
+    expected_response: dict[str, str] = {"message": "Lesson deleted"}
 
     # Call the API endpoint with form data
-    test_endpoint("/v1/module/lesson/", expected_response, method="DELETE", data=request_data)
+    test_endpoint(
+        "/v1/module/lesson/", expected_response, method="DELETE", data=request_data
+    )
 
 
 def add_module_subscription_endpoint_test() -> None:
     # Expected response
     expected_response: dict[str, Any] = {
         "success": True,
-        "message": "Successfully added subscription to user"
+        "message": "Successfully added subscription to user",
     }
 
     # Call the API endpoint
@@ -697,40 +691,39 @@ def get_module_info_endpoint_test() -> None:
 
 def activate_module_code_endpoint_test() -> None:
     # Request data
-    request_data: dict[str, str] = {
-        "code": "INTRO1"
-    }
+    request_data: dict[str, str] = {"code": "INTRO1"}
 
     # Expected response
     expected_response: dict[str, Any] = {
         "message": "Successfully subscribed user 1 to 3 modules",
-        "modules": [1, 2, 3]
+        "modules": [1, 2, 3],
     }
 
     # Call the API endpoint with form data
-    test_endpoint("/v1/module/code/1", expected_response, method="PUT", data=request_data)
+    test_endpoint(
+        "/v1/module/code/1", expected_response, method="PUT", data=request_data
+    )
+
 
 def verify_email_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "email": "example_user@example.com",
-        "token": "123456"
+        "token": "123456",
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Bad Request"
-    }
+    expected_response: dict[str, str] = {"message": "Bad Request"}
 
     # Call the API endpoint with form data
-    test_endpoint("/v1/auth/verify-email", expected_response, method="POST", data=request_data)
+    test_endpoint(
+        "/v1/auth/verify-email", expected_response, method="POST", data=request_data
+    )
 
 
 def username_check_endpoint_test() -> None:
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Valid username"
-    }
+    expected_response: dict[str, str] = {"message": "Valid username"}
 
     # Call the API endpoint with the username parameter
     test_endpoint("/v1/auth/username?username=example_username", expected_response)
@@ -742,29 +735,27 @@ def register_endpoint_test() -> None:
         "email": "new_user@example.com",
         "username": "new_username",
         "password": "new_password",
-        "accountType": "user"
+        "accountType": "user",
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Email not verified"
-    }
+    expected_response: dict[str, str] = {"message": "Email not verified"}
 
     # Call the API endpoint with form data
-    test_endpoint("/v1/auth/register", expected_response, method="POST", data=request_data)
+    test_endpoint(
+        "/v1/auth/register", expected_response, method="POST", data=request_data
+    )
 
 
 def login_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "email": "example_user@example.com",
-        "password": "example_password"
+        "password": "example_password",
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Bad request"
-    }
+    expected_response: dict[str, str] = {"message": "Bad request"}
 
     # Call the API endpoint with form data
     test_endpoint("/v1/auth/login", expected_response, method="POST", data=request_data)
@@ -774,13 +765,11 @@ def verify_2fa_endpoint_test() -> None:
     # Request data
     request_data: dict[str, str] = {
         "Limited JWT": "Bearer example_limited_jwt",
-        "code": "123456"
+        "code": "123456",
     }
 
     # Expected response
-    expected_response: dict[str, str] = {
-        "message": "Internal Server Error"
-    }
+    expected_response: dict[str, str] = {"message": "Internal Server Error"}
 
     # Call the API endpoint with form data
     test_endpoint("/v1/auth/2fa", expected_response, method="POST", data=request_data)

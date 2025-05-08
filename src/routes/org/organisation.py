@@ -2,6 +2,7 @@ import ast
 from flask import request
 from flask_restful import Resource
 from typing import Any
+from backend.auth import valid_jwt_sub
 from backend.database.organisations import OrganisationsTable
 from backend.database.modules import ModulesTable
 from backend.database.bundles import BundlesTable
@@ -48,20 +49,32 @@ class Organisation(Resource):
                     "number",
                     True,
                     "The ID of the owner of the Organisation",
-                    1,
+                    2,
                 ),
             ],
             [
                 SwagResp(200, "Organisation created successfully"),
                 SwagResp(400, "Invalid request data"),
             ],
+            protected=True
         )
     )
     @Instil("db")
     def post(self, service: SwapDB) -> tuple[dict[str, Any], int]:
         # Get Organisation data from request
         name: str | None = request.form.get("name")
-        owner_id: int | None = int(request.form.get("owner_id"))
+        owner_id_str: str | None = request.form.get("owner_id")
+
+        if owner_id_str is None:
+            return {"message": "Owner ID is required"}, 400
+
+        try:
+            owner_id: int = int(owner_id_str)
+        except ValueError:
+            return {"message": "Owner ID is required"}, 400
+        
+        if not valid_jwt_sub(owner_id):
+            return {"message": "You are unauthorised to access this endpoint"}, 401
 
         # Parse bundles and modules lists
         try:
@@ -82,7 +95,9 @@ class Organisation(Resource):
             return {"message": "Owner ID is required"}, 400
 
         # Create/Update Organisation
-        org_id: int | None = OrganisationsTable.write_org(service, name, owner_id)
+        org_id: int | None = OrganisationsTable.write_org(
+            service, name, owner_id
+        )
 
         # Process bundles and their modules
         created_bundles: list[dict[str, Any]] = []
@@ -128,7 +143,7 @@ class Organisation(Resource):
             if not isinstance(module, dict) or "name" not in module:
                 return {"message": "Invalid module format"}, 400
 
-            module_name: str = module.get("name")
+            module_name: str = module.get("name", "Blank Name")
 
             # Overwriting happens automatically in the database
             module_id: int | None = ModulesTable.write_module(service, org_id, module_name)
@@ -145,7 +160,7 @@ class Organisation(Resource):
             "Organisation": {
                 "name": name,
                 "id": org_id,
-                "bundles": created_bundles
+                "bundles": created_bundles,
+                "modules": created_direct_modules
             },
-            "modules": created_direct_modules
         }, 200

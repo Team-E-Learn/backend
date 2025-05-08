@@ -2,6 +2,7 @@
 
 from sys import stderr
 
+from backend.middleware import AuthMiddleware
 from routes.module.module import Module
 from testing import run_tests
 from flask.helpers import redirect
@@ -11,7 +12,7 @@ from backend.database.setup import initialise_tables, populate_dummy_data
 from backend.events.logevent import LogEvent, LogLevel
 from lib.dataswap.database import PsqlDatabase, SwapDB
 from lib.front.front import Front
-from lib.front.middleware import CORSMiddleware
+from lib.front.middleware import CORSResponseMiddleware
 from lib.instilled.instiled import Instil
 from lib.metro.metro import MetroBus
 from lib.swagdoc.swagtag import SwagTag
@@ -42,21 +43,20 @@ front: Front = Front(
     + " developed for the Team Software Engineering module at the University of Lincoln.",
     "0.0.0",
 )
-front.add_after_middleware(CORSMiddleware())  # apply middleware for CORS
 
+front.add_request_middleware(
+    AuthMiddleware(
+        "/auth/username",
+        "/auth/register",
+        "/auth/login",
+        "/auth/2fa",
+        "/auth/verify-email",
+        "/auth/email",
+        required_path="/v1",
+    )
+)  # apply middleware for CORS
 
-def log_event(event: LogEvent) -> None:
-    """
-    An event handler for LogEvents
-    """
-    if (
-        event.level != LogLevel.LOG
-    ):  # We don't need to log low level messages, this is for debug purposes
-        return
-    print(event, file=stderr)
-
-
-MetroBus().subscribe(LogEvent, log_event)  # subscribe log_event to the event bus
+front.add_response_middleware(CORSResponseMiddleware())  # apply middleware for CORS
 
 # get Postgres connection
 # conn: Connection[TupleRow] = psql_connect(projenv.DB_URL)
@@ -73,7 +73,6 @@ print("Registered database service")
 
 
 class Main(Resource):
-
     def get(self) -> Response:
         _ = MetroBus().publish(LogEvent(LogLevel.LOG, "Accessed docs."))
         return redirect("/apidocs")
@@ -107,13 +106,30 @@ front.register(
 front.register(Module, "/v1/module/<int:module_id>/")
 
 
+def log_event(event: LogEvent) -> None:
+    """
+    An event handler for LogEvents
+    """
+    if (
+        event.level != LogLevel.LOG
+    ):  # We don't need to log low level messages, this is for debug purposes
+        return
+    print(event, file=stderr)
+
+
 # Start app
 if __name__ == "__main__":
     debug_mode: bool = projenv.project_mode == projenv.ProjectMode.DEVELOPMENT
     if debug_mode:
         # Write dummy data
         populate_dummy_data(conn)
+
         # Run tests
-        run_tests(conn)  # Only works if dummy data is populated
+        #run_tests(conn)  # Only works if dummy data is populated
+
+        # Enable EventBus logging
+        MetroBus().subscribe(
+            LogEvent, log_event
+        )  # subscribe log_event to the event bus
 
     front.start(debug=debug_mode)
